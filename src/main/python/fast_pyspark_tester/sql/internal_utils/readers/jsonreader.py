@@ -4,7 +4,10 @@ from functools import partial
 
 from fast_pyspark_tester.sql.casts import get_struct_caster
 from fast_pyspark_tester.sql.internal_utils.options import Options
-from fast_pyspark_tester.sql.internal_utils.readers.utils import resolve_partitions, get_records
+from fast_pyspark_tester.sql.internal_utils.readers.utils import (
+    resolve_partitions,
+    get_records,
+)
 from fast_pyspark_tester.sql.internals import DataFrameInternal
 from fast_pyspark_tester.sql.schema_utils import infer_schema_from_rdd
 from fast_pyspark_tester.sql.types import StructType, create_row, row_from_keyed_values
@@ -19,9 +22,9 @@ class JSONReader(object):
         allowSingleQuotes=True,
         allowNumericLeadingZero=False,
         allowBackslashEscapingAnyCharacter=False,
-        mode="PERMISSIVE",
-        columnNameOfCorruptRecord="",
-        dateFormat="yyyy-MM-dd",
+        mode='PERMISSIVE',
+        columnNameOfCorruptRecord='',
+        dateFormat='yyyy-MM-dd',
         timestampFormat="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
         multiLine=False,
         allowUnquotedControlChars=False,
@@ -29,7 +32,7 @@ class JSONReader(object):
         lineSep=None,
         samplingRatio=1.0,
         dropFieldIfAllNull=False,
-        locale="en-US",
+        locale='en-US',
     )
 
     def __init__(self, spark, paths, schema, options):
@@ -45,28 +48,22 @@ class JSONReader(object):
         partitions, partition_schema = resolve_partitions(paths)
 
         rdd_filenames = sc.parallelize(sorted(partitions.keys()), len(partitions))
-        rdd = rdd_filenames.flatMap(partial(
-            parse_json_file,
-            partitions,
-            partition_schema,
-            self.schema,
-            self.options
-        ))
+        rdd = rdd_filenames.flatMap(
+            partial(
+                parse_json_file, partitions, partition_schema, self.schema, self.options
+            )
+        )
 
         inferred_schema = infer_schema_from_rdd(rdd)
 
         schema = self.schema if self.schema is not None else inferred_schema
-        schema_fields = {
-            field.name: field
-            for field in schema.fields
-        }
+        schema_fields = {field.name: field for field in schema.fields}
 
         # Field order is defined by fields in the record, not by the given schema
         # Field type is defined by the given schema or inferred
         full_schema = StructType(
             fields=[
-                schema_fields.get(field.name, field)
-                for field in inferred_schema.fields
+                schema_fields.get(field.name, field) for field in inferred_schema.fields
             ]
         )
 
@@ -74,11 +71,7 @@ class JSONReader(object):
         casted_rdd = rdd.map(cast_row)
         casted_rdd._name = paths
 
-        return DataFrameInternal(
-            sc,
-            casted_rdd,
-            schema=full_schema
-        )
+        return DataFrameInternal(sc, casted_rdd, schema=full_schema)
 
 
 def parse_json_file(partitions, partition_schema, schema, options, file_name):
@@ -96,9 +89,8 @@ def parse_record(record, schema, partition, partition_schema, options):
     raw_record_value = json.loads(record, encoding=options.encoding)
     if not isinstance(raw_record_value, dict):
         raise NotImplementedError(
-            "Top level items should be JSON objects (dicts), got {0} with {1}".format(
-                type(raw_record_value),
-                raw_record_value
+            'Top level items should be JSON objects (dicts), got {0} with {1}'.format(
+                type(raw_record_value), raw_record_value
             )
         )
     record_value = decode_record(raw_record_value)
@@ -114,12 +106,14 @@ def parse_record(record, schema, partition, partition_schema, options):
         record_value[field_name] if field_name in record_value.__fields__ else None
         for field_name in field_names
     ]
-    partition_field_names = [f.name for f in partition_schema.fields] if partition_schema else []
+    partition_field_names = (
+        [f.name for f in partition_schema.fields] if partition_schema else []
+    )
     # pylint: disable=W0511
     # todo: handle nested rows
     row = create_row(
         itertools.chain(field_names, partition_field_names),
-        itertools.chain(record_values, partition)
+        itertools.chain(record_values, partition),
     )
     return row
 
@@ -129,7 +123,6 @@ def decode_record(item):
         return [decode_record(e) for e in item]
     if isinstance(item, dict):
         return row_from_keyed_values(
-            (key, decode_record(value))
-            for key, value in item.items()
+            (key, decode_record(value)) for key, value in item.items()
         )
     return item

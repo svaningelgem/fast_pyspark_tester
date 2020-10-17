@@ -1,7 +1,6 @@
 """Manages caches of calculated partitions."""
 
-from __future__ import (division, absolute_import, print_function,
-                        unicode_literals)
+from __future__ import division, absolute_import, print_function, unicode_literals
 
 import logging
 import pickle
@@ -23,8 +22,7 @@ class CacheManager(object):
     :param checksum: Function returning a checksum.
     """
 
-    def __init__(self, max_mem=1.0, serializer=None, deserializer=None,
-                 checksum=None):
+    def __init__(self, max_mem=1.0, serializer=None, deserializer=None, checksum=None):
         self.max_mem = max_mem
         self.serializer = serializer if serializer else pickle.dumps
         self.deserializer = deserializer if deserializer else pickle.loads
@@ -62,11 +60,9 @@ class CacheManager(object):
         return self.cache_obj[ident]['mem_obj']
 
     def has(self, ident):
-        return (
-            ident in self.cache_obj and (
-                self.cache_obj[ident]['mem_obj'] is not None or
-                self.cache_obj[ident]['disk_location'] is not None
-            )
+        return ident in self.cache_obj and (
+            self.cache_obj[ident]['mem_obj'] is not None
+            or self.cache_obj[ident]['disk_location'] is not None
         )
 
     def get_not_in(self, idents):
@@ -75,9 +71,7 @@ class CacheManager(object):
         :param idents: A list of cache ids (or idents).
         :returns: All cache entries that are not in the given list.
         """
-        return {i: c
-                for i, c in self.cache_obj.items()
-                if i not in idents}
+        return {i: c for i, c in self.cache_obj.items() if i not in idents}
 
     def join(self, cache_objects):
         """join
@@ -88,10 +82,11 @@ class CacheManager(object):
         self.cache_obj.update(cache_objects)
 
     def stored_idents(self):
-        return [k
-                for k, v in self.cache_obj.items()
-                if (v['mem_obj'] is not None or
-                    v['disk_location'] is not None)]
+        return [
+            k
+            for k, v in self.cache_obj.items()
+            if (v['mem_obj'] is not None or v['disk_location'] is not None)
+        ]
 
     def clone_contains(self, filter_id):
         """Clone the cache manager and add a subset of the cache to it.
@@ -101,12 +96,10 @@ class CacheManager(object):
 
         :rtype: CacheManager
         """
-        cm = CacheManager(self.max_mem,
-                          self.serializer, self.deserializer,
-                          self.checksum)
-        cm.cache_obj = {i: c
-                        for i, c in self.cache_obj.items()
-                        if filter_id(i)}
+        cm = CacheManager(
+            self.max_mem, self.serializer, self.deserializer, self.checksum
+        )
+        cm.cache_obj = {i: c for i, c in self.cache_obj.items() if filter_id(i)}
         return cm
 
     def delete(self, ident):
@@ -137,12 +130,18 @@ class TimedCacheManager(CacheManager):
     :param checksum: Function returning a checksum.
     :param float timeout: timeout duration in seconds
     """
-    def __init__(self,
-                 max_mem=1.0,
-                 serializer=None, deserializer=None,
-                 checksum=None, timeout=600.0):
+
+    def __init__(
+        self,
+        max_mem=1.0,
+        serializer=None,
+        deserializer=None,
+        checksum=None,
+        timeout=600.0,
+    ):
         super(TimedCacheManager, self).__init__(
-            max_mem, serializer, deserializer, checksum)
+            max_mem, serializer, deserializer, checksum
+        )
 
         self.timeout = timeout
         self._time_added = []  # pairs of (id, timestamp); oldest first
@@ -160,12 +159,14 @@ class TimedCacheManager(CacheManager):
 
         :rtype: TimedCacheManager
         """
-        cm = TimedCacheManager(self.max_mem,
-                               self.serializer, self.deserializer,
-                               self.checksum, self.timeout)
-        cm.cache_obj = {i: c
-                        for i, c in self.cache_obj.items()
-                        if filter_id(i)}
+        cm = TimedCacheManager(
+            self.max_mem,
+            self.serializer,
+            self.deserializer,
+            self.checksum,
+            self.timeout,
+        )
+        cm.cache_obj = {i: c for i, c in self.cache_obj.items() if filter_id(i)}
         return cm
 
     def gc(self):

@@ -7,7 +7,7 @@ from pybuilder.errors import BuildFailedException
 from pybuilder.vcs import VCSRevision
 
 use_plugin("python.core")
-# use_plugin("python.flake8")
+use_plugin("python.flake8")
 use_plugin("python.distutils")
 use_plugin("python.pylint")
 # use_plugin("python.unittest")
@@ -61,7 +61,7 @@ def _add_extras_require(project, logger):
 
     # Get the requirements-dev.txt file line by line, ready for insertion.
     requirements_dev = '\n'.join(
-        ' '*4*indent_size + "'" + x.strip() + "',"
+        ' ' * 4 * indent_size + "'" + x.strip() + "',"
         for x in (Path(__file__).parent / 'requirements-build.txt').read_text().split('\n')
         if x
     )

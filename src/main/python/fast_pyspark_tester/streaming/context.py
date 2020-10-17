@@ -4,8 +4,11 @@ import logging
 import time
 
 from .dstream import DStream
-from .filestream import (FileStream, FileTextStreamDeserializer,
-                         FileBinaryStreamDeserializer)
+from .filestream import (
+    FileStream,
+    FileTextStreamDeserializer,
+    FileBinaryStreamDeserializer,
+)
 from .queuestream import QueueStream, QueueStreamDeserializer
 
 try:
@@ -71,8 +74,7 @@ class StreamingContext(object):
         """Provided for compatibility. Same as ``awaitTermination()`` here."""
         return self.awaitTermination(timeout)
 
-    def binaryRecordsStream(self, directory, recordLength=None,
-                            process_all=False):
+    def binaryRecordsStream(self, directory, recordLength=None, process_all=False):
         """Monitor a directory and process all binary files.
 
         File names starting with ``.`` are ignored.
@@ -86,8 +88,7 @@ class StreamingContext(object):
             Only ``int`` ``recordLength`` are supported in PySpark API.
             The ``process_all`` parameter does not exist in the PySpark API.
         """
-        deserializer = FileBinaryStreamDeserializer(self._context,
-                                                    recordLength)
+        deserializer = FileBinaryStreamDeserializer(self._context, recordLength)
         file_stream = FileStream(directory, process_all)
         self._on_stop_cb.append(file_stream.stop)
         return DStream(file_stream, self, deserializer)

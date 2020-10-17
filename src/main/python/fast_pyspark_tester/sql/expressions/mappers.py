@@ -4,13 +4,20 @@ import random
 import re
 import string
 
-from fast_pyspark_tester.sql.expressions.expressions import Expression, NullSafeColumnOperation, \
-    UnaryExpression
+from fast_pyspark_tester.sql.expressions.expressions import (
+    Expression,
+    NullSafeColumnOperation,
+    UnaryExpression,
+)
 from fast_pyspark_tester.sql.internal_utils.column import resolve_column
 from fast_pyspark_tester.sql.types import create_row, StringType
 from fast_pyspark_tester.sql.utils import AnalysisException
-from fast_pyspark_tester.utils import XORShiftRandom, half_up_round, half_even_round, \
-    MonotonicallyIncreasingIDGenerator
+from fast_pyspark_tester.utils import (
+    XORShiftRandom,
+    half_up_round,
+    half_even_round,
+    MonotonicallyIncreasingIDGenerator,
+)
 
 
 class StarOperator(Expression):
@@ -25,7 +32,7 @@ class StarOperator(Expression):
         return [row[col] for col in row.__fields__]
 
     def __str__(self):
-        return "*"
+        return '*'
 
 
 class CaseWhen(Expression):
@@ -43,25 +50,18 @@ class CaseWhen(Expression):
         return None
 
     def __str__(self):
-        return "CASE {0} END".format(
-            " ".join(
-                "WHEN {0} THEN {1}".format(condition, value)
+        return 'CASE {0} END'.format(
+            ' '.join(
+                'WHEN {0} THEN {1}'.format(condition, value)
                 for condition, value in zip(self.conditions, self.values)
             )
         )
 
     def add_when(self, condition, value):
-        return CaseWhen(
-            self.conditions + [condition],
-            self.values + [value]
-        )
+        return CaseWhen(self.conditions + [condition], self.values + [value])
 
     def set_otherwise(self, default):
-        return Otherwise(
-            self.conditions,
-            self.values,
-            default
-        )
+        return Otherwise(self.conditions, self.values, default)
 
 
 class Otherwise(Expression):
@@ -82,12 +82,12 @@ class Otherwise(Expression):
         return None
 
     def __str__(self):
-        return "CASE {0} ELSE {1} END".format(
-            " ".join(
-                "WHEN {0} THEN {1}".format(condition, value)
+        return 'CASE {0} ELSE {1} END'.format(
+            ' '.join(
+                'WHEN {0} THEN {1}'.format(condition, value)
                 for condition, value in zip(self.conditions, self.values)
             ),
-            self.default
+            self.default,
         )
 
 
@@ -100,7 +100,7 @@ class RegExpExtract(Expression):
         def fn(x):
             match = regexp.search(x)
             if not match:
-                return ""
+                return ''
             ret = match.group(groupIdx)
             return ret
 
@@ -113,7 +113,7 @@ class RegExpExtract(Expression):
         return self.fn(self.e.eval(row, schema))
 
     def __str__(self):
-        return "regexp_extract({0}, {1}, {2})".format(self.e, self.exp, self.groupIdx)
+        return 'regexp_extract({0}, {1}, {2})'.format(self.e, self.exp, self.groupIdx)
 
 
 class RegExpReplace(Expression):
@@ -134,7 +134,9 @@ class RegExpReplace(Expression):
         return self.fn(self.e.eval(row, schema))
 
     def __str__(self):
-        return "regexp_replace({0}, {1}, {2})".format(self.e, self.exp, self.replacement)
+        return 'regexp_replace({0}, {1}, {2})'.format(
+            self.e, self.exp, self.replacement
+        )
 
 
 class Round(NullSafeColumnOperation):
@@ -146,7 +148,7 @@ class Round(NullSafeColumnOperation):
         return half_up_round(value, self.scale)
 
     def __str__(self):
-        return "round({0}, {1})".format(self.column, self.scale)
+        return 'round({0}, {1})'.format(self.column, self.scale)
 
 
 class Bround(NullSafeColumnOperation):
@@ -158,7 +160,7 @@ class Bround(NullSafeColumnOperation):
         return half_even_round(value, self.scale)
 
     def __str__(self):
-        return "bround({0}, {1})".format(self.column, self.scale)
+        return 'bround({0}, {1})'.format(self.column, self.scale)
 
 
 class FormatNumber(Expression):
@@ -174,10 +176,10 @@ class FormatNumber(Expression):
         if not isinstance(value, (int, float)):
             return None
         rounded_value = half_even_round(value, self.digits)
-        return "{0:,}".format(rounded_value)
+        return '{0:,}'.format(rounded_value)
 
     def __str__(self):
-        return "format_number({0}, {1})".format(self.column, self.digits)
+        return 'format_number({0}, {1})'.format(self.column, self.digits)
 
 
 class SubstringIndex(Expression):
@@ -189,10 +191,14 @@ class SubstringIndex(Expression):
 
     def eval(self, row, schema):
         parts = str(self.column.eval(row, schema)).split(self.delim)
-        return self.delim.join(parts[:self.count] if self.count > 0 else parts[self.count:])
+        return self.delim.join(
+            parts[: self.count] if self.count > 0 else parts[self.count :]
+        )
 
     def __str__(self):
-        return "substring_index({0}, {1}, {2})".format(self.column, self.delim, self.count)
+        return 'substring_index({0}, {1}, {2})'.format(
+            self.column, self.delim, self.count
+        )
 
 
 class Coalesce(Expression):
@@ -208,15 +214,15 @@ class Coalesce(Expression):
         return None
 
     def __str__(self):
-        return "coalesce({0})".format(", ".join(self.columns))
+        return 'coalesce({0})'.format(', '.join(self.columns))
 
 
 class IsNaN(UnaryExpression):
     def eval(self, row, schema):
-        return self.eval(row, schema) is float("nan")
+        return self.eval(row, schema) is float('nan')
 
     def __str__(self):
-        return "isnan({0})".format(", ".join(self.column))
+        return 'isnan({0})'.format(', '.join(self.column))
 
 
 class NaNvl(Expression):
@@ -226,14 +232,14 @@ class NaNvl(Expression):
         self.col2 = col2
 
     def eval(self, row, schema):
-        nan = float("nan")
+        nan = float('nan')
         col1_value = self.col1.eval(row, schema)
         if col1_value is not nan:
             return float(col1_value)
         return float(self.col2.eval(row, schema))
 
     def __str__(self):
-        return "nanvl({0}, {1})".format(self.col1, self.col2)
+        return 'nanvl({0}, {1})'.format(self.col1, self.col2)
 
 
 class Hypot(Expression):
@@ -246,7 +252,7 @@ class Hypot(Expression):
         return math.hypot(self.a, self.b)
 
     def __str__(self):
-        return "hypot({0}, {1})".format(self.a, self.b)
+        return 'hypot({0}, {1})'.format(self.a, self.b)
 
 
 class Sqrt(UnaryExpression):
@@ -254,15 +260,15 @@ class Sqrt(UnaryExpression):
         return math.sqrt(self.column.eval(row, schema))
 
     def __str__(self):
-        return "SQRT({0})".format(self.column)
+        return 'SQRT({0})'.format(self.column)
 
 
 class Cbrt(UnaryExpression):
     def eval(self, row, schema):
-        return self.column.eval(row, schema) ** 1. / 3.
+        return self.column.eval(row, schema) ** 1.0 / 3.0
 
     def __str__(self):
-        return "CBRT({0})".format(self.column)
+        return 'CBRT({0})'.format(self.column)
 
 
 class Abs(UnaryExpression):
@@ -270,7 +276,7 @@ class Abs(UnaryExpression):
         return abs(self.column.eval(row, schema))
 
     def __str__(self):
-        return "ABS({0})".format(self.column)
+        return 'ABS({0})'.format(self.column)
 
 
 class Acos(UnaryExpression):
@@ -278,7 +284,7 @@ class Acos(UnaryExpression):
         return math.acos(self.column.eval(row, schema))
 
     def __str__(self):
-        return "ACOS({0})".format(self.column)
+        return 'ACOS({0})'.format(self.column)
 
 
 class Asin(UnaryExpression):
@@ -286,7 +292,7 @@ class Asin(UnaryExpression):
         return math.asin(self.column.eval(row, schema))
 
     def __str__(self):
-        return "ASIN({0})".format(self.column)
+        return 'ASIN({0})'.format(self.column)
 
 
 class Atan(UnaryExpression):
@@ -294,7 +300,7 @@ class Atan(UnaryExpression):
         return math.atan(self.column.eval(row, schema))
 
     def __str__(self):
-        return "ATAN({0})".format(self.column)
+        return 'ATAN({0})'.format(self.column)
 
 
 class Atan2(Expression):
@@ -307,7 +313,7 @@ class Atan2(Expression):
         return math.atan2(self.y.eval(row, schema), self.x.eval(row, schema))
 
     def __str__(self):
-        return "ATAN({0}, {1})".format(self.y, self.x)
+        return 'ATAN({0}, {1})'.format(self.y, self.x)
 
 
 class Tan(UnaryExpression):
@@ -315,7 +321,7 @@ class Tan(UnaryExpression):
         return math.tan(self.column.eval(row, schema))
 
     def __str__(self):
-        return "TAN({0})".format(self.column)
+        return 'TAN({0})'.format(self.column)
 
 
 class Tanh(UnaryExpression):
@@ -323,7 +329,7 @@ class Tanh(UnaryExpression):
         return math.tanh(self.column.eval(row, schema))
 
     def __str__(self):
-        return "TANH({0})".format(self.column)
+        return 'TANH({0})'.format(self.column)
 
 
 class Cos(UnaryExpression):
@@ -331,7 +337,7 @@ class Cos(UnaryExpression):
         return math.cos(self.column.eval(row, schema))
 
     def __str__(self):
-        return "COS({0})".format(self.column)
+        return 'COS({0})'.format(self.column)
 
 
 class Cosh(UnaryExpression):
@@ -339,7 +345,7 @@ class Cosh(UnaryExpression):
         return math.cosh(self.column.eval(row, schema))
 
     def __str__(self):
-        return "COSH({0})".format(self.column)
+        return 'COSH({0})'.format(self.column)
 
 
 class Sin(UnaryExpression):
@@ -347,7 +353,7 @@ class Sin(UnaryExpression):
         return math.sin(self.column.eval(row, schema))
 
     def __str__(self):
-        return "SIN({0})".format(self.column)
+        return 'SIN({0})'.format(self.column)
 
 
 class Sinh(UnaryExpression):
@@ -355,7 +361,7 @@ class Sinh(UnaryExpression):
         return math.sinh(self.column.eval(row, schema))
 
     def __str__(self):
-        return "SINH({0})".format(self.column)
+        return 'SINH({0})'.format(self.column)
 
 
 class Exp(UnaryExpression):
@@ -363,7 +369,7 @@ class Exp(UnaryExpression):
         return math.exp(self.column.eval(row, schema))
 
     def __str__(self):
-        return "EXP({0})".format(self.column)
+        return 'EXP({0})'.format(self.column)
 
 
 class ExpM1(UnaryExpression):
@@ -371,7 +377,7 @@ class ExpM1(UnaryExpression):
         return math.expm1(self.column.eval(row, schema))
 
     def __str__(self):
-        return "EXPM1({0})".format(self.column)
+        return 'EXPM1({0})'.format(self.column)
 
 
 class Factorial(UnaryExpression):
@@ -379,7 +385,7 @@ class Factorial(UnaryExpression):
         return math.factorial(self.column.eval(row, schema))
 
     def __str__(self):
-        return "factorial({0})".format(self.column)
+        return 'factorial({0})'.format(self.column)
 
 
 class Floor(UnaryExpression):
@@ -387,7 +393,7 @@ class Floor(UnaryExpression):
         return math.floor(self.column.eval(row, schema))
 
     def __str__(self):
-        return "FLOOR({0})".format(self.column)
+        return 'FLOOR({0})'.format(self.column)
 
 
 class Ceil(UnaryExpression):
@@ -395,7 +401,7 @@ class Ceil(UnaryExpression):
         return math.ceil(self.column.eval(row, schema))
 
     def __str__(self):
-        return "CEIL({0})".format(self.column)
+        return 'CEIL({0})'.format(self.column)
 
 
 class Log(Expression):
@@ -411,9 +417,8 @@ class Log(Expression):
         return math.log(value_eval, self.base)
 
     def __str__(self):
-        return "LOG({0}{1})".format(
-            "{}, ".format(self.base) if self.base != math.e else "",
-            self.value
+        return 'LOG({0}{1})'.format(
+            '{}, '.format(self.base) if self.base != math.e else '', self.value
         )
 
 
@@ -422,7 +427,7 @@ class Log10(UnaryExpression):
         return math.log10(self.column.eval(row, schema))
 
     def __str__(self):
-        return "LOG10({0})".format(self.column)
+        return 'LOG10({0})'.format(self.column)
 
 
 class Log2(UnaryExpression):
@@ -430,7 +435,7 @@ class Log2(UnaryExpression):
         return math.log(self.column.eval(row, schema), 2)
 
     def __str__(self):
-        return "LOG2({0})".format(self.column)
+        return 'LOG2({0})'.format(self.column)
 
 
 class Log1p(UnaryExpression):
@@ -438,7 +443,7 @@ class Log1p(UnaryExpression):
         return math.log1p(self.column.eval(row, schema))
 
     def __str__(self):
-        return "LOG1P({0})".format(self.column)
+        return 'LOG1P({0})'.format(self.column)
 
 
 class Rint(UnaryExpression):
@@ -446,7 +451,7 @@ class Rint(UnaryExpression):
         return round(self.column.eval(row, schema))
 
     def __str__(self):
-        return "ROUND({0})".format(self.column)
+        return 'ROUND({0})'.format(self.column)
 
 
 class Signum(UnaryExpression):
@@ -459,7 +464,7 @@ class Signum(UnaryExpression):
         return -1.0
 
     def __str__(self):
-        return "SIGNUM({0})".format(self.column)
+        return 'SIGNUM({0})'.format(self.column)
 
 
 class ToDegrees(UnaryExpression):
@@ -467,7 +472,7 @@ class ToDegrees(UnaryExpression):
         return math.degrees(self.column.eval(row, schema))
 
     def __str__(self):
-        return "DEGREES({0})".format(self.column)
+        return 'DEGREES({0})'.format(self.column)
 
 
 class ToRadians(UnaryExpression):
@@ -475,7 +480,7 @@ class ToRadians(UnaryExpression):
         return math.radians(self.column.eval(row, schema))
 
     def __str__(self):
-        return "RADIANS({0})".format(self.column)
+        return 'RADIANS({0})'.format(self.column)
 
 
 class Rand(Expression):
@@ -491,7 +496,7 @@ class Rand(Expression):
         self.random_generator = XORShiftRandom(self.seed + partition_index)
 
     def __str__(self):
-        return "rand({0})".format(self.seed)
+        return 'rand({0})'.format(self.seed)
 
 
 class Randn(Expression):
@@ -507,7 +512,7 @@ class Randn(Expression):
         self.random_generator = XORShiftRandom(self.seed + partition_index)
 
     def __str__(self):
-        return "randn({0})".format(self.seed)
+        return 'randn({0})'.format(self.seed)
 
 
 class SparkPartitionID(Expression):
@@ -522,7 +527,7 @@ class SparkPartitionID(Expression):
         self.partition_index = partition_index
 
     def __str__(self):
-        return "SPARK_PARTITION_ID()"
+        return 'SPARK_PARTITION_ID()'
 
 
 class CreateStruct(Expression):
@@ -533,13 +538,17 @@ class CreateStruct(Expression):
     def eval(self, row, schema):
         struct_cols, struct_values = [], []
         for col in self.columns:
-            output_cols, output_values = resolve_column(col, row, schema, allow_generator=False)
+            output_cols, output_values = resolve_column(
+                col, row, schema, allow_generator=False
+            )
             struct_cols += output_cols
             struct_values += output_values[0]
         return create_row(struct_cols, struct_values)
 
     def __str__(self):
-        return "named_struct({0})".format(", ".join("{0}, {0}".format(col) for col in self.columns))
+        return 'named_struct({0})'.format(
+            ', '.join('{0}, {0}'.format(col) for col in self.columns)
+        )
 
 
 class Bin(UnaryExpression):
@@ -547,7 +556,7 @@ class Bin(UnaryExpression):
         return format(self.column.eval(row, schema), 'b')
 
     def __str__(self):
-        return "bin({0})".format(self.column)
+        return 'bin({0})'.format(self.column)
 
 
 class Greatest(Expression):
@@ -560,7 +569,7 @@ class Greatest(Expression):
         return max((value for value in values if value is not None), default=None)
 
     def __str__(self):
-        return "greatest({0})".format(", ".join(str(col) for col in self.columns))
+        return 'greatest({0})'.format(', '.join(str(col) for col in self.columns))
 
 
 class Least(Expression):
@@ -573,7 +582,7 @@ class Least(Expression):
         return min((value for value in values if value is not None), default=None)
 
     def __str__(self):
-        return "least({0})".format(", ".join(str(col) for col in self.columns))
+        return 'least({0})'.format(', '.join(str(col) for col in self.columns))
 
 
 class Length(UnaryExpression):
@@ -581,7 +590,7 @@ class Length(UnaryExpression):
         return len(str(self.column.eval(row, schema)))
 
     def __str__(self):
-        return "length({0})".format(self.column)
+        return 'length({0})'.format(self.column)
 
 
 class Lower(UnaryExpression):
@@ -589,7 +598,7 @@ class Lower(UnaryExpression):
         return str(self.column.eval(row, schema)).lower()
 
     def __str__(self):
-        return "lower({0})".format(self.column)
+        return 'lower({0})'.format(self.column)
 
 
 class Upper(UnaryExpression):
@@ -597,7 +606,7 @@ class Upper(UnaryExpression):
         return str(self.column.eval(row, schema)).upper()
 
     def __str__(self):
-        return "Upper({0})".format(self.column)
+        return 'Upper({0})'.format(self.column)
 
 
 class Concat(Expression):
@@ -606,10 +615,10 @@ class Concat(Expression):
         self.columns = columns
 
     def eval(self, row, schema):
-        return "".join(str(col.eval(row, schema)) for col in self.columns)
+        return ''.join(str(col.eval(row, schema)) for col in self.columns)
 
     def __str__(self):
-        return "concat({0})".format(", ".join(str(col) for col in self.columns))
+        return 'concat({0})'.format(', '.join(str(col) for col in self.columns))
 
 
 class ConcatWs(Expression):
@@ -622,9 +631,11 @@ class ConcatWs(Expression):
         return self.sep.join(str(col.eval(row, schema)) for col in self.columns)
 
     def __str__(self):
-        return "concat_ws({0}{1})".format(
+        return 'concat_ws({0}{1})'.format(
             self.sep,
-            ", {0}".format(", ".join(str(col) for col in self.columns)) if self.columns else ""
+            ', {0}'.format(', '.join(str(col) for col in self.columns))
+            if self.columns
+            else '',
         )
 
 
@@ -633,7 +644,7 @@ class Reverse(UnaryExpression):
         return str(self.column.eval(row, schema))[::-1]
 
     def __str__(self):
-        return "reverse({0})".format(self.column)
+        return 'reverse({0})'.format(self.column)
 
 
 class MapKeys(UnaryExpression):
@@ -641,7 +652,7 @@ class MapKeys(UnaryExpression):
         return list(self.column.eval(row, schema).keys())
 
     def __str__(self):
-        return "map_keys({0})".format(self.column)
+        return 'map_keys({0})'.format(self.column)
 
 
 class MapValues(UnaryExpression):
@@ -649,7 +660,7 @@ class MapValues(UnaryExpression):
         return list(self.column.eval(row, schema).values())
 
     def __str__(self):
-        return "map_values({0})".format(self.column)
+        return 'map_values({0})'.format(self.column)
 
 
 class MapEntries(UnaryExpression):
@@ -657,7 +668,7 @@ class MapEntries(UnaryExpression):
         return list(self.column.eval(row, schema).items())
 
     def __str__(self):
-        return "map_entries({0})".format(self.column)
+        return 'map_entries({0})'.format(self.column)
 
 
 class MapFromEntries(UnaryExpression):
@@ -665,7 +676,7 @@ class MapFromEntries(UnaryExpression):
         return dict(self.column.eval(row, schema))
 
     def __str__(self):
-        return "map_from_entries({0})".format(self.column)
+        return 'map_from_entries({0})'.format(self.column)
 
 
 class MapConcat(Expression):
@@ -682,7 +693,7 @@ class MapConcat(Expression):
         return result
 
     def __str__(self):
-        return "map_concat({0})".format(", ".join(str(col) for col in self.columns))
+        return 'map_concat({0})'.format(', '.join(str(col) for col in self.columns))
 
 
 class StringSplit(Expression):
@@ -695,13 +706,15 @@ class StringSplit(Expression):
 
     def eval(self, row, schema):
         limit = self.limit if self.limit is not None else 0
-        return list(self.compiled_regex.split(str(self.column.eval(row, schema)), limit))
+        return list(
+            self.compiled_regex.split(str(self.column.eval(row, schema)), limit)
+        )
 
     def __str__(self):
-        return "split({0}, {1}{2})".format(
+        return 'split({0}, {1}{2})'.format(
             self.column,
             self.regex,
-            ", {0}".format(self.limit) if self.limit is not None else ""
+            ', {0}'.format(self.limit) if self.limit is not None else '',
         )
 
 
@@ -715,18 +728,11 @@ class Conv(Expression):
     def eval(self, row, schema):
         value = self.column.cast(StringType()).eval(row, schema)
         return self.convert(
-            value,
-            self.from_base,
-            abs(self.to_base),
-            positive_only=self.to_base > 0
+            value, self.from_base, abs(self.to_base), positive_only=self.to_base > 0
         )
 
     def __str__(self):
-        return "conv({0}, {1}, {2})".format(
-            self.column,
-            self.from_base,
-            self.to_base
-        )
+        return 'conv({0}, {1}, {2})'.format(self.column, self.from_base, self.to_base)
 
     @staticmethod
     def convert(from_string, from_base, to_base, positive_only=False):
@@ -763,12 +769,14 @@ class Conv(Expression):
         >>> Conv.convert("YOP", 36, 0)  # returns None if to_base < 2
         >>> Conv.convert("YOP", 10, 2)  # returns None if value is not in the from_base
         """
-        if (not (2 <= from_base <= 36 and 2 <= to_base <= 36)
-                or from_string is None
-                or not from_string):
+        if (
+            not (2 <= from_base <= 36 and 2 <= to_base <= 36)
+            or from_string is None
+            or not from_string
+        ):
             return None
 
-        if from_string.startswith("-"):
+        if from_string.startswith('-'):
             value_is_negative = True
             from_numbers = from_string[1:]
         else:
@@ -787,18 +795,18 @@ class Conv(Expression):
         if value_is_negative and positive_only:
             value = 2 ** 64 - value
 
-        returned_string = ""
+        returned_string = ''
         for exp in range(int(math.log(value, to_base)) + 1, -1, -1):
-            factor = (to_base ** exp)
+            factor = to_base ** exp
             number = value // factor
             value -= number * factor
             returned_string += digits[number]
 
         if returned_string:
-            returned_string = returned_string.lstrip("0")
+            returned_string = returned_string.lstrip('0')
 
         if value_is_negative and not positive_only:
-            returned_string = "-" + returned_string
+            returned_string = '-' + returned_string
 
         return returned_string
 
@@ -806,27 +814,21 @@ class Conv(Expression):
 class Hex(UnaryExpression):
     def eval(self, row, schema):
         return Conv.convert(
-            self.column.eval(row, schema),
-            from_base=10,
-            to_base=16,
-            positive_only=True
+            self.column.eval(row, schema), from_base=10, to_base=16, positive_only=True
         )
 
     def __str__(self):
-        return "hex({0})".format(self.column)
+        return 'hex({0})'.format(self.column)
 
 
 class Unhex(UnaryExpression):
     def eval(self, row, schema):
         return Conv.convert(
-            self.column.eval(row, schema),
-            from_base=16,
-            to_base=10,
-            positive_only=True
+            self.column.eval(row, schema), from_base=16, to_base=10, positive_only=True
         )
 
     def __str__(self):
-        return "unhex({0})".format(self.column)
+        return 'unhex({0})'.format(self.column)
 
 
 class Ascii(UnaryExpression):
@@ -840,7 +842,7 @@ class Ascii(UnaryExpression):
         return ord(value_as_string[0])
 
     def __str__(self):
-        return "ascii({0})".format(self.column)
+        return 'ascii({0})'.format(self.column)
 
 
 class MonotonicallyIncreasingID(Expression):
@@ -855,17 +857,17 @@ class MonotonicallyIncreasingID(Expression):
         self.generator = MonotonicallyIncreasingIDGenerator(partition_index)
 
     def __str__(self):
-        return "monotonically_increasing_id()"
+        return 'monotonically_increasing_id()'
 
 
 class Base64(UnaryExpression):
     def eval(self, row, schema):
         value = self.column.eval(row, schema)
-        encoded = base64.b64encode(bytes(value, encoding="utf-8"))
+        encoded = base64.b64encode(bytes(value, encoding='utf-8'))
         return str(encoded)[2:-1]
 
     def __str__(self):
-        return "base64({0})".format(self.column)
+        return 'base64({0})'.format(self.column)
 
 
 class UnBase64(UnaryExpression):
@@ -874,7 +876,7 @@ class UnBase64(UnaryExpression):
         return bytearray(base64.b64decode(value))
 
     def __str__(self):
-        return "unbase64({0})".format(self.column)
+        return 'unbase64({0})'.format(self.column)
 
 
 class GroupingID(Expression):
@@ -884,29 +886,31 @@ class GroupingID(Expression):
 
     def eval(self, row, schema):
         metadata = row.get_metadata()
-        if metadata is None or "grouping" not in metadata:
-            raise AnalysisException("grouping_id() can only be used with GroupingSets/Cube/Rollup")
-        id_binary_string_value = "".join(
-            "1" if grouping else "0" for grouping in metadata["grouping"]
+        if metadata is None or 'grouping' not in metadata:
+            raise AnalysisException(
+                'grouping_id() can only be used with GroupingSets/Cube/Rollup'
+            )
+        id_binary_string_value = ''.join(
+            '1' if grouping else '0' for grouping in metadata['grouping']
         )
         return int(id_binary_string_value, 2)
 
     def __str__(self):
-        return "grouping_id({0})".format(
-            ", ".join(str(col) for col in self.columns)
-        )
+        return 'grouping_id({0})'.format(', '.join(str(col) for col in self.columns))
 
 
 class Grouping(UnaryExpression):
     def eval(self, row, schema):
         metadata = row.get_metadata()
-        if metadata is None or "grouping" not in metadata:
-            raise AnalysisException("grouping_id() can only be used with GroupingSets/Cube/Rollup")
+        if metadata is None or 'grouping' not in metadata:
+            raise AnalysisException(
+                'grouping_id() can only be used with GroupingSets/Cube/Rollup'
+            )
         pos = self.column.find_position_in_schema(schema)
-        return int(metadata["grouping"][pos])
+        return int(metadata['grouping'][pos])
 
     def __str__(self):
-        return "grouping({0})".format(self.column)
+        return 'grouping({0})'.format(self.column)
 
 
 class InputFileName(Expression):
@@ -914,20 +918,77 @@ class InputFileName(Expression):
         metadata = row.get_metadata()
         if metadata is None:
             return None
-        return metadata.get("input_file_name", "")
+        return metadata.get('input_file_name', '')
 
     def __str__(self):
-        return "input_file_name()"
+        return 'input_file_name()'
 
 
 __all__ = [
-    "Grouping", "GroupingID", "Coalesce", "IsNaN", "MonotonicallyIncreasingID", "NaNvl", "Rand",
-    "Randn", "SparkPartitionID", "Sqrt", "CreateStruct", "CaseWhen", "Abs", "Acos", "Asin",
-    "Atan", "Atan2", "Bin", "Cbrt", "Ceil", "Conv", "Cos", "Cosh", "Exp", "ExpM1", "Factorial",
-    "Floor", "Greatest", "Hex", "Unhex", "Hypot", "Least", "Log", "Log10", "Log1p", "Log2",
-    "Rint", "Round", "Bround", "Signum", "Sin", "Sinh", "Tan", "Tanh", "ToDegrees",
-    "ToRadians", "Ascii", "Base64", "ConcatWs", "FormatNumber", "Length", "Lower",
-    "RegExpExtract", "RegExpReplace", "UnBase64", "StringSplit", "SubstringIndex", "Upper",
-    "Concat", "Reverse", "MapKeys", "MapValues", "MapEntries", "MapFromEntries",
-    "MapConcat", "StarOperator"
+    'Grouping',
+    'GroupingID',
+    'Coalesce',
+    'IsNaN',
+    'MonotonicallyIncreasingID',
+    'NaNvl',
+    'Rand',
+    'Randn',
+    'SparkPartitionID',
+    'Sqrt',
+    'CreateStruct',
+    'CaseWhen',
+    'Abs',
+    'Acos',
+    'Asin',
+    'Atan',
+    'Atan2',
+    'Bin',
+    'Cbrt',
+    'Ceil',
+    'Conv',
+    'Cos',
+    'Cosh',
+    'Exp',
+    'ExpM1',
+    'Factorial',
+    'Floor',
+    'Greatest',
+    'Hex',
+    'Unhex',
+    'Hypot',
+    'Least',
+    'Log',
+    'Log10',
+    'Log1p',
+    'Log2',
+    'Rint',
+    'Round',
+    'Bround',
+    'Signum',
+    'Sin',
+    'Sinh',
+    'Tan',
+    'Tanh',
+    'ToDegrees',
+    'ToRadians',
+    'Ascii',
+    'Base64',
+    'ConcatWs',
+    'FormatNumber',
+    'Length',
+    'Lower',
+    'RegExpExtract',
+    'RegExpReplace',
+    'UnBase64',
+    'StringSplit',
+    'SubstringIndex',
+    'Upper',
+    'Concat',
+    'Reverse',
+    'MapKeys',
+    'MapValues',
+    'MapEntries',
+    'MapFromEntries',
+    'MapConcat',
+    'StarOperator',
 ]

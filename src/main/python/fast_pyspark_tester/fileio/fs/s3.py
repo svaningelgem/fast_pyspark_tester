@@ -64,18 +64,11 @@ class S3(FileSystem):
         bucket_name = t.next('/')
         prefix = t.next(['*', '?'])
 
-        bucket = cls._get_conn().get_bucket(
-            bucket_name,
-            validate=False
-        )
-        expr = expr[len(scheme) + 3 + len(bucket_name) + 1:]
+        bucket = cls._get_conn().get_bucket(bucket_name, validate=False)
+        expr = expr[len(scheme) + 3 + len(bucket_name) + 1 :]
         for k in bucket.list(prefix=prefix):
             if fnmatch(k.name, expr) or fnmatch(k.name, expr + '/part*'):
-                files.append('{0}://{1}/{2}'.format(
-                    scheme,
-                    bucket_name,
-                    k.name,
-                ))
+                files.append('{0}://{1}/{2}'.format(scheme, bucket_name, k.name,))
         return files
 
     @classmethod
@@ -84,22 +77,15 @@ class S3(FileSystem):
 
         folder_path = folder_path[1:]  # Remove leading slash
 
-        expr = "{0}{1}".format(folder_path, pattern)
+        expr = '{0}{1}'.format(folder_path, pattern)
         # Match all files inside folders that match expr
-        pattern_expr = "{0}{1}*".format(expr, "" if expr.endswith("/") else "/")
+        pattern_expr = '{0}{1}*'.format(expr, '' if expr.endswith('/') else '/')
 
-        bucket = cls._get_conn().get_bucket(
-            bucket_name,
-            validate=False
-        )
+        bucket = cls._get_conn().get_bucket(bucket_name, validate=False)
         files = []
         for k in bucket.list(prefix=folder_path):
             if fnmatch(k.name, expr) or fnmatch(k.name, pattern_expr):
-                files.append('{0}://{1}/{2}'.format(
-                    scheme,
-                    bucket_name,
-                    k.name,
-                ))
+                files.append('{0}://{1}/{2}'.format(scheme, bucket_name, k.name,))
         return files
 
     def exists(self):
@@ -109,17 +95,14 @@ class S3(FileSystem):
         key_name = t.next()
         conn = self._get_conn()
         bucket = conn.get_bucket(bucket_name, validate=False)
-        return (bucket.get_key(key_name) or
-                bucket.list(prefix='{}/'.format(key_name)))
+        return bucket.get_key(key_name) or bucket.list(prefix='{}/'.format(key_name))
 
     def load(self):
-        log.debug('Loading {0} with size {1}.'
-                  ''.format(self.key.name, self.key.size))
+        log.debug('Loading {0} with size {1}.' ''.format(self.key.name, self.key.size))
         return BytesIO(self.key.get_contents_as_string())
 
     def load_text(self, encoding='utf8', encoding_errors='ignore'):
-        log.debug('Loading {0} with size {1}.'
-                  ''.format(self.key.name, self.key.size))
+        log.debug('Loading {0} with size {1}.' ''.format(self.key.name, self.key.size))
         return StringIO(
             self.key.get_contents_as_string().decode(encoding, encoding_errors)
         )

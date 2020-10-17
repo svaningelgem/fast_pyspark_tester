@@ -5,6 +5,7 @@ log = logging.getLogger(__name__)
 
 class Codec(object):
     """Codec."""
+
     def __init__(self):
         pass
 

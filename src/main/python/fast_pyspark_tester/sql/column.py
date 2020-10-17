@@ -2,12 +2,46 @@ from fast_pyspark_tester.sql.expressions.expressions import Expression
 from fast_pyspark_tester.sql.expressions.fields import find_position_in_schema
 from fast_pyspark_tester.sql.expressions.literals import Literal
 from fast_pyspark_tester.sql.expressions.mappers import StarOperator, CaseWhen
-from fast_pyspark_tester.sql.expressions.operators import Negate, Add, Minus, Time, Divide, Mod, Pow, \
-    Equal, LessThan, LessThanOrEqual, GreaterThanOrEqual, GreaterThan, EqNullSafe, And, Or, \
-    Invert, BitwiseOr, BitwiseAnd, BitwiseXor, GetField, Contains, IsNull, IsNotNull, StartsWith, \
-    EndsWith, Substring, IsIn, Alias, Cast
-from fast_pyspark_tester.sql.expressions.orders import DescNullsLast, DescNullsFirst, Desc, \
-    AscNullsLast, AscNullsFirst, Asc, SortOrder
+from fast_pyspark_tester.sql.expressions.operators import (
+    Negate,
+    Add,
+    Minus,
+    Time,
+    Divide,
+    Mod,
+    Pow,
+    Equal,
+    LessThan,
+    LessThanOrEqual,
+    GreaterThanOrEqual,
+    GreaterThan,
+    EqNullSafe,
+    And,
+    Or,
+    Invert,
+    BitwiseOr,
+    BitwiseAnd,
+    BitwiseXor,
+    GetField,
+    Contains,
+    IsNull,
+    IsNotNull,
+    StartsWith,
+    EndsWith,
+    Substring,
+    IsIn,
+    Alias,
+    Cast,
+)
+from fast_pyspark_tester.sql.expressions.orders import (
+    DescNullsLast,
+    DescNullsFirst,
+    Desc,
+    AscNullsLast,
+    AscNullsFirst,
+    Asc,
+    SortOrder,
+)
 from fast_pyspark_tester.sql.types import string_to_type, DataType, StructField
 from fast_pyspark_tester.sql.utils import IllegalArgumentException
 
@@ -139,8 +173,10 @@ class Column(object):
         return Column(Or(parse_operator(other), self))
 
     def __contains__(self, item):
-        raise ValueError("Cannot apply 'in' operator against a column: please use 'contains' "
-                         "in a string column or 'array_contains' function for an array column.")
+        raise ValueError(
+            "Cannot apply 'in' operator against a column: please use 'contains' "
+            "in a string column or 'array_contains' function for an array column."
+        )
 
     def bitwiseOR(self, other):
         return Column(BitwiseOr(self, parse_operator(other)))
@@ -201,19 +237,19 @@ class Column(object):
         return Column(GetField(self, name))
 
     def __getattr__(self, item):
-        if item.startswith("__"):
+        if item.startswith('__'):
             raise AttributeError(item)
         return self.getField(item)
 
     def __getitem__(self, k):
         if isinstance(k, slice):
             if k.step is not None:
-                raise ValueError("slice with step is not supported.")
+                raise ValueError('slice with step is not supported.')
             return self.substr(k.start, k.stop)
         return self.getField(k)
 
     def __iter__(self):
-        raise TypeError("Column is not iterable")
+        raise TypeError('Column is not iterable')
 
     def contains(self, other):
         return Column(Contains(self, parse_operator(other)))
@@ -221,10 +257,10 @@ class Column(object):
     # pylint: disable=W0511
     # todo: Like
     def rlike(self, other):
-        raise NotImplementedError("rlike is not yet implemented in fast_pyspark_tester")
+        raise NotImplementedError('rlike is not yet implemented in fast_pyspark_tester')
 
     def like(self, other):
-        raise NotImplementedError("like is not yet implemented in fast_pyspark_tester")
+        raise NotImplementedError('like is not yet implemented in fast_pyspark_tester')
 
     def startswith(self, substr):
         return Column(StartsWith(self, parse_operator(substr)))
@@ -250,8 +286,8 @@ class Column(object):
         """
         if not isinstance(startPos, type(length)):
             raise TypeError(
-                "startPos and length must be the same type. "
-                "Got {0} and {1}, respectively.".format(type(startPos), type(length))
+                'startPos and length must be the same type. '
+                'Got {0} and {1}, respectively.'.format(type(startPos), type(length))
             )
         return Column(Substring(self, startPos, length))
 
@@ -512,7 +548,7 @@ class Column(object):
         if isinstance(dataType, str):
             dataType = string_to_type(dataType)
         elif not isinstance(dataType, DataType):
-            raise NotImplementedError("Unknown cast type: {}".format(dataType))
+            raise NotImplementedError('Unknown cast type: {}'.format(dataType))
 
         return Column(Cast(self, dataType))
 
@@ -545,7 +581,7 @@ class Column(object):
         +-----+------------------------------------------------------------+
         """
         if not isinstance(condition, Column):
-            raise TypeError("condition should be a Column")
+            raise TypeError('condition should be a Column')
 
         if not isinstance(self.expr, CaseWhen):
             raise IllegalArgumentException(
@@ -619,17 +655,17 @@ class Column(object):
         if isinstance(self.expr, str):
             return False
         raise NotImplementedError(
-            "Not implemented column expression type: {0}".format(type(self.expr))
+            'Not implemented column expression type: {0}'.format(type(self.expr))
         )
 
     def output_fields(self, schema):
         if isinstance(self.expr, Expression):
             return self.expr.output_fields(schema)
-        return [StructField(
-            name=self.col_name,
-            dataType=self.data_type,
-            nullable=self.is_nullable
-        )]
+        return [
+            StructField(
+                name=self.col_name, dataType=self.data_type, nullable=self.is_nullable
+            )
+        ]
 
     def merge(self, row, schema):
         if isinstance(self.expr, Expression):
@@ -655,7 +691,7 @@ class Column(object):
     def sort_order(self):
         if isinstance(self.expr, SortOrder):
             return self.expr.sort_order
-        return "ASC NULLS FIRST"
+        return 'ASC NULLS FIRST'
 
     # pylint: disable=W0511
     # todo: support of window functions
@@ -671,11 +707,15 @@ class Column(object):
         # >>> from fast_pyspark_tester.sql.functions import rank, min
         # >>> # df.select(rank().over(window), min('age').over(window))
         """
-        raise NotImplementedError("window functions are not yet supported by fast_pyspark_tester")
+        raise NotImplementedError(
+            'window functions are not yet supported by fast_pyspark_tester'
+        )
 
     def __nonzero__(self):
-        raise ValueError("Cannot convert column into bool: please use '&' for 'and', '|' for 'or', "
-                         "'~' for 'not' when building DataFrame boolean expressions.")
+        raise ValueError(
+            "Cannot convert column into bool: please use '&' for 'and', '|' for 'or', "
+            "'~' for 'not' when building DataFrame boolean expressions."
+        )
 
     __bool__ = __nonzero__
 
@@ -697,7 +737,7 @@ class Column(object):
         return str(self)
 
     def __repr__(self):
-        return "Column<{0!r}>".format(self.expr)
+        return 'Column<{0!r}>'.format(self.expr)
 
 
 def parse(arg):
@@ -706,7 +746,7 @@ def parse(arg):
     """
     if isinstance(arg, Column):
         return arg
-    if arg == "*":
+    if arg == '*':
         return Column(StarOperator())
     if isinstance(arg, (str, Expression)):
         return Column(arg)
@@ -721,6 +761,6 @@ def parse_operator(arg):
     """
     if isinstance(arg, Column):
         return arg
-    if arg == "*":
+    if arg == '*':
         return Column(StarOperator())
     return Literal(value=arg)

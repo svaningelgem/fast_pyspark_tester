@@ -37,13 +37,12 @@ except ImportError:
 
 
 class StatCounter(object):
-
     def __init__(self, values=None):
         self.n = 0  # Running count of our values
         self.mu = 0.0  # Running mean of our values
         self.m2 = 0.0  # Running variance numerator (sum of (x - mean)^2)
-        self.maxValue = float("-inf")
-        self.minValue = float("inf")
+        self.maxValue = float('-inf')
+        self.minValue = float('inf')
 
         if values:
             for v in values:
@@ -81,14 +80,14 @@ class StatCounter(object):
             elif self.n * 10 < other.n:
                 self.mu = other.mu - (delta * self.n) / (self.n + other.n)
             else:
-                self.mu = ((self.mu * self.n + other.mu * other.n) /
-                           (self.n + other.n))
+                self.mu = (self.mu * self.n + other.mu * other.n) / (self.n + other.n)
 
             self.maxValue = maximum(self.maxValue, other.maxValue)
             self.minValue = minimum(self.minValue, other.minValue)
 
-            self.m2 += other.m2 + ((delta * delta * self.n * other.n) /
-                                   (self.n + other.n))
+            self.m2 += other.m2 + (
+                (delta * delta * self.n * other.n) / (self.n + other.n)
+            )
             self.n += other.n
 
         return self
@@ -141,11 +140,16 @@ class StatCounter(object):
         return sqrt(self.sampleVariance())
 
     def __repr__(self):
-        return ("(count: %s, mean: %s, stdev: %s, max: %s, min: %s)" %
-                (self.count(), self.mean(), self.stdev(), self.max(), self.min()))
+        return '(count: %s, mean: %s, stdev: %s, max: %s, min: %s)' % (
+            self.count(),
+            self.mean(),
+            self.stdev(),
+            self.max(),
+            self.min(),
+        )
 
 
-PercentileStats = namedtuple("PercentileStats", ["value", "g", "delta"])
+PercentileStats = namedtuple('PercentileStats', ['value', 'g', 'delta'])
 
 
 class ColumnStatHelper(object):
@@ -228,10 +232,12 @@ class ColumnStatHelper(object):
         delta2 = delta * delta
         deltaN2 = deltaN * deltaN
         self.m3 = self.m3 - 3 * deltaN * self.m2 + delta * (delta2 - deltaN2)
-        self.m4 = (self.m4 -
-                   4 * deltaN * self.m3 -
-                   6 * deltaN2 * self.m2 +
-                   delta * (delta * delta2 - deltaN * deltaN2))
+        self.m4 = (
+            self.m4
+            - 4 * deltaN * self.m3
+            - 6 * deltaN2 * self.m2
+            + delta * (delta * delta2 - deltaN * deltaN2)
+        )
 
     def update_sample(self, value):
         self.head_sampled.append(value)
@@ -260,11 +266,13 @@ class ColumnStatHelper(object):
 
             count_without_head += 1
             if not new_samples or (
-                    sample_idx == len(self.sampled) and ops_idx == len(sorted_head) - 1
+                sample_idx == len(self.sampled) and ops_idx == len(sorted_head) - 1
             ):
                 delta = 0
             else:
-                delta = math.floor(2 * self.percentiles_relative_error * count_without_head)
+                delta = math.floor(
+                    2 * self.percentiles_relative_error * count_without_head
+                )
 
             new_samples.append(PercentileStats(value=current_sample, g=1, delta=delta))
 
@@ -280,7 +288,9 @@ class ColumnStatHelper(object):
         head = self.sampled[-1]
         for sample1 in self.sampled[-2:0:-1]:
             if sample1.g + head.g + head.delta < merge_threshold:
-                head = PercentileStats(value=head.value, g=head.g + sample1.g, delta=head.delta)
+                head = PercentileStats(
+                    value=head.value, g=head.g + sample1.g, delta=head.delta
+                )
             else:
                 reverse_compressed_sample.append(head)
                 head = sample1
@@ -340,20 +350,26 @@ class ColumnStatHelper(object):
         deltaN = delta / new_count if new_count != 0 else 0
 
         new_m2 = self.m2 + other.m2 + delta * deltaN * n1 * n2
-        new_m3 = (self.m3 + other.m3 +
-                  deltaN * deltaN * delta * n1 * n2 * (n1 - n2) +
-                  3 * deltaN * (n1 * other.m2 - n2 * self.m2))
-        self.m4 = (self.m4 + other.m4 +
-                   deltaN * deltaN * deltaN * delta * n1 * n2 * (n1 * n1 - n1 * n2 + n2 * n2) +
-                   6 * deltaN * deltaN * (n1 * n1 * other.m2 + n2 * n2 * self.m2) +
-                   4 * deltaN * (n1 * other.m3 - n2 * self.m3))
+        new_m3 = (
+            self.m3
+            + other.m3
+            + deltaN * deltaN * delta * n1 * n2 * (n1 - n2)
+            + 3 * deltaN * (n1 * other.m2 - n2 * self.m2)
+        )
+        self.m4 = (
+            self.m4
+            + other.m4
+            + deltaN * deltaN * deltaN * delta * n1 * n2 * (n1 * n1 - n1 * n2 + n2 * n2)
+            + 6 * deltaN * deltaN * (n1 * n1 * other.m2 + n2 * n2 * self.m2)
+            + 4 * deltaN * (n1 * other.m3 - n2 * self.m3)
+        )
         self.m2 = new_m2
         self.m3 = new_m3
 
     def get_quantile(self, quantile):
         self.finalize()
         if not 0 <= quantile <= 1:
-            raise ValueError("quantile must be between 0 and 1")
+            raise ValueError('quantile must be between 0 and 1')
         if not self.sampled:
             return None
         if quantile <= self.percentiles_relative_error:
@@ -437,7 +453,7 @@ class ColumnStatHelper(object):
         if self.count == 0:
             return None
         if self.m2 == 0:
-            return float("nan")
+            return float('nan')
         return math.sqrt(self.count) * self.m3 / math.sqrt(self.m2 * self.m2 * self.m2)
 
     @property
@@ -445,7 +461,7 @@ class ColumnStatHelper(object):
         if self.count == 0:
             return None
         if self.m2 == 0:
-            return float("nan")
+            return float('nan')
         return self.count * self.m4 / (self.m2 * self.m2) - 3
 
 
@@ -457,7 +473,7 @@ class RowStatHelper(object):
     def __init__(self, exprs, percentiles_relative_error=1 / 10000):
         self.percentiles_relative_error = percentiles_relative_error
         self.column_stat_helpers = {}
-        self.cols = [parse(e) for e in exprs] if exprs else [parse("*")]
+        self.cols = [parse(e) for e in exprs] if exprs else [parse('*')]
         # As python < 3.6 does not guarantee dict ordering
         # we need to keep track of in which order the columns were
         self.col_names = []
@@ -468,8 +484,7 @@ class RowStatHelper(object):
                 col_name = field.name
                 if col_name not in self.column_stat_helpers:
                     self.column_stat_helpers[col_name] = ColumnStatHelper(
-                        parse(col_name),
-                        self.percentiles_relative_error
+                        parse(col_name), self.percentiles_relative_error
                     )
                     self.col_names.append(col_name)
                 self.column_stat_helpers[col_name].merge(row, schema)
@@ -484,25 +499,24 @@ class RowStatHelper(object):
         for col_name in other.col_names:
             counter = other.column_stat_helpers[col_name]
             if col_name in self.column_stat_helpers:
-                self.column_stat_helpers[col_name] = (
-                    self.column_stat_helpers[col_name].mergeStats(counter)
-                )
+                self.column_stat_helpers[col_name] = self.column_stat_helpers[
+                    col_name
+                ].mergeStats(counter)
             else:
                 self.column_stat_helpers[col_name] = counter
                 self.col_names.append(col_name)
 
         return self
 
-    def get_as_rows(self, stats=("count", "mean", "stddev", "min", "max")):
+    def get_as_rows(self, stats=('count', 'mean', 'stddev', 'min', 'max')):
         """
         Provide a list of Row with the same format as the one in the
         Dataset returned by Dataset.stats()
         """
         return [
             row_from_keyed_values(
-                [
-                    ("summary", stat)
-                ] + [
+                [('summary', stat)]
+                + [
                     (col_name, self.get_stat(self.column_stat_helpers[col_name], stat))
                     for col_name in self.col_names
                 ]
@@ -512,21 +526,21 @@ class RowStatHelper(object):
 
     @staticmethod
     def get_stat(stats_counter, stat):
-        if stat in ("count", "mean", "stddev", "min", "max"):
+        if stat in ('count', 'mean', 'stddev', 'min', 'max'):
             value = getattr(stats_counter, stat)
-        elif stat.endswith("%"):
+        elif stat.endswith('%'):
             try:
                 percentile = float(stat[:-1]) / 100
             except ValueError:
-                raise ValueError("Unable to parse {0} as a percentile".format(stat))
+                raise ValueError('Unable to parse {0} as a percentile'.format(stat))
             value = stats_counter.get_quantile(percentile)
         else:
-            raise ValueError("{0} is not a recognised statistic".format(stat))
+            raise ValueError('{0} is not a recognised statistic'.format(stat))
         return RowStatHelper.format_stat(value)
 
     def get_col_quantile(self, col, quantile):
         if str(col) not in self.column_stat_helpers:
-            raise Exception("Unable to get quantile for {0}".format(quantile))
+            raise Exception('Unable to get quantile for {0}'.format(quantile))
         quantile = self.column_stat_helpers[str(col)].get_quantile(quantile)
         return float(quantile) if quantile is not None else None
 
@@ -537,10 +551,10 @@ class RowStatHelper(object):
 
 class CovarianceCounter(object):
     def __init__(self, method):
-        if method != "pearson":
+        if method != 'pearson':
             raise ValueError(
-                "Currently only the calculation of the Pearson Correlation "
-                "coefficient is supported."
+                'Currently only the calculation of the Pearson Correlation '
+                'coefficient is supported.'
             )
         self.xAvg = 0.0  # the mean of all examples seen so far in col1
         self.yAvg = 0.0  # the mean of all examples seen so far in col2
@@ -569,11 +583,17 @@ class CovarianceCounter(object):
             totalCount = self.count + other.count
             deltaX = self.xAvg - other.xAvg
             deltaY = self.yAvg - other.yAvg
-            self.Ck += other.Ck + deltaX * deltaY * self.count / totalCount * other.count
+            self.Ck += (
+                other.Ck + deltaX * deltaY * self.count / totalCount * other.count
+            )
             self.xAvg = (self.xAvg * self.count + other.xAvg * other.count) / totalCount
             self.yAvg = (self.yAvg * self.count + other.yAvg * other.count) / totalCount
-            self.MkX += other.MkX + deltaX * deltaX * self.count / totalCount * other.count
-            self.MkY += other.MkY + deltaY * deltaY * self.count / totalCount * other.count
+            self.MkX += (
+                other.MkX + deltaX * deltaX * self.count / totalCount * other.count
+            )
+            self.MkY += (
+                other.MkY + deltaY * deltaY * self.count / totalCount * other.count
+            )
             self.count = totalCount
         return self
 

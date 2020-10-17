@@ -28,8 +28,7 @@ class FileBinaryStreamDeserializer(object):
         if path is None:
             return EmptyRDD(self.context)
 
-        return self.context.binaryRecords(
-            path, recordLength=self.record_length)
+        return self.context.binaryRecords(path, recordLength=self.record_length)
 
 
 class FileStream(object):
@@ -40,8 +39,9 @@ class FileStream(object):
             self.files_done = set(File.resolve_filenames(self.path))
 
     def get(self):
-        files = [fn for fn in File.resolve_filenames(self.path)
-                 if fn not in self.files_done]
+        files = [
+            fn for fn in File.resolve_filenames(self.path) if fn not in self.files_done
+        ]
         if not files:
             return None
 

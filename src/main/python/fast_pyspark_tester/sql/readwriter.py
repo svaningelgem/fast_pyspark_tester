@@ -2,14 +2,15 @@ from fast_pyspark_tester import RDD
 from fast_pyspark_tester.sql.dataframe import DataFrame
 from fast_pyspark_tester.sql.internal_utils.readers import InternalReader
 from fast_pyspark_tester.sql.internal_utils.readwrite import OptionUtils
-from fast_pyspark_tester.sql.internal_utils.writers import CSVWriter, JSONWriter, InternalWriter
+from fast_pyspark_tester.sql.internal_utils.writers import (
+    CSVWriter,
+    JSONWriter,
+    InternalWriter,
+)
 from fast_pyspark_tester.sql.utils import IllegalArgumentException
 
-WRITE_MODES = ("overwrite", "append", "ignore", "error", "errorifexists")
-DATA_WRITERS = dict(
-    csv=CSVWriter,
-    json=JSONWriter,
-)
+WRITE_MODES = ('overwrite', 'append', 'ignore', 'error', 'errorifexists')
+DATA_WRITERS = dict(csv=CSVWriter, json=JSONWriter,)
 
 
 class DataFrameReader(OptionUtils):
@@ -33,24 +34,67 @@ class DataFrameReader(OptionUtils):
         return DataFrame(jdf, self._spark)
 
     # pylint: disable=R0914
-    def csv(self, path, schema=None, sep=None, encoding=None, quote=None, escape=None,
-            comment=None, header=None, inferSchema=None, ignoreLeadingWhiteSpace=None,
-            ignoreTrailingWhiteSpace=None, nullValue=None, nanValue=None, positiveInf=None,
-            negativeInf=None, dateFormat=None, timestampFormat=None, maxColumns=None,
-            maxCharsPerColumn=None, maxMalformedLogPerPartition=None, mode=None,
-            columnNameOfCorruptRecord=None, multiLine=None, charToEscapeQuoteEscaping=None,
-            samplingRatio=None, enforceSchema=None, emptyValue=None, locale=None, lineSep=None):
+    def csv(
+        self,
+        path,
+        schema=None,
+        sep=None,
+        encoding=None,
+        quote=None,
+        escape=None,
+        comment=None,
+        header=None,
+        inferSchema=None,
+        ignoreLeadingWhiteSpace=None,
+        ignoreTrailingWhiteSpace=None,
+        nullValue=None,
+        nanValue=None,
+        positiveInf=None,
+        negativeInf=None,
+        dateFormat=None,
+        timestampFormat=None,
+        maxColumns=None,
+        maxCharsPerColumn=None,
+        maxMalformedLogPerPartition=None,
+        mode=None,
+        columnNameOfCorruptRecord=None,
+        multiLine=None,
+        charToEscapeQuoteEscaping=None,
+        samplingRatio=None,
+        enforceSchema=None,
+        emptyValue=None,
+        locale=None,
+        lineSep=None,
+    ):
         self._set_opts(
-            schema=schema, sep=sep, encoding=encoding, quote=quote, escape=escape, comment=comment,
-            header=header, inferSchema=inferSchema, ignoreLeadingWhiteSpace=ignoreLeadingWhiteSpace,
-            ignoreTrailingWhiteSpace=ignoreTrailingWhiteSpace, nullValue=nullValue,
-            nanValue=nanValue, positiveInf=positiveInf, negativeInf=negativeInf,
-            dateFormat=dateFormat, timestampFormat=timestampFormat, maxColumns=maxColumns,
+            schema=schema,
+            sep=sep,
+            encoding=encoding,
+            quote=quote,
+            escape=escape,
+            comment=comment,
+            header=header,
+            inferSchema=inferSchema,
+            ignoreLeadingWhiteSpace=ignoreLeadingWhiteSpace,
+            ignoreTrailingWhiteSpace=ignoreTrailingWhiteSpace,
+            nullValue=nullValue,
+            nanValue=nanValue,
+            positiveInf=positiveInf,
+            negativeInf=negativeInf,
+            dateFormat=dateFormat,
+            timestampFormat=timestampFormat,
+            maxColumns=maxColumns,
             maxCharsPerColumn=maxCharsPerColumn,
-            maxMalformedLogPerPartition=maxMalformedLogPerPartition, mode=mode,
-            columnNameOfCorruptRecord=columnNameOfCorruptRecord, multiLine=multiLine,
-            charToEscapeQuoteEscaping=charToEscapeQuoteEscaping, samplingRatio=samplingRatio,
-            enforceSchema=enforceSchema, emptyValue=emptyValue, locale=locale, lineSep=lineSep
+            maxMalformedLogPerPartition=maxMalformedLogPerPartition,
+            mode=mode,
+            columnNameOfCorruptRecord=columnNameOfCorruptRecord,
+            multiLine=multiLine,
+            charToEscapeQuoteEscaping=charToEscapeQuoteEscaping,
+            samplingRatio=samplingRatio,
+            enforceSchema=enforceSchema,
+            emptyValue=emptyValue,
+            locale=locale,
+            lineSep=lineSep,
         )
         if isinstance(path, str):
             path = [path]
@@ -58,46 +102,82 @@ class DataFrameReader(OptionUtils):
             return self._df(self._jreader.csv(path))
         if isinstance(path, RDD):
             return self._df(self._jreader.csv(path.collect()))
-        raise TypeError("path can be only string, list or RDD")
+        raise TypeError('path can be only string, list or RDD')
 
     # pylint: disable=R0914
-    def json(self, path, schema=None, primitivesAsString=None, prefersDecimal=None,
-             allowComments=None, allowUnquotedFieldNames=None, allowSingleQuotes=None,
-             allowNumericLeadingZero=None, allowBackslashEscapingAnyCharacter=None,
-             mode=None, columnNameOfCorruptRecord=None, dateFormat=None, timestampFormat=None,
-             multiLine=None, allowUnquotedControlChars=None, lineSep=None, samplingRatio=None,
-             dropFieldIfAllNull=None, encoding=None, locale=None):
+    def json(
+        self,
+        path,
+        schema=None,
+        primitivesAsString=None,
+        prefersDecimal=None,
+        allowComments=None,
+        allowUnquotedFieldNames=None,
+        allowSingleQuotes=None,
+        allowNumericLeadingZero=None,
+        allowBackslashEscapingAnyCharacter=None,
+        mode=None,
+        columnNameOfCorruptRecord=None,
+        dateFormat=None,
+        timestampFormat=None,
+        multiLine=None,
+        allowUnquotedControlChars=None,
+        lineSep=None,
+        samplingRatio=None,
+        dropFieldIfAllNull=None,
+        encoding=None,
+        locale=None,
+    ):
         self._set_opts(
-            schema=schema, primitivesAsString=primitivesAsString, prefersDecimal=prefersDecimal,
-            allowComments=allowComments, allowUnquotedFieldNames=allowUnquotedFieldNames,
-            allowSingleQuotes=allowSingleQuotes, allowNumericLeadingZero=allowNumericLeadingZero,
+            schema=schema,
+            primitivesAsString=primitivesAsString,
+            prefersDecimal=prefersDecimal,
+            allowComments=allowComments,
+            allowUnquotedFieldNames=allowUnquotedFieldNames,
+            allowSingleQuotes=allowSingleQuotes,
+            allowNumericLeadingZero=allowNumericLeadingZero,
             allowBackslashEscapingAnyCharacter=allowBackslashEscapingAnyCharacter,
-            mode=mode, columnNameOfCorruptRecord=columnNameOfCorruptRecord, dateFormat=dateFormat,
-            timestampFormat=timestampFormat, multiLine=multiLine,
-            allowUnquotedControlChars=allowUnquotedControlChars, lineSep=lineSep,
-            samplingRatio=samplingRatio, dropFieldIfAllNull=dropFieldIfAllNull, encoding=encoding,
-            locale=locale)
+            mode=mode,
+            columnNameOfCorruptRecord=columnNameOfCorruptRecord,
+            dateFormat=dateFormat,
+            timestampFormat=timestampFormat,
+            multiLine=multiLine,
+            allowUnquotedControlChars=allowUnquotedControlChars,
+            lineSep=lineSep,
+            samplingRatio=samplingRatio,
+            dropFieldIfAllNull=dropFieldIfAllNull,
+            encoding=encoding,
+            locale=locale,
+        )
         if isinstance(path, str):
             path = [path]
         if isinstance(path, list):
             return self._df(self._jreader.json(path))
         if isinstance(path, RDD):
             return self._df(self._jreader.json(path.collect()))
-        raise TypeError("path can be only string, list or RDD")
+        raise TypeError('path can be only string, list or RDD')
 
-    def text(self, paths, wholetext=False, lineSep=None,
-             pathGlobFilter=None, recursiveFileLookup=None):
-        self._set_opts(wholetext=wholetext,
-                       lineSep=lineSep,
-                       pathGlobFilter=pathGlobFilter,
-                       recursiveFileLookup=recursiveFileLookup)
+    def text(
+        self,
+        paths,
+        wholetext=False,
+        lineSep=None,
+        pathGlobFilter=None,
+        recursiveFileLookup=None,
+    ):
+        self._set_opts(
+            wholetext=wholetext,
+            lineSep=lineSep,
+            pathGlobFilter=pathGlobFilter,
+            recursiveFileLookup=recursiveFileLookup,
+        )
         if isinstance(paths, str):
             paths = [paths]
         if isinstance(paths, list):
             return self._df(self._jreader.text(paths))
         if isinstance(paths, RDD):
             return self._df(self._jreader.text(paths.collect()))
-        raise TypeError("paths can be only string, list or RDD")
+        raise TypeError('paths can be only string, list or RDD')
 
 
 class DataFrameWriter(OptionUtils):
@@ -111,9 +191,8 @@ class DataFrameWriter(OptionUtils):
             return self
         if saveMode not in WRITE_MODES:
             raise IllegalArgumentException(
-                "Unknown save mode: {0}. Accepted save modes are {1}.".format(
-                    saveMode,
-                    "', '".join(WRITE_MODES)
+                'Unknown save mode: {0}. Accepted save modes are {1}.'.format(
+                    saveMode, "', '".join(WRITE_MODES)
                 )
             )
         self._jwrite = self._jwrite.mode(saveMode)
@@ -140,18 +219,22 @@ class DataFrameWriter(OptionUtils):
 
     def bucketBy(self, numBuckets, col, *cols):
         if not isinstance(numBuckets, int):
-            raise TypeError("numBuckets should be an int, got {0}.".format(type(numBuckets)))
+            raise TypeError(
+                'numBuckets should be an int, got {0}.'.format(type(numBuckets))
+            )
 
         if isinstance(col, (list, tuple)):
             if cols:
-                raise ValueError("col is a {0} but cols are not empty".format(type(col)))
+                raise ValueError(
+                    'col is a {0} but cols are not empty'.format(type(col))
+                )
 
             cols = col
         else:
             cols = [col] + list(cols)
 
         if not all(isinstance(c, str) for c in cols):
-            raise TypeError("all names should be `str`")
+            raise TypeError('all names should be `str`')
 
         self._jwrite = self._jwrite.bucketBy(numBuckets, *cols)
         return self
@@ -159,12 +242,14 @@ class DataFrameWriter(OptionUtils):
     def sortBy(self, col, *cols):
         if isinstance(col, (list, tuple)):
             if cols:
-                raise ValueError("col is a {0} but cols are not empty".format(type(col)))
+                raise ValueError(
+                    'col is a {0} but cols are not empty'.format(type(col))
+                )
 
             col, cols = col[0], col[1:]
 
         if not all(isinstance(c, str) for c in cols) or not isinstance(col, str):
-            raise TypeError("all names should be `str`")
+            raise TypeError('all names should be `str`')
 
         self._jwrite = self._jwrite.sortBy(col, *cols)
         return self
@@ -183,43 +268,83 @@ class DataFrameWriter(OptionUtils):
         else:
             self._jwrite.save(writer_class, path)
 
-    def json(self, path, mode=None, compression=None, dateFormat=None, timestampFormat=None,
-             lineSep=None, encoding=None):
+    def json(
+        self,
+        path,
+        mode=None,
+        compression=None,
+        dateFormat=None,
+        timestampFormat=None,
+        lineSep=None,
+        encoding=None,
+    ):
         self.mode(mode)
         self._set_opts(
-            compression=compression, dateFormat=dateFormat, timestampFormat=timestampFormat,
-            lineSep=lineSep, encoding=encoding)
-        self.format("json").save(path)
+            compression=compression,
+            dateFormat=dateFormat,
+            timestampFormat=timestampFormat,
+            lineSep=lineSep,
+            encoding=encoding,
+        )
+        self.format('json').save(path)
 
     # pylint: disable=R0914
-    def csv(self, path, mode=None, compression=None, sep=None, quote=None, escape=None,
-            header=None, nullValue=None, escapeQuotes=None, quoteAll=None, dateFormat=None,
-            timestampFormat=None, ignoreLeadingWhiteSpace=None, ignoreTrailingWhiteSpace=None,
-            charToEscapeQuoteEscaping=None, encoding=None, emptyValue=None, lineSep=None):
+    def csv(
+        self,
+        path,
+        mode=None,
+        compression=None,
+        sep=None,
+        quote=None,
+        escape=None,
+        header=None,
+        nullValue=None,
+        escapeQuotes=None,
+        quoteAll=None,
+        dateFormat=None,
+        timestampFormat=None,
+        ignoreLeadingWhiteSpace=None,
+        ignoreTrailingWhiteSpace=None,
+        charToEscapeQuoteEscaping=None,
+        encoding=None,
+        emptyValue=None,
+        lineSep=None,
+    ):
         self.mode(mode)
-        self._set_opts(compression=compression, sep=sep, quote=quote, escape=escape, header=header,
-                       nullValue=nullValue, escapeQuotes=escapeQuotes, quoteAll=quoteAll,
-                       dateFormat=dateFormat, timestampFormat=timestampFormat,
-                       ignoreLeadingWhiteSpace=ignoreLeadingWhiteSpace,
-                       ignoreTrailingWhiteSpace=ignoreTrailingWhiteSpace,
-                       charToEscapeQuoteEscaping=charToEscapeQuoteEscaping,
-                       encoding=encoding, emptyValue=emptyValue, lineSep=lineSep)
-        self.format("csv").save(path)
+        self._set_opts(
+            compression=compression,
+            sep=sep,
+            quote=quote,
+            escape=escape,
+            header=header,
+            nullValue=nullValue,
+            escapeQuotes=escapeQuotes,
+            quoteAll=quoteAll,
+            dateFormat=dateFormat,
+            timestampFormat=timestampFormat,
+            ignoreLeadingWhiteSpace=ignoreLeadingWhiteSpace,
+            ignoreTrailingWhiteSpace=ignoreTrailingWhiteSpace,
+            charToEscapeQuoteEscaping=charToEscapeQuoteEscaping,
+            encoding=encoding,
+            emptyValue=emptyValue,
+            lineSep=lineSep,
+        )
+        self.format('csv').save(path)
 
     def insertInto(self, tableName=None):
-        raise NotImplementedError("Pysparkling does not implement write to table yet")
+        raise NotImplementedError('Pysparkling does not implement write to table yet')
 
     def saveAsTable(self, name):
-        raise NotImplementedError("Pysparkling does not implement write to table yet")
+        raise NotImplementedError('Pysparkling does not implement write to table yet')
 
     def parquet(self, path):
-        raise NotImplementedError("Pysparkling does not implement write to parquet yet")
+        raise NotImplementedError('Pysparkling does not implement write to parquet yet')
 
     def text(self, path):
-        raise NotImplementedError("Pysparkling does not implement write to text yet")
+        raise NotImplementedError('Pysparkling does not implement write to text yet')
 
     def orc(self, path):
-        raise NotImplementedError("Pysparkling does not implement write to ORC")
+        raise NotImplementedError('Pysparkling does not implement write to ORC')
 
     def jdbc(self, path):
-        raise NotImplementedError("Pysparkling does not implement write to JDBC")
+        raise NotImplementedError('Pysparkling does not implement write to JDBC')

@@ -10,8 +10,7 @@ import struct
 import time
 
 
-N_CONNECTIONS = (100, 1000, 2000, 3000, 3500, 4000, 4500, 5000,
-                 6000, 7000, 8000)
+N_CONNECTIONS = (100, 1000, 2000, 3000, 3500, 4000, 4500, 5000, 6000, 7000, 8000)
 N_CONNECTIONS_1K = (10, 20, 30, 40, 45, 50, 60, 70, 80, 90, 100)
 
 
@@ -24,10 +23,11 @@ class Server(object):
 
     def client(self, n=2000, format_='hello'):
         for _ in range(self.processes):
-            os.system('python tests/tcpperf_client.py '
-                      '-n {} --port {} --format {} --values {} &'
-                      ''.format(int(n / self.processes), self.port, format_,
-                                self.values))
+            os.system(
+                'python tests/tcpperf_client.py '
+                '-n {} --port {} --format {} --values {} &'
+                ''.format(int(n / self.processes), self.port, format_, self.values)
+            )
 
     def run(self, n=2000, to_kv=None, format_='hello'):
         c = fast_pyspark_tester.Context()
@@ -44,6 +44,7 @@ class Server(object):
             t = stream_c.socketBinaryStream('localhost', self.port, length)
         t.count().foreachRDD(lambda _, rdd: counts.append(rdd.collect()[0]))
         if to_kv is not None:
+
             def update(rdd):
                 for k, v in rdd.collect():
                     sensor_sums[k] += sum(v)
@@ -67,8 +68,7 @@ class Server(object):
             k: (ex_ex2[0], math.sqrt(ex_ex2[1] - ex_ex2[0] ** 2))
             for k, ex_ex2 in sensor_expections.items()
         }
-        print('run: n = {}, counts = {}, result = {}'
-              ''.format(n, counts, result))
+        print('run: n = {}, counts = {}, result = {}' ''.format(n, counts, result))
         print('sensors = {}'.format(sensors))
         time.sleep(self.pause)
         self.port += 1

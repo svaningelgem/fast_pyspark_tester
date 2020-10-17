@@ -16,10 +16,9 @@ class Context(unittest.TestCase):
         sc = fast_pyspark_tester.Context()
         self.assertRaises(
             fast_pyspark_tester.exceptions.ContextIsLockedException,
-            lambda: (sc
-                     .parallelize(range(5))
-                     .map(lambda _: sc.parallelize([1]))
-                     .collect())
+            lambda: (
+                sc.parallelize(range(5)).map(lambda _: sc.parallelize([1])).collect()
+            ),
         )
 
     def test_lock2(self):
@@ -32,7 +31,7 @@ class Context(unittest.TestCase):
 
         self.assertRaises(
             fast_pyspark_tester.exceptions.ContextIsLockedException,
-            parallelize_in_parallelize
+            parallelize_in_parallelize,
         )
 
     def test_parallelize_single_element(self):
@@ -51,7 +50,6 @@ class Context(unittest.TestCase):
         self.assertEqual(my_rdd.count(), 3529)
 
     def test_retry(self):
-
         class EverySecondCallFails(object):
             def __init__(self):
                 self.attempt = 0

@@ -13,4 +13,4 @@ class Literal(Expression):
         return str(self.value)
 
 
-__all__ = ["Literal"]
+__all__ = ['Literal']

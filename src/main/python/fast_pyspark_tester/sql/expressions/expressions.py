@@ -1,6 +1,10 @@
 from fast_pyspark_tester.sql.casts import get_caster
-from fast_pyspark_tester.sql.types import StructField, DataType, \
-    INTERNAL_TYPE_ORDER, python_to_spark_type
+from fast_pyspark_tester.sql.types import (
+    StructField,
+    DataType,
+    INTERNAL_TYPE_ORDER,
+    python_to_spark_type,
+)
 from fast_pyspark_tester.sql.utils import AnalysisException
 
 
@@ -19,11 +23,11 @@ class Expression(object):
         return self.__class__.__name__
 
     def output_fields(self, schema):
-        return [StructField(
-            name=str(self),
-            dataType=self.data_type,
-            nullable=self.is_nullable
-        )]
+        return [
+            StructField(
+                name=str(self), dataType=self.data_type, nullable=self.is_nullable
+            )
+        ]
 
     @property
     def data_type(self):
@@ -59,7 +63,7 @@ class Expression(object):
         for child in children:
             if isinstance(child, Expression):
                 child.recursive_merge(row, schema)
-            elif hasattr(child, "expr") and isinstance(child.expr, Expression):
+            elif hasattr(child, 'expr') and isinstance(child.expr, Expression):
                 child.expr.recursive_merge(row, schema)
             elif isinstance(child, (list, set, tuple)):
                 Expression.children_merge(child, row, schema)
@@ -71,6 +75,7 @@ class Expression(object):
         # Top level import would cause cyclic dependencies
         # pylint: disable=import-outside-toplevel
         from fast_pyspark_tester.sql.expressions.operators import Alias
+
         if isinstance(other.expr, Alias):
             self.recursive_merge_stats(other.expr.expr, schema)
         else:
@@ -82,6 +87,7 @@ class Expression(object):
         # Top level import would cause cyclic dependencies
         # pylint: disable=import-outside-toplevel
         from fast_pyspark_tester.sql.column import Column
+
         for child in children:
             if isinstance(child, Expression):
                 child.recursive_merge_stats(other, schema)
@@ -104,6 +110,7 @@ class Expression(object):
         # Top level import would cause cyclic dependencies
         # pylint: disable=import-outside-toplevel
         from fast_pyspark_tester.sql.column import Column
+
         for child in children:
             if isinstance(child, Expression):
                 child.recursive_initialize(partition_index)
@@ -128,6 +135,7 @@ class Expression(object):
         # Top level import would cause cyclic dependencies
         # pylint: disable=import-outside-toplevel
         from fast_pyspark_tester.sql.column import Column
+
         for child in children:
             if isinstance(child, Expression):
                 child.recursive_pre_evaluation_schema(schema)
@@ -190,16 +198,20 @@ class TypeSafeBinaryOperation(BinaryOperation):
             order_1 = INTERNAL_TYPE_ORDER.index(type_1)
             order_2 = INTERNAL_TYPE_ORDER.index(type_2)
         except ValueError as e:
-            raise AnalysisException("Unable to process type: {0}".format(e))
+            raise AnalysisException('Unable to process type: {0}'.format(e))
 
         spark_type_1 = python_to_spark_type(type_1)
         spark_type_2 = python_to_spark_type(type_2)
 
         if order_1 > order_2:
-            caster = get_caster(from_type=spark_type_2, to_type=spark_type_1, options={})
+            caster = get_caster(
+                from_type=spark_type_2, to_type=spark_type_1, options={}
+            )
             value_2 = caster(value_2)
         elif order_1 < order_2:
-            caster = get_caster(from_type=spark_type_1, to_type=spark_type_2, options={})
+            caster = get_caster(
+                from_type=spark_type_1, to_type=spark_type_2, options={}
+            )
             value_1 = caster(value_1)
 
         return self.unsafe_operation(value_1, value_2)
@@ -228,14 +240,13 @@ class NullSafeBinaryOperation(BinaryOperation):
         type_1 = value_1.__class__
         type_2 = value_2.__class__
         if type_1 == type_2 or (
-                isinstance(value_1, (int, float)) and
-                isinstance(value_2, (int, float))
+            isinstance(value_1, (int, float)) and isinstance(value_2, (int, float))
         ):
             return self.unsafe_operation(value_1, value_2)
 
         raise AnalysisException(
-            "Cannot resolve {0} due to data type mismatch, first value is {1}, second value is {2}."
-            "".format(self, type_1, type_2)
+            'Cannot resolve {0} due to data type mismatch, first value is {1}, second value is {2}.'
+            ''.format(self, type_1, type_2)
         )
 
     def __str__(self):

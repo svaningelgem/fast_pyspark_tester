@@ -16,8 +16,8 @@ def test_column_stat_helper():
     """
     Expected quantile values come from use of org.apache.spark.sql.catalyst.util.QuantileSummaries
     """
-    schema = StructType([StructField("value", IntegerType())])
-    helper = ColumnStatHelper(col("value"))
+    schema = StructType([StructField('value', IntegerType())])
+    helper = ColumnStatHelper(col('value'))
     for i in range(1, 100001):
         helper.merge(Row(value=i), schema)
     helper.finalize()

@@ -1,6 +1,7 @@
 from collections import namedtuple
 import csv
 import matplotlib
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
@@ -17,8 +18,9 @@ class Plot(object):
     def read(self):
         with open(self.filename, 'r') as f:
             reader = csv.reader(f)
-            self.record = namedtuple('record', [k.strip().replace('# ', '')
-                                                for k in next(reader)])
+            self.record = namedtuple(
+                'record', [k.strip().replace('# ', '') for k in next(reader)]
+            )
             for row_raw in reader:
                 row = self.record._make([int(v) for v in row_raw])
                 yield row
@@ -44,16 +46,22 @@ class Plot(object):
     def plot(self):
         x = [row.messages for row in self.data]
 
-        ideal, = self.ax.plot([0.0, max(x)], [0.0, max(x)], label='ideal',
-                              color='black', linestyle='--', linewidth=1)
+        (ideal,) = self.ax.plot(
+            [0.0, max(x)],
+            [0.0, max(x)],
+            label='ideal',
+            color='black',
+            linestyle='--',
+            linewidth=1,
+        )
         graphs = [
             self.ax.plot(x, [getattr(row, k) for row in self.data], label=k)
-            for k in self.record._fields if k != 'messages'
+            for k in self.record._fields
+            if k != 'messages'
         ]
 
         self.ax.legend(
-            handles=[ideal] + [g for g, in graphs],
-            loc='upper left',
+            handles=[ideal] + [g for g, in graphs], loc='upper left',
         )
 
         return self
@@ -70,7 +78,8 @@ class Plot(object):
 
 if __name__ == '__main__':
     Plot('tests/tcpperf_connections.csv').plot().save()
-    (Plot('tests/tcpperf_messages.csv',
-          x_label='inbound messages per second')
-     .plot()
-     .save())
+    (
+        Plot('tests/tcpperf_messages.csv', x_label='inbound messages per second')
+        .plot()
+        .save()
+    )

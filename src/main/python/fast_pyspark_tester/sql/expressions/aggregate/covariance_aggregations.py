@@ -6,13 +6,16 @@ class CovarianceStatAggregation(Aggregation):
         # Top level import would cause cyclic dependencies
         # pylint: disable=import-outside-toplevel
         from fast_pyspark_tester.stat_counter import CovarianceCounter
+
         super(CovarianceStatAggregation, self).__init__(column1, column2)
         self.column1 = column1
         self.column2 = column2
-        self.stat_helper = CovarianceCounter(method="pearson")
+        self.stat_helper = CovarianceCounter(method='pearson')
 
     def merge(self, row, schema):
-        self.stat_helper.add(row.eval(self.column1, schema), row.eval(self.column2, schema))
+        self.stat_helper.add(
+            row.eval(self.column1, schema), row.eval(self.column2, schema)
+        )
 
     def mergeStats(self, other, schema):
         self.stat_helper.merge(other)
@@ -29,7 +32,7 @@ class Corr(CovarianceStatAggregation):
         return self.stat_helper.pearson_correlation
 
     def __str__(self):
-        return "corr({0}, {1})".format(self.column1, self.column2)
+        return 'corr({0}, {1})'.format(self.column1, self.column2)
 
 
 class CovarSamp(CovarianceStatAggregation):
@@ -37,7 +40,7 @@ class CovarSamp(CovarianceStatAggregation):
         return self.stat_helper.covar_samp
 
     def __str__(self):
-        return "covar_samp({0}, {1})".format(self.column1, self.column2)
+        return 'covar_samp({0}, {1})'.format(self.column1, self.column2)
 
 
 class CovarPop(CovarianceStatAggregation):
@@ -45,7 +48,7 @@ class CovarPop(CovarianceStatAggregation):
         return self.stat_helper.covar_pop
 
     def __str__(self):
-        return "covar_pop({0}, {1})".format(self.column1, self.column2)
+        return 'covar_pop({0}, {1})'.format(self.column1, self.column2)
 
 
-__all__ = ["Corr", "CovarSamp", "CovarPop"]
+__all__ = ['Corr', 'CovarSamp', 'CovarPop']

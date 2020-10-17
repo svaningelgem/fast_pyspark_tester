@@ -20,6 +20,7 @@ import fast_pyspark_tester
 
 class Processor(object):
     """This modifies lines but also keeps track whether it was executed."""
+
     def __init__(self):
         self.executed = False
 
@@ -46,9 +47,9 @@ class LazyTestInjection(object):
 class Multiprocessing(unittest.TestCase):
     def setUp(self):
         self.pool = multiprocessing.Pool(4)
-        self.sc = fast_pyspark_tester.Context(pool=self.pool,
-                                              serializer=cloudpickle.dumps,
-                                              deserializer=pickle.loads)
+        self.sc = fast_pyspark_tester.Context(
+            pool=self.pool, serializer=cloudpickle.dumps, deserializer=pickle.loads
+        )
 
     def test_basic(self):
         my_rdd = self.sc.parallelize([1, 3, 4])
@@ -104,9 +105,9 @@ class ThreadPool(unittest.TestCase, LazyTestInjection):
 class ProcessPool(unittest.TestCase):  # cannot work here: LazyTestInjection):
     def setUp(self):
         self.pool = futures.ProcessPoolExecutor(4)
-        self.sc = fast_pyspark_tester.Context(pool=self.pool,
-                                              serializer=cloudpickle.dumps,
-                                              deserializer=pickle.loads)
+        self.sc = fast_pyspark_tester.Context(
+            pool=self.pool, serializer=cloudpickle.dumps, deserializer=pickle.loads
+        )
 
     def tearDown(self):
         self.pool.shutdown()
@@ -121,10 +122,11 @@ class ProcessPool(unittest.TestCase):  # cannot work here: LazyTestInjection):
         Test the case of parallelizing data directly form toLocalIterator()
         in the multiprocessing case.
         """
-        r = (self.sc
-             .parallelize([1, 3, 4, 9, 15, 25, 50, 75, 100], 3)
-             .zipWithIndex()
-             .collect())
+        r = (
+            self.sc.parallelize([1, 3, 4, 9, 15, 25, 50, 75, 100], 3)
+            .zipWithIndex()
+            .collect()
+        )
         self.assertIn((4, 2), r)
 
     def test_cache(self):
@@ -151,15 +153,14 @@ class ProcessPoolIdlePerformance(unittest.TestCase):
     def runtime(self, n=10, processes=1):
         start = time.time()
         with futures.ProcessPoolExecutor(processes) as pool:
-            sc = fast_pyspark_tester.Context(pool=pool,
-                                             serializer=cloudpickle.dumps,
-                                             deserializer=pickle.loads)
+            sc = fast_pyspark_tester.Context(
+                pool=pool, serializer=cloudpickle.dumps, deserializer=pickle.loads
+            )
             rdd = sc.parallelize(range(n), 10)
             rdd.map(lambda _: time.sleep(0.1)).collect()
         return time.time() - start
 
-    @unittest.skipIf(platform.python_implementation() == 'PyPy',
-                     'test fails in PyPy')
+    @unittest.skipIf(platform.python_implementation() == 'PyPy', 'test fails in PyPy')
     def test_basic(self):
         t1 = self.runtime(processes=1)
         t10 = self.runtime(processes=10)
@@ -172,15 +173,16 @@ def map1(ft):
 
 
 def map_pi(n):
-    return sum((
-        1 for x in (random.random() ** 2 + random.random() ** 2
-                    for _ in range(n))
-        if x < 1.0
-    ))
+    return sum(
+        (
+            1
+            for x in (random.random() ** 2 + random.random() ** 2 for _ in range(n))
+            if x < 1.0
+        )
+    )
 
 
-@unittest.skipIf(os.getenv('PERFORMANCE') is None,
-                 'PERFORMANCE env variable not set')
+@unittest.skipIf(os.getenv('PERFORMANCE') is None, 'PERFORMANCE env variable not set')
 def test_performance():
     # not pickle-able map function
     # def map2(ft):
@@ -191,18 +193,19 @@ def test_performance():
             return fast_pyspark_tester.Context()
 
         pool = futures.ProcessPoolExecutor(n_processes)
-        return fast_pyspark_tester.Context(pool=pool,
-                                           serializer=cloudpickle.dumps,
-                                           # serializer=pickle.dumps,
-                                           deserializer=pickle.loads)
+        return fast_pyspark_tester.Context(
+            pool=pool,
+            serializer=cloudpickle.dumps,
+            # serializer=pickle.dumps,
+            deserializer=pickle.loads,
+        )
 
     def test(n_processes):
         sc = create_context(n_processes)
         timed = timeit.Timer(
-            lambda: sc.parallelize(
-                [1000 for _ in range(100)],
-                100,
-            ).map(map_pi).collect()
+            lambda: sc.parallelize([1000 for _ in range(100)], 100,)
+            .map(map_pi)
+            .collect()
         ).timeit(number=10)
         return (timed, sc._stats)
 
@@ -213,14 +216,16 @@ def test_performance():
         test_results[n] = test(n)
         print(n, test_results[n][0])
     print('results where running on one core with full serialization is 1.0:')
-    pprint.pprint({
-        n: 1.0 / (v[0] / test_results[1][0]) for n, v in test_results.items()
-    })
+    pprint.pprint(
+        {n: 1.0 / (v[0] / test_results[1][0]) for n, v in test_results.items()}
+    )
     print('time spent where:')
-    pprint.pprint({
-        n: {k: '{:.1%}'.format(t / v[1]['map_exec']) for k, t in v[1].items()}
-        for n, v in test_results.items()
-    })
+    pprint.pprint(
+        {
+            n: {k: '{:.1%}'.format(t / v[1]['map_exec']) for k, t in v[1].items()}
+            for n, v in test_results.items()
+        }
+    )
 
     return (n_cpu, test_results)
 

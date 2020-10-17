@@ -1,4 +1,3 @@
-
 class ConnectionException(Exception):
     pass
 

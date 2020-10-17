@@ -25,10 +25,7 @@ class Options(dict):
             if arg is not None
             for key, value in arg.items()
         }
-        d.update({
-            key.lower(): value
-            for key, value in kwargs.items()
-        })
+        d.update({key.lower(): value for key, value in kwargs.items()})
         super(Options, self).__init__(d)
 
     def setdefault(self, k, default=None):
@@ -42,8 +39,8 @@ class Options(dict):
         return super(Options, self).__getitem__(k.lower())
 
     def __setitem__(self, k, v):
-        if isinstance(v, str) and v.lower() in ("true", "false"):
-            v = (v.lower() == "true")
+        if isinstance(v, str) and v.lower() in ('true', 'false'):
+            v = v.lower() == 'true'
         super(Options, self).__setitem__(k.lower(), v)
 
     def __delitem__(self, k):
@@ -58,6 +55,6 @@ class Options(dict):
         return super(Options, self).__contains__(o.lower())
 
     def __getattr__(self, item):
-        if not item.startswith("_"):
+        if not item.startswith('_'):
             return self[item.lower()]
         return getattr(super(Options, self), item)

@@ -17,7 +17,7 @@ class CollectList(Aggregation):
         return self.items
 
     def __str__(self):
-        return "collect_list({0})".format(self.column)
+        return 'collect_list({0})'.format(self.column)
 
 
 class CollectSet(Aggregation):
@@ -36,7 +36,7 @@ class CollectSet(Aggregation):
         return list(self.items)
 
     def __str__(self):
-        return "collect_set({0})".format(self.column)
+        return 'collect_set({0})'.format(self.column)
 
 
 class SumDistinct(Aggregation):
@@ -55,7 +55,7 @@ class SumDistinct(Aggregation):
         return sum(self.items)
 
     def __str__(self):
-        return "sum_distinct({0})".format(self.column)
+        return 'sum_distinct({0})'.format(self.column)
 
 
 class First(Aggregation):
@@ -79,7 +79,7 @@ class First(Aggregation):
         return self.value if self.value is not First._sentinel else None
 
     def __str__(self):
-        return "first({0}, {1})".format(self.column, str(self.ignore_nulls).lower())
+        return 'first({0}, {1})'.format(self.column, str(self.ignore_nulls).lower())
 
 
 class Last(Aggregation):
@@ -104,7 +104,7 @@ class Last(Aggregation):
         return self.value
 
     def __str__(self):
-        return "last({0}, {1})".format(self.column, str(self.ignore_nulls).lower())
+        return 'last({0}, {1})'.format(self.column, str(self.ignore_nulls).lower())
 
 
 class CountDistinct(Aggregation):
@@ -114,9 +114,7 @@ class CountDistinct(Aggregation):
         self.items = set()
 
     def merge(self, row, schema):
-        self.items.add(tuple(
-            col.eval(row, schema) for col in self.columns
-        ))
+        self.items.add(tuple(col.eval(row, schema) for col in self.columns))
 
     def mergeStats(self, other, schema):
         self.items += other.items
@@ -125,7 +123,7 @@ class CountDistinct(Aggregation):
         return len(self.items)
 
     def __str__(self):
-        return "count(DISTINCT {0})".format(",".join(self.columns))
+        return 'count(DISTINCT {0})'.format(','.join(self.columns))
 
 
 class ApproxCountDistinct(Aggregation):
@@ -144,10 +142,15 @@ class ApproxCountDistinct(Aggregation):
         return len(self.items)
 
     def __str__(self):
-        return "approx_count_distinct({0})".format(self.column)
+        return 'approx_count_distinct({0})'.format(self.column)
 
 
 __all__ = [
-    "SumDistinct", "ApproxCountDistinct", "CollectList", "CollectSet",
-    "First", "CountDistinct", "Last"
+    'SumDistinct',
+    'ApproxCountDistinct',
+    'CollectList',
+    'CollectSet',
+    'First',
+    'CountDistinct',
+    'Last',
 ]

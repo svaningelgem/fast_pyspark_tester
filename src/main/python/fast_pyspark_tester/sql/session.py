@@ -1,8 +1,15 @@
 import sys
 from threading import RLock
 
-from fast_pyspark_tester.sql.types import _make_type_verifier, DataType, StructType, \
-    _create_converter, _infer_schema, _has_nulltype, _merge_type
+from fast_pyspark_tester.sql.types import (
+    _make_type_verifier,
+    DataType,
+    StructType,
+    _create_converter,
+    _infer_schema,
+    _has_nulltype,
+    _merge_type,
+)
 
 from fast_pyspark_tester import RDD
 from fast_pyspark_tester.context import Context
@@ -23,7 +30,7 @@ else:
     import itertools as _itertools
 
     # pylint: disable=W0622
-    map = getattr(_itertools, "imap")
+    map = getattr(_itertools, 'imap')
 
 
 class SparkSession(object):
@@ -46,6 +53,7 @@ class SparkSession(object):
         # Top level import would cause cyclic dependencies
         # pylint: disable=import-outside-toplevel
         from fast_pyspark_tester.sql.context import SQLContext
+
         self._sc = sparkContext
         self._wrapped = SQLContext(self._sc, self)
         SparkSession._instantiatedSession = self
@@ -80,7 +88,7 @@ class SparkSession(object):
         configurations that are relevant to Spark SQL. When getting the value of a config,
         this defaults to the value set in the underlying :class:`SparkContext`, if any.
         """
-        if not hasattr(self, "_conf"):
+        if not hasattr(self, '_conf'):
             # Compatibility with Pyspark behavior
             # noinspection PyAttributeOutsideInit
             # pylint: disable=W0201
@@ -105,7 +113,7 @@ class SparkSession(object):
     def udf(self):
         # pylint: disable=W0511
         # todo: Add support of udf registration
-        raise NotImplementedError("Pysparkling does not support yet catalog")
+        raise NotImplementedError('Pysparkling does not support yet catalog')
         # from fast_pyspark_tester.sql.udf import UDFRegistration
         # return UDFRegistration(self)
 
@@ -119,13 +127,12 @@ class SparkSession(object):
         """
         first = rdd.first()
         if not first:
-            raise ValueError("The first row in RDD is empty, "
-                             "can not infer schema")
+            raise ValueError('The first row in RDD is empty, ' 'can not infer schema')
         if isinstance(first, dict):
             raise NotImplementedError(
-                "Using RDD of dict to inferSchema is deprecated in Spark "
-                "and not implemented in fast_pyspark_tester. "
-                "Please use .sql.Row instead"
+                'Using RDD of dict to inferSchema is deprecated in Spark '
+                'and not implemented in fast_pyspark_tester. '
+                'Please use .sql.Row instead'
             )
 
         if samplingRatio is None:
@@ -136,8 +143,10 @@ class SparkSession(object):
                     if not _has_nulltype(schema):
                         break
                 else:
-                    raise ValueError("Some of types cannot be determined by the "
-                                     "first 100 rows, please try again with sampling")
+                    raise ValueError(
+                        'Some of types cannot be determined by the '
+                        'first 100 rows, please try again with sampling'
+                    )
         else:
             if samplingRatio < 0.99:
                 rdd = rdd.sample(False, float(samplingRatio))
@@ -159,7 +168,9 @@ class SparkSession(object):
             schema = struct
 
         elif not isinstance(schema, StructType):
-            raise TypeError("schema should be StructType or list or None, but got: %s" % schema)
+            raise TypeError(
+                'schema should be StructType or list or None, but got: %s' % schema
+            )
 
         # convert python objects to sql data
         rdd = rdd.map(schema.toInternal)
@@ -185,7 +196,9 @@ class SparkSession(object):
             schema = struct
 
         elif not isinstance(schema, StructType):
-            raise TypeError("schema should be StructType or list or None, but got: %s" % schema)
+            raise TypeError(
+                'schema should be StructType or list or None, but got: %s' % schema
+            )
 
         # convert python objects to sql data
         data = [schema.toInternal(row) for row in data]
@@ -196,6 +209,7 @@ class SparkSession(object):
         # numpy is an optional dependency
         # pylint: disable=import-outside-toplevel
         import numpy as np
+
         cur_dtypes = rec.dtype
         col_names = cur_dtypes.names
         record_type_list = []
@@ -213,7 +227,9 @@ class SparkSession(object):
 
     def _convert_from_pandas(self, pdf, schema, timezone):
         if timezone is not None:
-            raise NotImplementedError("Pandas with session timezone respect is not supported")
+            raise NotImplementedError(
+                'Pandas with session timezone respect is not supported'
+            )
 
         # Convert pandas.DataFrame to list of numpy records
         np_records = pdf.to_records(index=False)
@@ -231,13 +247,15 @@ class SparkSession(object):
         SparkSession._activeSession = self
 
         if isinstance(data, DataFrame):
-            raise TypeError("data is already a DataFrame")
+            raise TypeError('data is already a DataFrame')
 
         if isinstance(schema, basestring):
             schema = StructType.fromDDL(schema)
         elif isinstance(schema, (list, tuple)):
             # Must re-encode any unicode strings to be consistent with StructField names
-            schema = [x.encode('utf-8') if not isinstance(x, str) else x for x in schema]
+            schema = [
+                x.encode('utf-8') if not isinstance(x, str) else x for x in schema
+            ]
 
         try:
             # pandas is an optional dependency
@@ -260,16 +278,20 @@ class SparkSession(object):
 
         elif isinstance(schema, DataType):
             dataType = schema
-            schema = StructType().add("value", schema)
+            schema = StructType().add('value', schema)
 
-            verify_func = _make_type_verifier(
-                dataType, name="field value"
-            ) if verifySchema else no_check
+            verify_func = (
+                _make_type_verifier(dataType, name='field value')
+                if verifySchema
+                else no_check
+            )
 
             def prepare(obj):
                 verify_func(obj)
                 return tuple([obj])
+
         else:
+
             def prepare(obj):
                 return obj
 
@@ -279,10 +301,12 @@ class SparkSession(object):
             rdd, schema = self._createFromLocal(map(prepare, data), schema)
 
         cols = [
-            col_type.name if hasattr(col_type, "name") else "_" + str(i)
+            col_type.name if hasattr(col_type, 'name') else '_' + str(i)
             for i, col_type in enumerate(schema)
         ]
-        df = DataFrame(DataFrameInternal(self._sc, rdd, cols, True, schema), self._wrapped)
+        df = DataFrame(
+            DataFrameInternal(self._sc, rdd, cols, True, schema), self._wrapped
+        )
         return df
 
     def parse_pandas_dataframe(self, data, schema):
@@ -295,9 +319,12 @@ class SparkSession(object):
         timezone = None
         # If no schema supplied by user then get the names of columns only
         if schema is None:
-            schema = [str(x) if not isinstance(x, basestring) else
-                      (x.encode('utf-8') if not isinstance(x, str) else x)
-                      for x in data.columns]
+            schema = [
+                str(x)
+                if not isinstance(x, basestring)
+                else (x.encode('utf-8') if not isinstance(x, str) else x)
+                for x in data.columns
+            ]
         data = self._convert_from_pandas(data, schema, timezone)
         return data, schema
 
@@ -305,7 +332,9 @@ class SparkSession(object):
         if numPartitions is None:
             numPartitions = self._sc.defaultParallelism
 
-        idf = DataFrameInternal.range(self.sparkContext, start, end, step, numPartitions)
+        idf = DataFrameInternal.range(
+            self.sparkContext, start, end, step, numPartitions
+        )
         return DataFrame(idf, self._wrapped)
 
     @property

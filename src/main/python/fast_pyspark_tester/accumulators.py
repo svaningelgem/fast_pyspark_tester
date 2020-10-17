@@ -79,7 +79,6 @@ TypeError: No default accumulator param for type <type 'list'>
 __all__ = ['Accumulator', 'AccumulatorParam']
 
 
-
 class Accumulator(object):
     """
     A shared variable that can be accumulated, i.e., has a commutative and associative "add"
@@ -116,13 +115,14 @@ class Accumulator(object):
         return str(self._value)
 
     def __repr__(self):
-        return "Accumulator<value={0}>".format(self._value)
+        return 'Accumulator<value={0}>'.format(self._value)
 
 
 class AccumulatorParam(object):
     """
     Helper object that defines how to accumulate values of a given type.
     """
+
     def zero(self, value):
         """
         Provide a "zero value" for the type, compatible in dimensions with the
@@ -144,6 +144,7 @@ class AddingAccumulatorParam(AccumulatorParam):
     such as integers, floats, and lists. Requires the zero value for the underlying type
     as a parameter.
     """
+
     def __init__(self, zero_value):
         self.zero_value = zero_value
 
@@ -161,7 +162,7 @@ FLOAT_ACCUMULATOR_PARAM = AddingAccumulatorParam(0.0)
 COMPLEX_ACCUMULATOR_PARAM = AddingAccumulatorParam(0.0j)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     """
     Execute doctests with
 

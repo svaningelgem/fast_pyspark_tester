@@ -13,8 +13,15 @@ from pytz import UnknownTimeZoneError
 
 from fast_pyspark_tester.sql.casts import get_time_formatter
 from fast_pyspark_tester.sql.schema_utils import get_on_fields
-from fast_pyspark_tester.sql.internal_utils.joins import FULL_JOIN, RIGHT_JOIN, LEFT_JOIN, \
-    CROSS_JOIN, INNER_JOIN, LEFT_SEMI_JOIN, LEFT_ANTI_JOIN
+from fast_pyspark_tester.sql.internal_utils.joins import (
+    FULL_JOIN,
+    RIGHT_JOIN,
+    LEFT_JOIN,
+    CROSS_JOIN,
+    INNER_JOIN,
+    LEFT_SEMI_JOIN,
+    LEFT_ANTI_JOIN,
+)
 from fast_pyspark_tester.sql.types import Row, create_row, row_from_keyed_values
 from fast_pyspark_tester.sql.utils import IllegalArgumentException
 
@@ -26,11 +33,12 @@ class Tokenizer(object):
     def next(self, separator=None):
         if isinstance(separator, list):
             separator_positions_and_lengths = [
-                (self.expression.find(s), s)
-                for s in separator if s in self.expression
+                (self.expression.find(s), s) for s in separator if s in self.expression
             ]
             if separator_positions_and_lengths:
-                sep_pos, separator = min(separator_positions_and_lengths, key=itemgetter(0))
+                sep_pos, separator = min(
+                    separator_positions_and_lengths, key=itemgetter(0)
+                )
             else:
                 sep_pos = -1
         elif separator:
@@ -44,7 +52,7 @@ class Tokenizer(object):
             return value
 
         value = self.expression[:sep_pos]
-        self.expression = self.expression[sep_pos + len(separator):]
+        self.expression = self.expression[sep_pos + len(separator) :]
         return value
 
 
@@ -53,14 +61,14 @@ def parse_file_uri(expr):
     scheme = t.next('://')
     domain = t.next('/')
     last_slash_position = t.expression.rfind('/')
-    folder_path = '/' + t.expression[:last_slash_position + 1]
-    file_pattern = t.expression[last_slash_position + 1:]
+    folder_path = '/' + t.expression[: last_slash_position + 1]
+    file_pattern = t.expression[last_slash_position + 1 :]
 
     return scheme, domain, folder_path, file_pattern
 
 
 def format_file_uri(scheme, domain, *local_path_components):
-    return '{0}://{1}{2}'.format(scheme, domain, "/".join(local_path_components))
+    return '{0}://{1}{2}'.format(scheme, domain, '/'.join(local_path_components))
 
 
 def reservoir_sample_and_size(iterable, k, seed):
@@ -93,7 +101,9 @@ def reservoir_sample_and_size(iterable, k, seed):
     return reservoir, reservoir_size
 
 
-def compute_weighted_percentiles(weighted_values, number_of_percentiles, key=lambda x: x):
+def compute_weighted_percentiles(
+    weighted_values, number_of_percentiles, key=lambda x: x
+):
     """
     Compute weighted percentiles from a list of values and weights.
 
@@ -131,16 +141,21 @@ def compute_weighted_percentiles(weighted_values, number_of_percentiles, key=lam
     [(3, 'a'), (1, 'b'), (2, 'c')]
     """
     if number_of_percentiles == 1:
-        raise ValueError("number_of_percentiles must be at least 2")
+        raise ValueError('number_of_percentiles must be at least 2')
 
-    ordered_values = sorted(weighted_values, key=lambda weighted_value: key(weighted_value[0]))
+    ordered_values = sorted(
+        weighted_values, key=lambda weighted_value: key(weighted_value[0])
+    )
     total_weight = sum(weight for value, weight in ordered_values)
 
     bounds = []
     cumulative_weight = 0
     for value, weight in ordered_values:
         cumulative_weight += weight
-        while len(bounds) / (number_of_percentiles - 1) <= cumulative_weight / total_weight:
+        while (
+            len(bounds) / (number_of_percentiles - 1)
+            <= cumulative_weight / total_weight
+        ):
             bounds.append(value)
 
     return bounds
@@ -165,26 +180,23 @@ def get_keyfunc(cols, schema, nulls_are_smaller=False):
         values = []
         for col in cols:
             value = col.eval(row, schema)
-            values += (
-                (value is None) != nulls_are_smaller,
-                value
-            )
+            values += ((value is None) != nulls_are_smaller, value)
         return tuple(values)
 
     return key
 
 
 FULL_WIDTH_REGEX = re.compile(
-    "[" +
-    r"\u1100-\u115F" +
-    r"\u2E80-\uA4CF" +
-    r"\uAC00-\uD7A3" +
-    r"\uF900-\uFAFF" +
-    r"\uFE10-\uFE19" +
-    r"\uFE30-\uFE6F" +
-    r"\uFF00-\uFF60" +
-    r"\uFFE0-\uFFE6" +
-    "]"
+    '['
+    + r'\u1100-\u115F'
+    + r'\u2E80-\uA4CF'
+    + r'\uAC00-\uD7A3'
+    + r'\uF900-\uFAFF'
+    + r'\uFE10-\uFE19'
+    + r'\uFE30-\uFE6F'
+    + r'\uFF00-\uFF60'
+    + r'\uFFE0-\uFFE6'
+    + ']'
 )
 
 
@@ -220,19 +232,16 @@ def format_cell(value):
     Convert a cell value to a string using the logic needed in DataFrame.show()
     """
     if value is None:
-        return "null"
+        return 'null'
     if isinstance(value, bool):
         return str(value).lower()
     if isinstance(value, Row):
-        return "[{0}]".format(
-            ", ".join(format_cell(sub_value) for sub_value in value)
-        )
+        return '[{0}]'.format(', '.join(format_cell(sub_value) for sub_value in value))
     if isinstance(value, dict):
-        return "[{0}]".format(
-            ", ".join(
-                "{0} -> {1}".format(
-                    format_cell(key), format_cell(sub_value)
-                ) for key, sub_value in value.items()
+        return '[{0}]'.format(
+            ', '.join(
+                '{0} -> {1}'.format(format_cell(key), format_cell(sub_value))
+                for key, sub_value in value.items()
             )
         )
     return str(value)
@@ -260,15 +269,15 @@ class XORShiftRandom(object):
     def nextValue(self, bits):
         seed = self.seed
         nextSeed = seed ^ (seed << 21)
-        nextSeed ^= (nextSeed >> 35)
-        nextSeed ^= (nextSeed << 4)
+        nextSeed ^= nextSeed >> 35
+        nextSeed ^= nextSeed << 4
         self.seed = nextSeed
         return int(nextSeed & ((1 << bits) - 1))
 
     def nextDouble(self):
         a = self.nextValue(26)
         b = self.nextValue(27)
-        return ((a << 27) + b) * 1.1102230246251565E-16
+        return ((a << 27) + b) * 1.1102230246251565e-16
 
     def nextGaussian(self):
         if self.haveNextNextGaussian:
@@ -290,7 +299,7 @@ class XORShiftRandom(object):
 
     @staticmethod
     def hashSeed(seed):
-        as_bytes = seed.to_bytes(8, "big")
+        as_bytes = seed.to_bytes(8, 'big')
         lowBits = MurmurHash3.bytesHash(as_bytes)
         highBits = MurmurHash3.bytesHash(as_bytes, lowBits)
         return (highBits << 32) | (lowBits & 0xFFFFFFFF)
@@ -298,7 +307,7 @@ class XORShiftRandom(object):
 
 class MurmurHash3(object):
     @staticmethod
-    def bytesHash(data, seed=0x3c074a61):
+    def bytesHash(data, seed=0x3C074A61):
         length = len(data)
         h = seed
 
@@ -322,7 +331,7 @@ class MurmurHash3(object):
         if length >= 2:
             k ^= (data[i + 1] & 0xFF) << 8
         if length >= 1:
-            k ^= (data[i + 0] & 0xFF)
+            k ^= data[i + 0] & 0xFF
             h = MurmurHash3.mixLast(h, k)
 
         # Finalization
@@ -332,7 +341,7 @@ class MurmurHash3(object):
     def mix(h, data):
         h = MurmurHash3.mixLast(h, data)
         h = MurmurHash3.rotl(h, 13)
-        return h * 5 + 0xe6546b64
+        return h * 5 + 0xE6546B64
 
     @staticmethod
     def finalizeHash(h, length):
@@ -341,17 +350,17 @@ class MurmurHash3(object):
     @staticmethod
     def avalanche(h):
         h ^= h >> 16
-        h *= 0x85ebca6b
+        h *= 0x85EBCA6B
         h ^= h >> 13
-        h *= 0xc2b2ae35
+        h *= 0xC2B2AE35
         h ^= h >> 16
         return h
 
     @staticmethod
     def mixLast(h, k):
-        k *= 0xcc9e2d51
+        k *= 0xCC9E2D51
         k = MurmurHash3.rotl(k, 15)
-        k *= 0x1b873593
+        k *= 0x1B873593
 
         return h ^ k
 
@@ -361,10 +370,7 @@ class MurmurHash3(object):
 
 
 def merge_rows(left, right):
-    return create_row(
-        itertools.chain(left.__fields__, right.__fields__),
-        left + right
-    )
+    return create_row(itertools.chain(left.__fields__, right.__fields__), left + right)
 
 
 def merge_rows_joined_on_values(left, right, left_schema, right_schema, how, on):
@@ -410,13 +416,13 @@ def strhash(string):
     :param string: string to hash
     :return: hash
     """
-    if string == "":
+    if string == '':
         return 0
 
     x = ord(string[0]) << 7
     for c in string[1:]:
         x = ((1000003 * x) ^ ord(c)) & (1 << 32)
-    x = (x ^ len(string))
+    x = x ^ len(string)
     return x
 
 
@@ -472,7 +478,9 @@ def parse_tz(tz):
     try:
         return pytz.timezone(tz)
     except UnknownTimeZoneError:
-        GMT_PATTERN = r'GMT(?P<sign>[+-])(?P<hours>[0-9]{1,2})(?::(?P<minutes>[0-9]{2}))?'
+        GMT_PATTERN = (
+            r'GMT(?P<sign>[+-])(?P<hours>[0-9]{1,2})(?::(?P<minutes>[0-9]{2}))?'
+        )
         match = re.match(GMT_PATTERN, tz)
         if match:
             return parse_gmt_based_offset(match)
@@ -482,7 +490,7 @@ def parse_tz(tz):
 def parse_gmt_based_offset(match):
     # GMT+2 or GMT+2:30 case
     sign, hours, minutes = match.groups()
-    sign = -1 if sign == "-" else 1
+    sign = -1 if sign == '-' else 1
     try:
         hours = int(hours)
         minutes = int(minutes) if minutes else 0
@@ -512,7 +520,7 @@ def half_up_round(value, scale):
     """
     # Python2 and Python3's round behavior differs for rounding e.g. 0.5
     # hence we handle the "half" case so that it is rounded up
-    scaled_value = (value * (10 ** scale))
+    scaled_value = value * (10 ** scale)
     removed_part = scaled_value % 1
     if removed_part == 0.5:
         sign = -1 if value < 0 else 1
@@ -539,7 +547,7 @@ def half_even_round(value, scale):
     # hence we handle the "half" case so that it round even up and odd down
     if scale > 0:
         return round(value, scale)
-    scaled_value = (value * (10 ** scale))
+    scaled_value = value * (10 ** scale)
     removed_part = scaled_value % 1
     if removed_part == 0.5:
         rounded_part = int(scaled_value)
@@ -553,14 +561,14 @@ def half_even_round(value, scale):
 
 
 def levenshtein_distance(str1, str2):
-    if str1 == "":
+    if str1 == '':
         return len(str2)
-    if str2 == "":
+    if str2 == '':
         return len(str1)
     return min(
         levenshtein_distance(str1[1:], str2[1:]) + (str1[0] != str2[0]),
         levenshtein_distance(str1[1:], str2) + 1,
-        levenshtein_distance(str1, str2[1:]) + 1
+        levenshtein_distance(str1, str2[1:]) + 1,
     )
 
 
@@ -573,8 +581,8 @@ def get_json_encoder(options):
     :param timestamp_formatter: a function that convert a timestamp into a string
     :return: type
     """
-    date_format = options.get("dateformat", "yyyy-MM-dd")
-    timestamp_format = options.get("timestampformat", "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    date_format = options.get('dateformat', 'yyyy-MM-dd')
+    timestamp_format = options.get('timestampformat', "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     date_formatter = get_time_formatter(date_format)
     timestamp_formatter = get_time_formatter(timestamp_format)
 
@@ -590,8 +598,7 @@ def get_json_encoder(options):
                     return [encode_rows(e) for e in item]
                 if isinstance(item, dict):
                     return collections.OrderedDict(
-                        (key, encode_rows(value))
-                        for key, value in item.items()
+                        (key, encode_rows(value)) for key, value in item.items()
                     )
                 return item
 

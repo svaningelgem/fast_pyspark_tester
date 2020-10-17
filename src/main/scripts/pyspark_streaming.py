@@ -15,10 +15,11 @@ def simple_queue(ssc):
 
 
 def simple_queue_count(ssc):
-    (ssc
-     .queueStream([range(5), ['a', 'b'], ['c']], oneAtATime=False)
-     .count()
-     .foreachRDD(lambda t, r: print('>>>>>>>>>>>>>>', t, r.collect())))
+    (
+        ssc.queueStream([range(5), ['a', 'b'], ['c']], oneAtATime=False)
+        .count()
+        .foreachRDD(lambda t, r: print('>>>>>>>>>>>>>>', t, r.collect()))
+    )
 
 
 def simple_queue_one_at_a_time(ssc):
@@ -26,16 +27,19 @@ def simple_queue_one_at_a_time(ssc):
 
 
 def save_text(ssc):
-    (ssc
-     .queueStream([range(5), ['a', 'b'], ['c']], oneAtATime=True)
-     .saveAsTextFiles('scripts/textout/'))
+    (
+        ssc.queueStream([range(5), ['a', 'b'], ['c']], oneAtATime=True).saveAsTextFiles(
+            'scripts/textout/'
+        )
+    )
 
 
 def window(ssc):
-    (ssc
-     .queueStream([[1], [2], [3], [4], [5], [6]])
-     .window(3)
-     .foreachRDD(lambda rdd: print('>>>>>>>>>', rdd.collect())))
+    (
+        ssc.queueStream([[1], [2], [3], [4], [5], [6]])
+        .window(3)
+        .foreachRDD(lambda rdd: print('>>>>>>>>>', rdd.collect()))
+    )
 
 
 def updateStateByKey(ssc):
@@ -45,11 +49,11 @@ def updateStateByKey(ssc):
         return state if not input_stream else input_stream[-1]
 
     ssc.checkpoint('checkpoints/')
-    (ssc
-     .queueStream([[('a', 1), ('b', 3)], [('a', 2), ('a', 5), ('c', 4)]])
-     .updateStateByKey(processStateUpdateByKey)
-     .pprint()
-     )
+    (
+        ssc.queueStream([[('a', 1), ('b', 3)], [('a', 2), ('a', 5), ('c', 4)]])
+        .updateStateByKey(processStateUpdateByKey)
+        .pprint()
+    )
 
 
 def stream_log(ssc):
@@ -57,33 +61,29 @@ def stream_log(ssc):
 
 
 def stream_queue_default(ssc):
-    (ssc
-     .queueStream([[4], [2]], default=['placeholder'])
-     .foreachRDD(lambda rdd: print(rdd.collect())))
+    (
+        ssc.queueStream([[4], [2]], default=['placeholder']).foreachRDD(
+            lambda rdd: print(rdd.collect())
+        )
+    )
 
 
 def join_with_repeated_keys(ssc):
     s1 = ssc.queueStream([[('a', 4), ('a', 2)], [('c', 7)]])
     s2 = ssc.queueStream([[('b', 1), ('b', 3)], [('c', 8)]])
-    (
-        s1.fullOuterJoin(s2)
-        .foreachRDD(lambda rdd: print(sorted(rdd.collect())))
-    )
+    (s1.fullOuterJoin(s2).foreachRDD(lambda rdd: print(sorted(rdd.collect()))))
 
 
 def union(ssc):
     odd = ssc.queueStream([[1], [3], [5]])
     even = ssc.queueStream([[2], [4], [6]])
-    (
-        odd.union(even)
-        .foreachRDD(lambda rdd: print(rdd.collect()))
-    )
+    (odd.union(even).foreachRDD(lambda rdd: print(rdd.collect())))
 
 
 def quiet_logs(sc):
     logger = sc._jvm.org.apache.log4j
-    logger.LogManager.getLogger("org").setLevel(logger.Level.ERROR)
-    logger.LogManager.getLogger("akka").setLevel(logger.Level.ERROR)
+    logger.LogManager.getLogger('org').setLevel(logger.Level.ERROR)
+    logger.LogManager.getLogger('akka').setLevel(logger.Level.ERROR)
 
 
 if __name__ == '__main__':

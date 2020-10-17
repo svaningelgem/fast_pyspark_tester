@@ -83,8 +83,11 @@ class GS(FileSystem):
         expr = expr[expr_s:]
         for k in bucket.list_blobs(prefix=prefix):
             if fnmatch(k.name, expr) or fnmatch(k.name, expr + '/part*'):
-                files.append('{0}://{1}:{2}/{3}'.format(
-                    scheme, project_name, bucket_name, k.name))
+                files.append(
+                    '{0}://{1}:{2}/{3}'.format(
+                        scheme, project_name, bucket_name, k.name
+                    )
+                )
         return files
 
     @staticmethod
@@ -99,20 +102,18 @@ class GS(FileSystem):
 
         folder_path = folder_path[1:]  # Remove leading slash
 
-        expr = "{0}{1}".format(folder_path, pattern)
+        expr = '{0}{1}'.format(folder_path, pattern)
         # Match all files inside folders that match expr
-        pattern_expr = "{0}{1}*".format(expr, "" if expr.endswith("/") else "/")
+        pattern_expr = '{0}{1}*'.format(expr, '' if expr.endswith('/') else '/')
 
         bucket = GS._get_client(project_name).get_bucket(bucket_name)
 
         files = []
         for k in bucket.list_blobs(prefix=folder_path):
-            if not k.name.endswith("/") and (
-                    fnmatch(k.name, expr) or fnmatch(k.name, pattern_expr)
+            if not k.name.endswith('/') and (
+                fnmatch(k.name, expr) or fnmatch(k.name, pattern_expr)
             ):
-                files.append(
-                    '{0}://{1}/{2}'.format(scheme, raw_bucket_name, k.name)
-                )
+                files.append('{0}://{1}/{2}'.format(scheme, raw_bucket_name, k.name))
         return files
 
     def exists(self):
@@ -125,27 +126,27 @@ class GS(FileSystem):
             project_name = GS.project_name
         blob_name = t.next()
         bucket = GS._get_client(project_name).get_bucket(bucket_name)
-        return (bucket.get_blob(blob_name) or
-                list(bucket.list_blobs(prefix='{}/'.format(blob_name))))
+        return bucket.get_blob(blob_name) or list(
+            bucket.list_blobs(prefix='{}/'.format(blob_name))
+        )
 
     def load(self):
-        log.debug('Loading {0} with size {1}.'
-                  ''.format(self.blob.name, self.blob.size))
+        log.debug(
+            'Loading {0} with size {1}.' ''.format(self.blob.name, self.blob.size)
+        )
         return BytesIO(self.blob.download_as_string())
 
     def load_text(self, encoding='utf8', encoding_errors='ignore'):
-        log.debug('Loading {0} with size {1}.'
-                  ''.format(self.blob.name, self.blob.size))
+        log.debug(
+            'Loading {0} with size {1}.' ''.format(self.blob.name, self.blob.size)
+        )
         return StringIO(
-            self.blob.download_as_string().decode(
-                encoding, encoding_errors
-            )
+            self.blob.download_as_string().decode(encoding, encoding_errors)
         )
 
     def dump(self, stream):
         log.debug('Dumping to {0}.'.format(self.blob.name))
-        self.blob.upload_from_string(stream.read(),
-                                     content_type=self.mime_type)
+        self.blob.upload_from_string(stream.read(), content_type=self.mime_type)
         return self
 
     def make_public(self, recursive=False):

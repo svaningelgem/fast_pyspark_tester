@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-__all__ = ["StorageLevel"]
+__all__ = ['StorageLevel']
 
 
 class StorageLevel(object):
@@ -37,16 +37,21 @@ class StorageLevel(object):
         self.replication = replication
 
     def __repr__(self):
-        return "StorageLevel(%s, %s, %s, %s, %s)" % (
-            self.useDisk, self.useMemory, self.useOffHeap, self.deserialized, self.replication)
+        return 'StorageLevel(%s, %s, %s, %s, %s)' % (
+            self.useDisk,
+            self.useMemory,
+            self.useOffHeap,
+            self.deserialized,
+            self.replication,
+        )
 
     def __str__(self):
-        result = ""
-        result += "Disk " if self.useDisk else ""
-        result += "Memory " if self.useMemory else ""
-        result += "OffHeap " if self.useOffHeap else ""
-        result += "Deserialized " if self.deserialized else "Serialized "
-        result += "%sx Replicated" % self.replication
+        result = ''
+        result += 'Disk ' if self.useDisk else ''
+        result += 'Memory ' if self.useMemory else ''
+        result += 'OffHeap ' if self.useOffHeap else ''
+        result += 'Deserialized ' if self.deserialized else 'Serialized '
+        result += '%sx Replicated' % self.replication
         return result
 
 
