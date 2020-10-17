@@ -1,6 +1,11 @@
+import os
+
 import tornado.testing
 
 import fast_pyspark_tester
+
+
+LICENSE_FILE = os.path.join(os.path.dirname(__file__), '../../../LICENS*')
 
 
 class TextFile(tornado.testing.AsyncTestCase):
@@ -10,7 +15,7 @@ class TextFile(tornado.testing.AsyncTestCase):
 
         result = []
         (
-            ssc.textFileStream('LICENS*', process_all=True)
+            ssc.textFileStream(LICENSE_FILE, process_all=True)
             .count()
             .foreachRDD(lambda rdd: result.append(rdd.collect()[0]))
         )
@@ -23,14 +28,14 @@ class TextFile(tornado.testing.AsyncTestCase):
         sc = fast_pyspark_tester.Context()
         ssc = fast_pyspark_tester.streaming.StreamingContext(sc, 0.1)
 
-        (ssc.textFileStream('LICENS*').count().saveAsTextFiles('tests/textout/'))
+        (ssc.textFileStream(LICENSE_FILE).count().saveAsTextFiles('tests/textout/'))
 
     def test_save_gz(self):
         sc = fast_pyspark_tester.Context()
         ssc = fast_pyspark_tester.streaming.StreamingContext(sc, 0.1)
 
         (
-            ssc.textFileStream('LICENS*')
+            ssc.textFileStream(LICENSE_FILE)
             .count()
             .saveAsTextFiles('tests/textout/', suffix='.gz')
         )
@@ -43,7 +48,7 @@ class BinaryFile(tornado.testing.AsyncTestCase):
 
         result = []
         (
-            ssc.fileBinaryStream('LICENS*', process_all=True)
+            ssc.fileBinaryStream(LICENSE_FILE, process_all=True)
             .count()
             .foreachRDD(lambda rdd: result.append(rdd.collect()[0]))
         )
@@ -58,11 +63,11 @@ class BinaryFile(tornado.testing.AsyncTestCase):
 
         result = []
         (
-            ssc.fileBinaryStream('LICENS*', recordLength=40, process_all=True)
+            ssc.fileBinaryStream(LICENSE_FILE, recordLength=40, process_all=True)
             .count()
             .foreachRDD(lambda rdd: result.append(rdd.collect()[0]))
         )
 
         ssc.start()
         ssc.awaitTermination(timeout=0.3)
-        self.assertEqual(sum(result), 54)
+        self.assertEqual(sum(result), 55)

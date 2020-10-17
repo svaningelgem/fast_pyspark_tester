@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import os
+from pathlib import Path
 
 import pytest
 
@@ -42,10 +43,8 @@ class MockedS3Key(object):
 
 
 def test_local_1():
-    filenames = File.resolve_filenames(
-        '{}/*'.format(os.path.dirname(CURRENT_FILE_LOCATION))
-    )
-    assert CURRENT_FILE_LOCATION in filenames
+    filenames = File.resolve_filenames(f'{os.path.dirname(CURRENT_FILE_LOCATION)}/*')
+    assert Path(CURRENT_FILE_LOCATION) in map(Path, filenames)
 
 
 def test_local_2():

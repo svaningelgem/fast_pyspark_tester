@@ -30,6 +30,7 @@ class NoCodec(Codec):
 
 def get_codec(path):
     """Find the codec implementation for this path."""
+    path = str(path)
     if '.' not in path or path.rfind('/') > path.rfind('.'):
         return Codec
 

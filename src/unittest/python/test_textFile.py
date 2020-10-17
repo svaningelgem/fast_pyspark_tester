@@ -7,8 +7,10 @@ import random
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 import pytest
+import requests
 
 from fast_pyspark_tester import Context
 from fast_pyspark_tester.fileio import File
@@ -23,7 +25,10 @@ S3_TEST_PATH = os.getenv('S3_TEST_PATH')
 OAUTH2_CLIENT_ID = os.getenv('OAUTH2_CLIENT_ID')
 GS_TEST_PATH = os.getenv('GS_TEST_PATH')
 HDFS_TEST_PATH = os.getenv('HDFS_TEST_PATH')
-LOCAL_TEST_PATH = os.path.dirname(__file__)
+LOCAL_FILENAME = __file__
+if os.path.altsep:
+    LOCAL_FILENAME = LOCAL_FILENAME.replace(os.path.altsep, os.path.sep)
+LOCAL_TEST_PATH = os.path.dirname(LOCAL_FILENAME)
 
 
 def test_cache():
@@ -58,8 +63,8 @@ def test_local_textFile_name():
 
 
 def test_wholeTextFiles():
-    all_files = Context().wholeTextFiles('{}/*.py'.format(LOCAL_TEST_PATH))
-    this_file = all_files.lookup(__file__)
+    all_files = Context().wholeTextFiles(f'{LOCAL_TEST_PATH}/*.py')
+    this_file = all_files.lookup(LOCAL_FILENAME)
     print(this_file)
     assert 'test_wholeTextFiles' in this_file[0]
 
@@ -257,7 +262,13 @@ def test_read_tar_gz_20news():
     # 20 news dataset has some '0xff' characters that lead to encoding
     # errors before. Adding this as a test case.
     src = 'http://qwone.com/~jason/20Newsgroups/20news-19997.tar.gz'
-    rdd = Context().textFile(src, use_unicode=False)
+    tgt = Path(__file__).parent / os.path.basename(src)
+
+    if not os.path.isfile(os.path.basename(src)):
+        # Fetch it to speed up future tests.
+        tgt.write_bytes(requests.get(src).content)
+
+    rdd = Context().textFile(str(tgt), use_unicode=False)
     assert '}|> 1. Mechanical driven odometer:' in rdd.top(500)
 
 
@@ -301,4 +312,4 @@ def test_local_regex_read():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    test_local_regex_read()
+    test_wholeTextFiles()

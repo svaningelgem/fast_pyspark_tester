@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import asyncio
 from collections import defaultdict
 import itertools
 import logging
@@ -10,7 +11,7 @@ import struct
 import time
 import traceback
 
-from .__version__ import __version__ as PYSPARKLING_VERSION
+from .__version__ import FAST_PYSPARK_TESTER_VERSION
 from .broadcast import Broadcast
 from . import accumulators
 from .cache_manager import CacheManager
@@ -19,14 +20,6 @@ from .fileio import File, TextFile
 from .partition import Partition
 from .rdd import RDD, EmptyRDD
 from .task_context import TaskContext
-
-# Python 2 compatibility
-if not hasattr(time, 'perf_counter'):
-    try:  # Python 2
-        time.perf_counter = time.clock
-    except AttributeError:  # Unexpected
-        raise Exception('`time`should contain either clock (py2) or perf_counter (py3)')
-
 
 log = logging.getLogger(__name__)
 
@@ -178,7 +171,7 @@ class Context(object):
         self._stats = defaultdict(float)
         self.locked = False
 
-        self.version = PYSPARKLING_VERSION
+        self.version = FAST_PYSPARK_TESTER_VERSION
 
     def __getstate__(self):
         r = {k: v if k not in ('_pool',) else None for k, v in self.__dict__.items()}

@@ -49,8 +49,10 @@ class CastTests(TestCase):
     maxDiff = None
 
     def setUp(self):
-        os.environ['TZ'] = 'Europe/Paris'
-        time.tzset()
+        if hasattr(time, 'tzset'):
+            # Not available on Win32!
+            os.environ['TZ'] = 'Europe/Paris'
+            time.tzset()
 
     def test_identity(self):
         x = object()

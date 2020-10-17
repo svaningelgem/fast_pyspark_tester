@@ -137,11 +137,12 @@ class ProcessPool(unittest.TestCase):  # cannot work here: LazyTestInjection):
             return v
 
         r = r.map(sleep05).cache()
-        self.assertEqual(r.collect(), [0, 1, 2])
+        self.assertCountEqual(r.collect(), [0, 1, 2])
 
         start = time.time()
         r.collect()
-        self.assertLess(time.time() - start, 0.5)
+        end = time.time()
+        self.assertLess(end - start, 0.5)
 
 
 class ProcessPoolIdlePerformance(unittest.TestCase):
@@ -231,7 +232,7 @@ def test_performance():
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     # test_performance()
     t = ProcessPool()
     t.setUp()
