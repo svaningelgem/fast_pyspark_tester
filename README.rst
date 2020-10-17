@@ -1,9 +1,9 @@
 .. image:: https://raw.githubusercontent.com/svaningelgem/fast_pyspark_tester/master/logo/logo-w100.png
     :target: https://github.com/svaningelgem/fast_pyspark_tester
 
-.. image:: https://travis-ci.org/svaningelgem/fast_pyspark_tester.svg?branch=master
-    :target: https://travis-ci.org/svaningelgem/fast_pyspark_tester
-    
+.. image:: https://img.shields.io/travis/svaningelgem/fast_pyspark_tester/master
+.. image:: https://img.shields.io/codecov/c/github/svaningelgem/fast_pyspark_tester/master
+
 fast_pyspark_tester
 ===================
 
