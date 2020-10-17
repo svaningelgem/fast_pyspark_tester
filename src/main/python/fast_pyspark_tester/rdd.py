@@ -33,9 +33,8 @@ from .samplers import (
 )
 from .stat_counter import StatCounter
 
-maxint = (
-    sys.maxint if hasattr(sys, 'maxint') else sys.maxsize
-)  # pylint: disable=no-member
+maxint = sys.maxint if hasattr(sys, 'maxint') else sys.maxsize  # pylint: disable=no-member
+
 
 log = logging.getLogger(__name__)
 

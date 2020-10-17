@@ -1135,9 +1135,9 @@ def _merge_type(a, b, name=None):
 
     if isinstance(a, NullType):
         return b
-    elif isinstance(b, NullType):
+    if isinstance(b, NullType):
         return a
-    elif type(a) is not type(b):
+    if type(a) is not type(b):
         # pylint: disable=W0511
         # TODO: type cast (such as int -> long)
         raise TypeError(new_msg(f'Can not merge type {type(a)} and {type(b)}'))
