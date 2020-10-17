@@ -4,12 +4,12 @@
 fileio
 ------
 
-.. currentmodule:: pysparkling
+.. currentmodule:: fast_pyspark_tester
 
 The functionality provided by this module is used in :func:`Context.textFile`
 for reading and in :func:`RDD.saveAsTextFile` for writing.
 
-.. currentmodule:: pysparkling.fileio
+.. currentmodule:: fast_pyspark_tester.fileio
 
 You can use this submodule with :func:`File.dump`, :func:`File.load` and
 :func:`File.exists` to read, write and check for existance of a file.
@@ -18,61 +18,61 @@ All methods transparently handle various schemas (for example ``http://``,
 ``.bz2`` files (among others).
 
 
-.. autoclass:: pysparkling.fileio.File
+.. autoclass:: fast_pyspark_tester.fileio.File
     :members:
 
-.. autoclass:: pysparkling.fileio.TextFile
+.. autoclass:: fast_pyspark_tester.fileio.TextFile
     :members:
 
 
 File System
 ^^^^^^^^^^^
 
-.. autoclass:: pysparkling.fileio.fs.FileSystem
+.. autoclass:: fast_pyspark_tester.fileio.fs.FileSystem
     :members:
 
-.. autoclass:: pysparkling.fileio.fs.Local
+.. autoclass:: fast_pyspark_tester.fileio.fs.Local
     :members:
 
-.. autoclass:: pysparkling.fileio.fs.GS
+.. autoclass:: fast_pyspark_tester.fileio.fs.GS
     :members:
 
-.. autoclass:: pysparkling.fileio.fs.Hdfs
+.. autoclass:: fast_pyspark_tester.fileio.fs.Hdfs
     :members:
 
-.. autoclass:: pysparkling.fileio.fs.Http
+.. autoclass:: fast_pyspark_tester.fileio.fs.Http
     :members:
 
-.. autoclass:: pysparkling.fileio.fs.S3
+.. autoclass:: fast_pyspark_tester.fileio.fs.S3
     :members:
 
 
 Codec
 ^^^^^
 
-.. autoclass:: pysparkling.fileio.codec.Codec
+.. autoclass:: fast_pyspark_tester.fileio.codec.Codec
     :members:
 
-.. autoclass:: pysparkling.fileio.codec.Bz2
+.. autoclass:: fast_pyspark_tester.fileio.codec.Bz2
     :members:
 
-.. autoclass:: pysparkling.fileio.codec.Gz
+.. autoclass:: fast_pyspark_tester.fileio.codec.Gz
     :members:
 
-.. autoclass:: pysparkling.fileio.codec.Lzma
+.. autoclass:: fast_pyspark_tester.fileio.codec.Lzma
     :members:
 
-.. autoclass:: pysparkling.fileio.codec.SevenZ
+.. autoclass:: fast_pyspark_tester.fileio.codec.SevenZ
     :members:
 
-.. autoclass:: pysparkling.fileio.codec.Tar
+.. autoclass:: fast_pyspark_tester.fileio.codec.Tar
     :members:
 
-.. autoclass:: pysparkling.fileio.codec.TarGz
+.. autoclass:: fast_pyspark_tester.fileio.codec.TarGz
     :members:
 
-.. autoclass:: pysparkling.fileio.codec.TarBz2
+.. autoclass:: fast_pyspark_tester.fileio.codec.TarBz2
     :members:
 
-.. autoclass:: pysparkling.fileio.codec.Zip
+.. autoclass:: fast_pyspark_tester.fileio.codec.Zip
     :members:

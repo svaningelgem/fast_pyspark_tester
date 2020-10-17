@@ -1,6 +1,6 @@
 .. _read_write:
 
-.. currentmodule:: pysparkling
+.. currentmodule:: fast_pyspark_tester
 
 
 Reading and Writing
@@ -20,9 +20,9 @@ The most direct input and output is from and to a Python list.
 
 .. code-block:: python
 
-    import pysparkling
+    import fast_pyspark_tester
 
-    sc = pysparkling.Context()
+    sc = fast_pyspark_tester.Context()
 
     # reading
     rdd = sc.parallelize(['hello', 'world'])
@@ -43,9 +43,9 @@ Newline delimited JSON is a text file where every line is its own JSON string.
 .. code-block:: python
 
     import json
-    import pysparkling
+    import fast_pyspark_tester
 
-    sc = pysparkling.Context()
+    sc = fast_pyspark_tester.Context()
 
     # reading
     rdd = (
@@ -69,9 +69,9 @@ CSV
 
     import csv
     import io
-    import pysparkling
+    import fast_pyspark_tester
 
-    sc = pysparkling.Context()
+    sc = fast_pyspark_tester.Context()
 
     # reading
     rdd = (
@@ -101,7 +101,7 @@ second part is a cross check and prints the contents of the `tfrecords` file.
 
 .. code-block:: python
 
-    import pysparkling
+    import fast_pyspark_tester
     import tensorflow as tf
 
     def to_tfrecord(self, xy):
@@ -117,7 +117,7 @@ second part is a cross check and prints the contents of the `tfrecords` file.
     y = [2, 5]
 
     # writing
-    sc = pysparkling.Context()
+    sc = fast_pyspark_tester.Context()
     rdd = (
         sc
         .parallelize([(X, y)])
@@ -144,10 +144,10 @@ Python List
 
 .. code-block:: python
 
-    import pysparkling
+    import fast_pyspark_tester
 
-    sc = pysparkling.Context()
-    ssc = pysparkling.streaming.StreamingContext(sc, 1.0)
+    sc = fast_pyspark_tester.Context()
+    ssc = fast_pyspark_tester.streaming.StreamingContext(sc, 1.0)
 
     (
         ssc

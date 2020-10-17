@@ -3,9 +3,9 @@
 API
 ===
 
-.. currentmodule:: pysparkling
+.. currentmodule:: fast_pyspark_tester
 
-A usual ``pysparkling`` session starts with either parallelizing a `list`
+A usual ``fast_pyspark_tester`` session starts with either parallelizing a `list`
 with :func:`Context.parallelize` or by reading data from a file using
 :func:`Context.textFile`. These two methods return :class:`RDD` instances that
 can then be processed.

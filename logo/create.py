@@ -89,7 +89,7 @@ def main():
     # add banner text
     g = svg_banner.g(style='font-size:40px; font-family:Arial; font-weight: bold; font-style: italic;')
     g.add(svg_banner.text(
-        'pysparkling',
+        'fast_pyspark_tester',
         insert=(180, 120), fill='#000000'),
     )
     svg_banner.add(g)

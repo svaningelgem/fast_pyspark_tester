@@ -3,8 +3,8 @@
 RDD
 ---
 
-.. autoclass:: pysparkling.RDD
+.. autoclass:: fast_pyspark_tester.RDD
    :members:
 
-.. autoclass:: pysparkling.StatCounter
+.. autoclass:: fast_pyspark_tester.StatCounter
    :members:

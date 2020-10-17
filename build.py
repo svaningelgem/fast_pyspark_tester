@@ -2,12 +2,14 @@
 import logging
 from pathlib import Path
 
-from pybuilder.core import use_plugin, init, before, after, Author
+from pybuilder.core import use_plugin, init, before, after, Author, Project
 from pybuilder.errors import BuildFailedException
+from pybuilder.vcs import VCSRevision
 
 use_plugin("python.core")
-use_plugin("python.flake8")
+# use_plugin("python.flake8")
 use_plugin("python.distutils")
+use_plugin("python.pylint")
 # use_plugin("python.unittest")
 # use_plugin("python.coverage")
 # https://github.com/AlexeySanko/pybuilder_pytest
@@ -16,21 +18,11 @@ use_plugin("python.distutils")
 # use_plugin('pypi:pybuilder_pytest_coverage')
 
 
-def _get_pysparkling_version() -> str:
-    """Returns the pysparkling version based on the one mentioned in the __init__.py file under the package."""
-    from pathlib import Path
-    import re
-
-    with open(Path(__file__).parent / 'src/pysparkling/__init__.py') as fp:
-        version_line = next(l for l in fp if l.startswith('__version__'))
-        return re.search(r'=\s*(["\'])(.*)(\1)\s*$', version_line).group(2)
-
-
-name = "pysparkling"
+name = "fast_pyspark_tester"
 default_task = "publish"
-version = _get_pysparkling_version()
+version = '0.6.0'
 license = 'MIT'
-summary = 'Pure Python implementation of the Spark RDD interface.'
+summary = 'Pure Python implementation of the pyspark interface.'
 description = None
 authors = [
     Author(name='Sven Kreiss', email='me@svenkreiss.com'),
@@ -38,10 +30,10 @@ authors = [
     Author(name='Steven Van Ingelgem', email='steven@vaningelgem.be'),
 ]
 maintainers = [
-    Author(name="Erwan Guyomarc'h", email='tools4origins@gmail.com'),
+    Author(name='Steven Van Ingelgem', email='steven@vaningelgem.be'),
 ]
-requires_python = '>= 3.4'
-url = 'https://github.com/pysparkling/pysparkling/'
+requires_python = '>= 3.6'
+url = 'https://github.com/svaningelgem/fast_pyspark_tester/'
 
 _logging_root_level: int = logging.root.getEffectiveLevel()
 
@@ -52,7 +44,7 @@ def _set_debug_mode():
 
 
 @after('run_unit_tests')
-def _set_debug_mode_after():
+def _reset_debug_mode():
     logging.root.setLevel(_logging_root_level)
 
 
@@ -94,6 +86,17 @@ def _add_extras_require(project, logger):
     setup_script.write_text(new_setup, encoding=encoding)
 
 
+@after('package')
+def write_version_into_library(project: Project):
+    version_file = Path(project.expand_path('$dir_dist', f'{project.name}/__version__.py'))
+    version_file.write_text(
+        version_file
+        .read_text()
+        .replace('%version%', project.version)
+        .replace('%hash%', VCSRevision().get_git_hash())
+    )
+
+
 @init
 def set_properties(project):
     # Small tweak to project.list_scripts() as that method lists EVERYTHING in the scripts directory.
@@ -108,15 +111,11 @@ def set_properties(project):
         ]
     setattr(project, 'list_scripts', _my_list_scripts)
 
-    project.set_property('dir_source_main_python', 'src/')
-    project.set_property('dir_source_main_scripts', 'scripts/')
-
     project.depends_on_requirements(file='requirements.txt')
 
     project.set_property('distutils_readme_description', True)
     project.set_property('distutils_readme_file', 'README.rst')
 
-    project.set_property_if_unset("pytest_extra_args", [])
     project.set_property('pytest_coverage_break_build_threshold', 0)  # Don't let coverage break the build (for now)
 
     project.set_property('distutils_console_scripts', [])
