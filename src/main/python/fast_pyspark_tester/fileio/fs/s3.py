@@ -65,7 +65,7 @@ class S3(FileSystem):
         prefix = t.next(['*', '?'])
 
         bucket = cls._get_conn().get_bucket(bucket_name, validate=False)
-        expr = expr[len(scheme) + 3 + len(bucket_name) + 1 :]
+        expr = expr[len(scheme) + 3 + len(bucket_name) + 1:]
         for k in bucket.list(prefix=prefix):
             if fnmatch(k.name, expr) or fnmatch(k.name, expr + '/part*'):
                 files.append('{0}://{1}/{2}'.format(scheme, bucket_name, k.name,))

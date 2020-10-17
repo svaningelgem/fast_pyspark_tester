@@ -492,9 +492,11 @@ class DStream(object):
         :param f: Function that transforms an RDD.
         :rtype: DStream
         """
+
         if func.__code__.co_argcount == 1:
+            # Convert a method that only accepts 1 argument into one that is acceptable for the TransformedDStream.
             one_arg_func = func
-            func = lambda _, rdd: one_arg_func(rdd)
+            func = lambda _, rdd: one_arg_func(rdd)  # noqa: E731
 
         return TransformedDStream(self, func)
 
@@ -509,7 +511,7 @@ class DStream(object):
         """
         if func.__code__.co_argcount == 2:
             two_arg_func = func
-            func = lambda _, rdd_a, rdd_b: two_arg_func(rdd_a, rdd_b)
+            func = lambda _, rdd_a, rdd_b: two_arg_func(rdd_a, rdd_b)  # noqa: E731
 
         return TransformedWithDStream(self, func, other)
 

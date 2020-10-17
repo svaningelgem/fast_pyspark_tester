@@ -268,7 +268,9 @@ class SparkSession(object):
         if has_pandas and isinstance(data, pandas.DataFrame):
             data, schema = self.parse_pandas_dataframe(data, schema)
 
-        no_check = lambda _: True
+        def no_check(_):
+            return True
+
         if isinstance(schema, StructType):
             verify_func = _make_type_verifier(schema) if verifySchema else no_check
 

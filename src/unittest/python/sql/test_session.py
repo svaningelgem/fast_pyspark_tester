@@ -37,7 +37,7 @@ class SessionTests(TestCase):
 
     def test_session_create_data_frame_from_rdd(self):
         df = self.spark.createDataFrame(
-            self.spark.sparkContext.parallelize([(1, 'one'), (2, 'two'), (3, 'three'),])
+            self.spark.sparkContext.parallelize([(1, 'one'), (2, 'two'), (3, 'three')])
         )
         self.assertEqual(df.count(), 3)
         self.assertListEqual(
@@ -55,7 +55,7 @@ class SessionTests(TestCase):
         )
 
     def test_session_create_data_frame_from_list(self):
-        df = self.spark.createDataFrame([(1, 'one'), (2, 'two'), (3, 'three'),])
+        df = self.spark.createDataFrame([(1, 'one'), (2, 'two'), (3, 'three')])
         self.assertEqual(df.count(), 3)
         self.assertListEqual(
             df.collect(),

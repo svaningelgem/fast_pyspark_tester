@@ -801,7 +801,7 @@ class UserDefinedType(DataType):
         pyUDT = str(json['pyClass'])  # convert unicode to str
         split = pyUDT.rfind('.')
         pyModule = pyUDT[:split]
-        pyClass = pyUDT[split + 1 :]
+        pyClass = pyUDT[split + 1:]
         m = __import__(pyModule, globals(), locals(), [pyClass])
         if not hasattr(m, pyClass):
             raise NotImplementedError(
@@ -917,7 +917,7 @@ _type_mappings = {
 
 if sys.version < '3':
     _type_mappings.update(
-        {unicode: StringType, long: LongType,}
+        {unicode: StringType, long: LongType}
     )
 
 # Mapping Python array types to Spark SQL DataType
@@ -1120,22 +1120,27 @@ def _get_null_fields(field, prefix=''):
     return [prefixed_field_name] if isinstance(field.dataType, NullType) else []
 
 
+def _get_msg_name_methods(name=None):
+    def new_msg(msg):
+        return msg if not name else f'{name}: {msg}'
+
+    def new_name(n_):
+        return f'field {n_}' if not name else f'field {n_} in {name}'
+
+    return new_msg, new_name
+
+
 def _merge_type(a, b, name=None):
-    if name is None:
-        new_msg = lambda msg: msg
-        new_name = lambda n: 'field %s' % n
-    else:
-        new_msg = lambda msg: '%s: %s' % (name, msg)
-        new_name = lambda n: 'field %s in %s' % (n, name)
+    new_msg, new_name = _get_msg_name_methods(name)
 
     if isinstance(a, NullType):
         return b
-    if isinstance(b, NullType):
+    elif isinstance(b, NullType):
         return a
-    if type(a) is not type(b):
+    elif type(a) is not type(b):
         # pylint: disable=W0511
         # TODO: type cast (such as int -> long)
-        raise TypeError(new_msg('Can not merge type %s and %s' % (type(a), type(b))))
+        raise TypeError(new_msg(f'Can not merge type {type(a)} and {type(b)}'))
 
     # same type
     if isinstance(a, StructType):
@@ -1319,12 +1324,7 @@ def _make_type_verifier(dataType, nullable=True, name=None):
     ValueError:...
     """
 
-    if name is None:
-        new_msg = lambda msg: msg
-        new_name = lambda n: 'field %s' % n
-    else:
-        new_msg = lambda msg: '%s: %s' % (name, msg)
-        new_name = lambda n: 'field %s in %s' % (n, name)
+    new_msg, new_name = _get_msg_name_methods(name)
 
     def verify_nullability(obj):
         if obj is None:

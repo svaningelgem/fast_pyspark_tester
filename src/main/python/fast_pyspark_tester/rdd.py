@@ -174,9 +174,9 @@ class RDD(object):
                 r[k] = seqFunc(r[k], v)
             return r
 
-        def combFuncByKey(l):
+        def combFuncByKey(l_):
             r = defaultdict(lambda: copy.deepcopy(zeroValue))
-            for p in l:
+            for p in l_:
                 for k, v in p.items():
                     r[k] = combFunc(r[k], v)
             return r
@@ -1194,7 +1194,7 @@ class RDD(object):
                 if lb <= r < ub:
                     lists[i].append(e)
 
-        return [self.context.parallelize(l) for l in lists]
+        return [self.context.parallelize(l_) for l_ in lists]
 
     def reduce(self, f):
         """reduce
@@ -1525,7 +1525,7 @@ class RDD(object):
                 for ending in endings
             )
         ):
-            codec_suffix = path[path.rfind('.') :]
+            codec_suffix = path[path.rfind('.'):]
 
         def _map(path, obj):
             stream = io.BytesIO()
@@ -1587,7 +1587,7 @@ class RDD(object):
                 for ending in endings
             )
         ):
-            codec_suffix = path[path.rfind('.') :]
+            codec_suffix = path[path.rfind('.'):]
 
         self.context.runJob(
             self.mapPartitions(to_stringio),
@@ -2225,13 +2225,13 @@ def unit_map(task_context, elements):
     return list(elements)
 
 
-def unit_collect(l):
-    return [x for p in l for x in p]
+def unit_collect(l_):
+    return [x for p in l_ for x in p]
 
 
 def sum_counts_by_keys(list_of_pairlists):
     r = defaultdict(int)  # calling int results in a zero
-    for l in list_of_pairlists:
-        for key, count in l.items():
+    for l_ in list_of_pairlists:
+        for key, count in l_.items():
             r[key] += count
     return r

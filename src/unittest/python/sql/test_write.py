@@ -15,7 +15,7 @@ spark = SparkSession(Context())
 def get_folder_content(folder_path):
     folder_content = {}
     for root, _, files in os.walk(folder_path):
-        relative_path = root[len(folder_path) :]
+        relative_path = root[len(folder_path):]
         for file in files:
             file_path = os.path.join(root, file)
             with open(file_path, 'r') as file_content:

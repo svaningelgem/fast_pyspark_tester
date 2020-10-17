@@ -322,7 +322,7 @@ class Substring(Expression):
 
     def eval(self, row, schema):
         return str(self.expr.eval(row, schema))[
-            self.start - 1 : self.start - 1 + self.length
+            self.start - 1:self.start - 1 + self.length
         ]
 
     def __str__(self):

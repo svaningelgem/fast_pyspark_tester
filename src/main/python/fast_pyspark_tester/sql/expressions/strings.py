@@ -52,7 +52,7 @@ class StringLocate(Expression):
 
     def eval(self, row, schema):
         value = self.column.cast(StringType()).eval(row, schema)
-        if self.substr not in value[self.start :]:
+        if self.substr not in value[self.start:]:
             return 0
         return value.index(self.substr, self.start) + 1
 
