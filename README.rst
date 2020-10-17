@@ -1,22 +1,27 @@
-.. image:: https://raw.githubusercontent.com/svenkreiss/pysparkling/master/logo/logo-w100.png
-    :target: https://github.com/svenkreiss/pysparkling
+.. image:: https://raw.githubusercontent.com/svaningelgem/fast_pyspark_tester/master/logo/logo-w100.png
+    :target: https://github.com/svaningelgem/fast_pyspark_tester
 
-pysparkling
-===========
+fast_pyspark_tester
+===================
 
-**Pysparkling** provides a faster, more responsive way to develop programs
+**fast_pyspark_tester** is a fork of the very excellent **pysparkling** library originally created by
+Sven Kreiss. It includes lots of contributions from the pysparkling contributors (for more info, please
+see their `github repository <https://github.com/pysparkling/pysparkling.git>`_. Changes will be pulled
+regularly. This fork is aimed at clean and well tested code, both against itself and against Spark.
+
+**fast_pyspark_tester** provides a faster, more responsive way to develop programs
 for PySpark. It enables code intended for Spark applications to execute
 entirely in Python, without incurring the overhead of initializing and
 passing data through the JVM and Hadoop. The focus is on having a lightweight
 and fast implementation for small datasets at the expense of some data
 resilience features and some parallel processing features.
 
-**How does it work?** To switch execution of a script from PySpark to pysparkling,
-have the code initialize a pysparkling Context instead of a SparkContext, and
-use the pysparkling Context to set up your RDDs. The beauty is you don't have
+**How does it work?** To switch execution of a script from PySpark to fast_pyspark_tester,
+have the code initialize a fast_pyspark_tester Context instead of a SparkContext, and
+use the fast_pyspark_tester Context to set up your RDDs. The beauty is you don't have
 to change a single line of code after the Context initialization, because
-pysparkling's API is (almost) exactly the same as PySpark's. Since it's so easy
-to switch between PySpark and pysparkling, you can choose the right tool for your
+fast_pyspark_tester's API is (almost) exactly the same as PySpark's. Since it's so easy
+to switch between PySpark and fast_pyspark_tester, you can choose the right tool for your
 use case.
 
 **When would I use it?** Say you are writing a Spark application because you
@@ -24,10 +29,10 @@ need robust computation on huge datasets, but you also want the same application
 to provide fast answers on a small dataset. You're finding Spark is not responsive
 enough for your needs, but you don't want to rewrite an entire separate application
 for the *small-answers-fast* problem. You'd rather reuse your Spark code but somehow
-get it to run fast. Pysparkling bypasses the stuff that causes Spark's long startup
+get it to run fast. fast_pyspark_tester bypasses the stuff that causes Spark's long startup
 times and less responsive feel.
 
-Here are a few areas where pysparkling excels:
+Here are a few areas where fast_pyspark_tester excels:
 
 * Small to medium-scale exploratory data analysis
 * Application prototyping
@@ -40,22 +45,22 @@ Install
 
 .. code-block:: bash
 
-    pip install pysparkling[s3,hdfs,streaming]
+    pip install fast_pyspark_tester[s3,hdfs,streaming]
 
 
-`Documentation <https://pysparkling.trivial.io>`_:
+`Documentation <https://fast_pyspark_tester.trivial.io>`_:
 
-.. image:: https://raw.githubusercontent.com/svenkreiss/pysparkling/master/docs/readthedocs.png
-   :target: https://pysparkling.trivial.io
+.. image:: https://raw.githubusercontent.com/svenkreiss/fast_pyspark_tester/master/docs/readthedocs.png
+   :target: https://fast_pyspark_tester.trivial.io
 
 
 Other links:
-`Github <https://github.com/svenkreiss/pysparkling>`_,
-`Issue Tracker <https://github.com/svenkreiss/pysparkling/issues>`_,
+`Github <https://github.com/svenkreiss/fast_pyspark_tester>`_,
+`Issue Tracker <https://github.com/svenkreiss/fast_pyspark_tester/issues>`_,
 |pypi-badge|
 
-.. |pypi-badge| image:: https://badge.fury.io/py/pysparkling.svg
-   :target: https://pypi.python.org/pypi/pysparkling/
+.. |pypi-badge| image:: https://badge.fury.io/py/fast_pyspark_tester.svg
+   :target: https://pypi.python.org/pypi/fast_pyspark_tester/
 
 
 Features
@@ -71,7 +76,7 @@ Features
 * Parallelization via ``multiprocessing.Pool``,
   ``concurrent.futures.ThreadPoolExecutor`` or any other Pool-like
   objects that have a ``map(func, iterable)`` method.
-* Plain pysparkling does not have any dependencies (use ``pip install pysparkling``).
+* Plain fast_pyspark_tester does not have any dependencies (use ``pip install fast_pyspark_tester``).
   Some file access methods have optional dependencies:
   ``boto`` for AWS S3, ``requests`` for http, ``hdfs`` for hdfs
 
@@ -80,16 +85,16 @@ Examples
 ========
 
 Some demos are in the notebooks
-`docs/demo.ipynb <https://github.com/svenkreiss/pysparkling/blob/master/docs/demo.ipynb>`_
+`docs/demo.ipynb <https://github.com/svenkreiss/fast_pyspark_tester/blob/master/docs/demo.ipynb>`_
 and
-`docs/iris.ipynb <https://github.com/svenkreiss/pysparkling/blob/master/docs/iris.ipynb>`_
+`docs/iris.ipynb <https://github.com/svenkreiss/fast_pyspark_tester/blob/master/docs/iris.ipynb>`_
 .
 
 **Word Count**
 
 .. code-block:: python
 
-    from pysparkling import Context
+    from fast_pyspark_tester import Context
 
     counts = (
         Context()

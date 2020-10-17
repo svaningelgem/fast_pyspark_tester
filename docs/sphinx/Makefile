@@ -84,9 +84,9 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/pysparkling.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/fast_pyspark_tester.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/pysparkling.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/fast_pyspark_tester.qhc"
 
 applehelp:
 	$(SPHINXBUILD) -b applehelp $(ALLSPHINXOPTS) $(BUILDDIR)/applehelp
@@ -101,8 +101,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/pysparkling"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/pysparkling"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/fast_pyspark_tester"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/fast_pyspark_tester"
 	@echo "# devhelp"
 
 epub:

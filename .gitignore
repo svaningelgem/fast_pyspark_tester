@@ -71,6 +71,7 @@ docs/sphinx/_build/
 
 # PyBuilder
 target/
+.pybuilder/
 
 # Spark data files
 *.crc
@@ -79,4 +80,6 @@ target/
 *.ipynb.syncdoc
 .ipynb_checkpoints
 .ipython-daemon.json
-.cache
+
+.idea/
+_SUCCESS

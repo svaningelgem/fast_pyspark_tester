@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2015-2020 pysparkling contributors
+Copyright (c) 2015-2020 fast_pyspark_tester contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,8 @@ SOFTWARE.
 -----------------------------------------------------------------------------
 
 
-Parts of the files pysparkling/accumulators.py, pysparkling/broadcast.py,
-pysparkling/rdd.py, pysparkling/storagelevel.py and pysparkling/sql were
+Parts of the files fast_pyspark_tester/accumulators.py, fast_pyspark_tester/broadcast.py,
+fast_pyspark_tester/rdd.py, fast_pyspark_tester/storagelevel.py and fast_pyspark_tester/sql were
 extracted from their PySpark counterparts under the following license:
 
 Licensed to the Apache Software Foundation (ASF) under one or more

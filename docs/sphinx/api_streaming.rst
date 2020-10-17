@@ -11,12 +11,12 @@ Streaming
 StreamingContext
 ^^^^^^^^^^^^^^^^
 
-.. autoclass:: pysparkling.streaming.StreamingContext
+.. autoclass:: fast_pyspark_tester.streaming.StreamingContext
    :members:
 
 
 DStream
 ^^^^^^^
 
-.. autoclass:: pysparkling.streaming.DStream
+.. autoclass:: fast_pyspark_tester.streaming.DStream
    :members:

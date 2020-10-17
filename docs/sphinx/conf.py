@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# pysparkling documentation build configuration file, created by
+# fast_pyspark_tester documentation build configuration file, created by
 # sphinx-quickstart on Sun Jun  7 12:37:20 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -15,9 +15,11 @@
 import os
 import sys
 
+import src.main.python.fast_pyspark_tester.__version__
+
 sys.path.insert(0, os.path.abspath('../..'))
-import pysparkling
-PYSPARKLING_VERSION = pysparkling.__version__
+import fast_pyspark_tester
+PYSPARKLING_VERSION = src.main.python.fast_pyspark_tester.__version__.__version__
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -66,9 +68,9 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'pysparkling'
+project = u'fast_pyspark_tester'
 copyright = u'2015-2020, a project started by Sven Kreiss.'
-author = u'pysparkling contributors'
+author = u'fast_pyspark_tester contributors'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
