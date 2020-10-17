@@ -1,14 +1,19 @@
 from fast_pyspark_tester.sql.internal_utils.readers.csvreader import CSVReader
 from fast_pyspark_tester.sql.internal_utils.readers.jsonreader import JSONReader
 from fast_pyspark_tester.sql.internal_utils.readers.textreader import TextReader
-from fast_pyspark_tester.sql.internal_utils.readwrite import OptionUtils, to_option_stored_value
+from fast_pyspark_tester.sql.internal_utils.readwrite import (
+    OptionUtils,
+    to_option_stored_value,
+)
 from fast_pyspark_tester.sql.types import StructType
 
 
 class InternalReader(OptionUtils):
     def schema(self, schema):
         if not isinstance(schema, StructType):
-            raise NotImplementedError("Pysparkling currently only supports StructType for schemas")
+            raise NotImplementedError(
+                'Pysparkling currently only supports StructType for schemas'
+            )
         self._schema = schema
 
     def option(self, key, value):

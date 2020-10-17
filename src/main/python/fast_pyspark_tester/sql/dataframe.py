@@ -4,11 +4,25 @@ from fast_pyspark_tester import StorageLevel
 from fast_pyspark_tester.sql.column import parse, Column
 from fast_pyspark_tester.sql.expressions.fields import FieldAsExpression
 from fast_pyspark_tester.sql.internal_utils.joins import JOIN_TYPES, CROSS_JOIN
-from fast_pyspark_tester.sql.internals import InternalGroupedDataFrame, ROLLUP_TYPE, CUBE_TYPE
-from fast_pyspark_tester.sql.types import ByteType, ShortType, IntegerType, FloatType, IntegralType, \
-    TimestampType, _check_series_convert_timestamps_local_tz
-from fast_pyspark_tester.sql.utils import IllegalArgumentException, AnalysisException, \
-    require_minimum_pandas_version
+from fast_pyspark_tester.sql.internals import (
+    InternalGroupedDataFrame,
+    ROLLUP_TYPE,
+    CUBE_TYPE,
+)
+from fast_pyspark_tester.sql.types import (
+    ByteType,
+    ShortType,
+    IntegerType,
+    FloatType,
+    IntegralType,
+    TimestampType,
+    _check_series_convert_timestamps_local_tz,
+)
+from fast_pyspark_tester.sql.utils import (
+    IllegalArgumentException,
+    AnalysisException,
+    require_minimum_pandas_version,
+)
 
 _NoValue = object()
 
@@ -71,7 +85,7 @@ class DataFrame(object):
 
     @property
     def writeStream(self):
-        raise NotImplementedError("Pysparkling does not support yet writing to stream")
+        raise NotImplementedError('Pysparkling does not support yet writing to stream')
 
     @property
     def schema(self):
@@ -81,7 +95,7 @@ class DataFrame(object):
         print(self.schema.treeString())
 
     def explain(self, extended=False):
-        print("Pysparkling does not provide query execution explanation")
+        print('Pysparkling does not provide query execution explanation')
 
     def exceptAll(self, other):
         """Return a new :class:`DataFrame` containing rows in this :class:`DataFrame` but
@@ -185,30 +199,34 @@ class DataFrame(object):
             print(self._jdf.showString(n, int(truncate), vertical))
 
     def __repr__(self):
-        return "DataFrame[%s]" % (", ".join("%s: %s" % c for c in self.dtypes))
+        return 'DataFrame[%s]' % (', '.join('%s: %s' % c for c in self.dtypes))
 
     def checkpoint(self, eager=True):
-        raise NotImplementedError("Streaming is not supported in PySparkling")
+        raise NotImplementedError('Streaming is not supported in PySparkling')
 
     def localCheckpoint(self, eager=True):
-        raise NotImplementedError("Streaming is not supported in PySparkling")
+        raise NotImplementedError('Streaming is not supported in PySparkling')
 
     def withWatermark(self, eventTime, delayThreshold):
-        raise NotImplementedError("Streaming is not supported in PySparkling")
+        raise NotImplementedError('Streaming is not supported in PySparkling')
 
     def hint(self, name, *parameters):
         if len(parameters) == 1 and isinstance(parameters[0], list):
             parameters = parameters[0]
 
         if not isinstance(name, str):
-            raise TypeError("name should be provided as str, got {0}".format(type(name)))
+            raise TypeError(
+                'name should be provided as str, got {0}'.format(type(name))
+            )
 
         allowed_types = (str, list, float, int)
         for p in parameters:
             if not isinstance(p, allowed_types):
                 raise TypeError(
-                    "all parameters should be in {0}, got {1} of type {2}".format(
-                        allowed_types, p, type(p)))
+                    'all parameters should be in {0}, got {1} of type {2}'.format(
+                        allowed_types, p, type(p)
+                    )
+                )
 
         # No hint are supported by fast_pyspark_tester hence nothing is done here
         jdf = self._jdf
@@ -332,7 +350,7 @@ class DataFrame(object):
         """
         if storageLevel != StorageLevel.MEMORY_ONLY:
             raise NotImplementedError(
-                "Pysparkling currently only supports memory as the storage level"
+                'Pysparkling currently only supports memory as the storage level'
             )
         return DataFrame(self._jdf.persist(storageLevel), self.sql_ctx)
 
@@ -438,14 +456,16 @@ class DataFrame(object):
         """
         if isinstance(numPartitions, int):
             if not cols:
-                return DataFrame(self._jdf.simple_repartition(numPartitions), self.sql_ctx)
+                return DataFrame(
+                    self._jdf.simple_repartition(numPartitions), self.sql_ctx
+                )
 
             cols = [parse(col) for col in cols]
             repartitioned_jdf = self._jdf.repartition(numPartitions, cols)
             return DataFrame(repartitioned_jdf, self.sql_ctx)
         if isinstance(numPartitions, (str, Column)):
             return self.repartition(200, numPartitions, *cols)
-        raise TypeError("numPartitions should be an int, str or Column")
+        raise TypeError('numPartitions should be an int, str or Column')
 
     def repartitionByRange(self, numPartitions, *cols):
         """
@@ -482,34 +502,43 @@ class DataFrame(object):
         # todo: support sort orders and assume "ascending nulls first" if needed
         if isinstance(numPartitions, int):
             if not cols:
-                raise ValueError("At least one partition-by expression must be specified.")
+                raise ValueError(
+                    'At least one partition-by expression must be specified.'
+                )
             cols = [parse(col) for col in cols]
             repartitioned_jdf = self._jdf.repartitionByRange(numPartitions, *cols)
             return DataFrame(repartitioned_jdf, self.sql_ctx)
         if isinstance(numPartitions, (str, Column)):
             return self.repartitionByRange(200, numPartitions, *cols)
-        raise TypeError("numPartitions should be an int, str or Column")
+        raise TypeError('numPartitions should be an int, str or Column')
 
     def distinct(self):
         return DataFrame(self._jdf.distinct(), self.sql_ctx)
 
     def sample(self, withReplacement=None, fraction=None, seed=None):
-        is_withReplacement_set = isinstance(withReplacement, bool) and isinstance(fraction, float)
-        is_withReplacement_omitted_kwargs = withReplacement is None and isinstance(fraction, float)
+        is_withReplacement_set = isinstance(withReplacement, bool) and isinstance(
+            fraction, float
+        )
+        is_withReplacement_omitted_kwargs = withReplacement is None and isinstance(
+            fraction, float
+        )
         is_withReplacement_omitted_args = isinstance(withReplacement, float)
 
-        if not (is_withReplacement_set
-                or is_withReplacement_omitted_kwargs
-                or is_withReplacement_omitted_args):
+        if not (
+            is_withReplacement_set
+            or is_withReplacement_omitted_kwargs
+            or is_withReplacement_omitted_args
+        ):
             argtypes = [
                 str(type(arg))
                 for arg in [withReplacement, fraction, seed]
                 if arg is not None
             ]
             raise TypeError(
-                "withReplacement (optional), fraction (required) and seed (optional)"
-                " should be a bool, float and number; however, "
-                "got [%s]." % ", ".join(argtypes))
+                'withReplacement (optional), fraction (required) and seed (optional)'
+                ' should be a bool, float and number; however, '
+                'got [%s].' % ', '.join(argtypes)
+            )
 
         if is_withReplacement_omitted_args:
             if fraction is not None:
@@ -572,7 +601,9 @@ class DataFrame(object):
     def randomSplit(self, weights, seed=None):
         for w in weights:
             if w < 0.0:
-                raise ValueError("Weights must be positive. Found weight value: {}".format(w))
+                raise ValueError(
+                    'Weights must be positive. Found weight value: {}'.format(w)
+                )
         seed = int(seed) if seed is not None else None
         rdd_array = self._jdf.randomSplit(weights, seed)
         return [DataFrame(rdd, self.sql_ctx) for rdd in rdd_array]
@@ -586,8 +617,8 @@ class DataFrame(object):
         return [f.name for f in self.schema.fields]
 
     def alias(self, alias):
-        assert isinstance(alias, str), "alias should be a string"
-        raise NotImplementedError("Pysparkling does not currently support SQL catalog")
+        assert isinstance(alias, str), 'alias should be a string'
+        raise NotImplementedError('Pysparkling does not currently support SQL catalog')
 
     def crossJoin(self, other):
         """
@@ -623,7 +654,7 @@ class DataFrame(object):
         jdf = self._jdf.crossJoin(other._jdf)
         return DataFrame(jdf, self.sql_ctx)
 
-    def join(self, other, on=None, how="inner"):
+    def join(self, other, on=None, how='inner'):
         """
         >>> from fast_pyspark_tester import Context, Row
         >>> from fast_pyspark_tester.sql.session import SparkSession
@@ -729,18 +760,20 @@ class DataFrame(object):
         if isinstance(on, str):
             return self.join(other=other, on=[on], how=how)
 
-        how = how.lower().replace("_", "")
+        how = how.lower().replace('_', '')
         if how not in JOIN_TYPES:
-            raise IllegalArgumentException("Invalid how argument in join: {0}".format(how))
+            raise IllegalArgumentException(
+                'Invalid how argument in join: {0}'.format(how)
+            )
         how = JOIN_TYPES[how]
 
         if how == CROSS_JOIN and on is not None:
-            raise IllegalArgumentException("`on` must be None for a crossJoin")
+            raise IllegalArgumentException('`on` must be None for a crossJoin')
 
         if how != CROSS_JOIN and on is None:
             raise IllegalArgumentException(
-                "Join condition is missing. "
-                "Use the CROSS JOIN syntax to allow cartesian products"
+                'Join condition is missing. '
+                'Use the CROSS JOIN syntax to allow cartesian products'
             )
 
         return DataFrame(self._jdf.join(other._jdf, on, how), self.sql_ctx)
@@ -756,9 +789,9 @@ class DataFrame(object):
         [Row(id=1), Row(id=0)]
         [Row(id=3), Row(id=2)]
         """
-        ascending = kwargs.pop("ascending", True)
+        ascending = kwargs.pop('ascending', True)
         if kwargs:
-            raise TypeError("Unrecognized arguments: {0}".format(kwargs))
+            raise TypeError('Unrecognized arguments: {0}'.format(kwargs))
         sorted_jdf = self._jdf.sortWithinPartitions(cols, ascending=ascending)
         return DataFrame(sorted_jdf, self.sql_ctx)
 
@@ -819,7 +852,7 @@ class DataFrame(object):
         """ Return a list of Columns that describes the sort order
         """
         if not cols:
-            raise ValueError("should sort by at least one column")
+            raise ValueError('should sort by at least one column')
 
         ascending = kwargs.pop('ascending', True)
         if isinstance(ascending, (bool, int)):
@@ -828,10 +861,12 @@ class DataFrame(object):
         elif isinstance(ascending, list):
             cols = [jc if asc else jc.desc() for asc, jc in zip(ascending, cols)]
         else:
-            raise TypeError("ascending can only be boolean or list, but got %s" % type(ascending))
+            raise TypeError(
+                'ascending can only be boolean or list, but got %s' % type(ascending)
+            )
 
         if kwargs:
-            raise TypeError("Unrecognized arguments: {0}".format(kwargs))
+            raise TypeError('Unrecognized arguments: {0}'.format(kwargs))
 
         return cols
 
@@ -876,7 +911,7 @@ class DataFrame(object):
         if len(cols) == 1 and isinstance(cols[0], list):
             cols = cols[0]
         if not cols:
-            cols = ["*"]
+            cols = ['*']
         return DataFrame(self._jdf.describe(cols), self.sql_ctx)
 
     def summary(self, *statistics):
@@ -960,10 +995,10 @@ class DataFrame(object):
             return self.select(*item)
         if isinstance(item, int):
             return Column(FieldAsExpression(self._jdf.bound_schema[item]))
-        raise TypeError("unexpected item type: %s" % type(item))
+        raise TypeError('unexpected item type: %s' % type(item))
 
     def __getattr__(self, name):
-        if name.startswith("_"):
+        if name.startswith('_'):
             raise AttributeError(name)
 
         try:
@@ -1093,7 +1128,7 @@ class DataFrame(object):
         elif isinstance(condition, Column):
             jdf = self._jdf.filter(condition)
         else:
-            raise TypeError("condition should be string or Column")
+            raise TypeError('condition should be string or Column')
         return DataFrame(jdf, self.sql_ctx)
 
     def groupBy(self, *cols):
@@ -1122,6 +1157,7 @@ class DataFrame(object):
         # Top level import would cause cyclic dependencies
         # pylint: disable=import-outside-toplevel
         from fast_pyspark_tester.sql.group import GroupedData
+
         jgd = InternalGroupedDataFrame(self._jdf, [parse(c) for c in cols])
         return GroupedData(jgd, self)
 
@@ -1307,7 +1343,7 @@ class DataFrame(object):
 
     def subtract(self, other):
         # noinspection PyProtectedMember
-        return DataFrame(getattr(self._jdf, "except")(other._jdf), self.sql_ctx)
+        return DataFrame(getattr(self._jdf, 'except')(other._jdf), self.sql_ctx)
 
     def dropDuplicates(self, subset=None):
         """Return a new DataFrame without any duplicate values
@@ -1346,7 +1382,7 @@ class DataFrame(object):
         elif isinstance(subset, str):
             subset = [subset]
         elif not isinstance(subset, (list, tuple)):
-            raise ValueError("subset should be a list or tuple of column names")
+            raise ValueError('subset should be a list or tuple of column names')
 
         if thresh is None:
             thresh = len(subset) if how == 'any' else 1
@@ -1355,7 +1391,7 @@ class DataFrame(object):
 
     def fillna(self, value, subset=None):
         if not isinstance(value, (float, int, str, bool, dict)):
-            raise ValueError("value should be a float, int, long, string, bool or dict")
+            raise ValueError('value should be a float, int, long, string, bool or dict')
 
         # Note that bool validates isinstance(int), but we don't want to
         # convert bools to floats
@@ -1370,7 +1406,7 @@ class DataFrame(object):
         if isinstance(subset, str):
             subset = [subset]
         elif not isinstance(subset, (list, tuple)):
-            raise ValueError("subset should be a list or tuple of column names")
+            raise ValueError('subset should be a list or tuple of column names')
 
         return DataFrame(self._jdf.fillna(value, subset), self.sql_ctx)
 
@@ -1395,7 +1431,9 @@ class DataFrame(object):
         if isinstance(to_replace, dict):
             rep_dict = to_replace
             if value is not None:
-                warnings.warn("to_replace is a dict and value is not None. value will be ignored.")
+                warnings.warn(
+                    'to_replace is a dict and value is not None. value will be ignored.'
+                )
         else:
             if isinstance(value, (float, int, str)) or value is None:
                 value = [value for _ in range(len(to_replace))]
@@ -1405,10 +1443,12 @@ class DataFrame(object):
             subset = [subset]
 
         # Verify we were not passed in mixed type generics.
-        if not any(all_of_type(rep_dict.keys())
-                   and all_of_type(x for x in rep_dict.values() if x is not None)
-                   for all_of_type in [all_of_bool, all_of_str, all_of_numeric]):
-            raise ValueError("Mixed type replacements are not supported")
+        if not any(
+            all_of_type(rep_dict.keys())
+            and all_of_type(x for x in rep_dict.values() if x is not None)
+            for all_of_type in [all_of_bool, all_of_str, all_of_numeric]
+        ):
+            raise ValueError('Mixed type replacements are not supported')
 
         if subset is None:
             return DataFrame(self._jdf.replace('*', rep_dict), self.sql_ctx)
@@ -1419,26 +1459,38 @@ class DataFrame(object):
             if isinstance(to_replace, dict):
                 value = None
             else:
-                raise TypeError("value argument is required when to_replace is not a dictionary.")
+                raise TypeError(
+                    'value argument is required when to_replace is not a dictionary.'
+                )
 
         # Validate input types
         valid_types = (bool, float, int, str, list, tuple)
         if not isinstance(to_replace, valid_types) and not isinstance(to_replace, dict):
             raise ValueError(
-                "to_replace should be a bool, float, int, long, string, list, tuple, or dict. "
-                "Got {0}".format(type(to_replace)))
-        if not isinstance(value, valid_types) and value is not None \
-                and not isinstance(to_replace, dict):
-            raise ValueError("If to_replace is not a dict, value should be "
-                             "a bool, float, int, long, string, list, tuple or None. "
-                             "Got {0}".format(type(value)))
+                'to_replace should be a bool, float, int, long, string, list, tuple, or dict. '
+                'Got {0}'.format(type(to_replace))
+            )
+        if (
+            not isinstance(value, valid_types)
+            and value is not None
+            and not isinstance(to_replace, dict)
+        ):
+            raise ValueError(
+                'If to_replace is not a dict, value should be '
+                'a bool, float, int, long, string, list, tuple or None. '
+                'Got {0}'.format(type(value))
+            )
         if isinstance(to_replace, (list, tuple)) and isinstance(value, (list, tuple)):
             if len(to_replace) != len(value):
-                raise ValueError("to_replace and value lists should be of the same length. "
-                                 "Got {0} and {1}".format(len(to_replace), len(value)))
+                raise ValueError(
+                    'to_replace and value lists should be of the same length. '
+                    'Got {0} and {1}'.format(len(to_replace), len(value))
+                )
         if not (subset is None or isinstance(subset, (list, tuple, str))):
-            raise ValueError("subset should be a list or tuple of column names, "
-                             "column name or None. Got {0}".format(type(subset)))
+            raise ValueError(
+                'subset should be a list or tuple of column names, '
+                'column name or None. Got {0}'.format(type(subset))
+            )
         return value
 
     def approxQuantile(self, col, probabilities, relativeError):
@@ -1460,7 +1512,9 @@ class DataFrame(object):
         [[2.0, 2.0, 5.0]]
         """
         if not isinstance(col, (str, list, tuple)):
-            raise ValueError("col should be a string, list or tuple, but got %r" % type(col))
+            raise ValueError(
+                'col should be a string, list or tuple, but got %r' % type(col)
+            )
 
         isStr = isinstance(col, str)
 
@@ -1471,18 +1525,22 @@ class DataFrame(object):
 
         for c in col:
             if not isinstance(c, str):
-                raise ValueError("columns should be strings, but got %r" % type(c))
+                raise ValueError('columns should be strings, but got %r' % type(c))
 
         if not isinstance(probabilities, (list, tuple)):
-            raise ValueError("probabilities should be a list or tuple")
+            raise ValueError('probabilities should be a list or tuple')
         if isinstance(probabilities, tuple):
             probabilities = list(probabilities)
         for p in probabilities:
             if not isinstance(p, (float, int)) or p < 0 or p > 1:
-                raise ValueError("probabilities should be numerical (float, int, long) in [0,1].")
+                raise ValueError(
+                    'probabilities should be numerical (float, int, long) in [0,1].'
+                )
 
         if not isinstance(relativeError, (float, int)) or relativeError < 0:
-            raise ValueError("relativeError should be numerical (float, int, long) >= 0.")
+            raise ValueError(
+                'relativeError should be numerical (float, int, long) >= 0.'
+            )
         relativeError = float(relativeError)
 
         jaq = self._jdf.approxQuantile(col, probabilities, relativeError)
@@ -1498,14 +1556,16 @@ class DataFrame(object):
         1.0
         """
         if not isinstance(col1, str):
-            raise ValueError("col1 should be a string.")
+            raise ValueError('col1 should be a string.')
         if not isinstance(col2, str):
-            raise ValueError("col2 should be a string.")
+            raise ValueError('col2 should be a string.')
         if not method:
-            method = "pearson"
-        if method != "pearson":
-            raise ValueError("Currently only the calculation of the Pearson Correlation " +
-                             "coefficient is supported.")
+            method = 'pearson'
+        if method != 'pearson':
+            raise ValueError(
+                'Currently only the calculation of the Pearson Correlation '
+                + 'coefficient is supported.'
+            )
         return self._jdf.corr(col1, col2, method)
 
     def cov(self, col1, col2):
@@ -1517,23 +1577,23 @@ class DataFrame(object):
         212.5
         """
         if not isinstance(col1, str):
-            raise ValueError("col1 should be a string.")
+            raise ValueError('col1 should be a string.')
         if not isinstance(col2, str):
-            raise ValueError("col2 should be a string.")
+            raise ValueError('col2 should be a string.')
         return self._jdf.cov(col1, col2)
 
     def crosstab(self, col1, col2):
         if not isinstance(col1, str):
-            raise ValueError("col1 should be a string.")
+            raise ValueError('col1 should be a string.')
         if not isinstance(col2, str):
-            raise ValueError("col2 should be a string.")
+            raise ValueError('col2 should be a string.')
         return DataFrame(self._jdf.crosstab(self, col1, col2), self.sql_ctx)
 
     def freqItems(self, cols, support=None):
         if isinstance(cols, tuple):
             cols = list(cols)
         if not isinstance(cols, list):
-            raise ValueError("cols must be a list or tuple of column names as strings.")
+            raise ValueError('cols must be a list or tuple of column names as strings.')
         if not support:
             support = 0.01
         return DataFrame(self._jdf.freqItems(cols, support), self.sql_ctx)
@@ -1556,7 +1616,7 @@ class DataFrame(object):
         |  2|Alice|          5|
         +---+-----+-----------+
         """
-        assert isinstance(col, Column), "col should be Column"
+        assert isinstance(col, Column), 'col should be Column'
         return DataFrame(self._jdf.withColumn(colName, col), self.sql_ctx)
 
     def withColumnRenamed(self, existing, new):
@@ -1594,11 +1654,11 @@ class DataFrame(object):
             if isinstance(col, (str, Column)):
                 jdf = self._jdf.drop([col])
             else:
-                raise TypeError("col should be a string or a Column")
+                raise TypeError('col should be a string or a Column')
         else:
             for col in cols:
                 if not isinstance(col, str):
-                    raise TypeError("each col in the param list should be a string")
+                    raise TypeError('each col in the param list should be a string')
             jdf = self._jdf.drop(cols)
 
         return DataFrame(jdf, self.sql_ctx)
@@ -1626,8 +1686,10 @@ class DataFrame(object):
 
     def transform(self, func):
         result = func(self)
-        assert isinstance(result, DataFrame), "Func returned an instance of type [%s], " \
-                                              "should have been DataFrame." % type(result)
+        assert isinstance(result, DataFrame), (
+            'Func returned an instance of type [%s], '
+            'should have been DataFrame.' % type(result)
+        )
         return result
 
     def toPandas(self):
@@ -1638,7 +1700,7 @@ class DataFrame(object):
             # pylint: disable=import-outside-toplevel
             import pandas as pd
         except ImportError:
-            raise Exception("require_minimum_pandas_version() was not called")
+            raise Exception('require_minimum_pandas_version() was not called')
 
         # noinspection PyProtectedMember
         sql_ctx_conf = self.sql_ctx._conf
@@ -1659,9 +1721,11 @@ class DataFrame(object):
             # inferred by pandas as float column. Once we convert the column with NaN back
             # to integer type e.g., np.int16, we will hit exception. So we use the inferred
             # float type, not the corrected type from the schema in this case.
-            if pandas_type is not None and \
-                    not (isinstance(field.dataType, IntegralType) and field.nullable and
-                         pdf[field.name].isnull().any()):
+            if pandas_type is not None and not (
+                isinstance(field.dataType, IntegralType)
+                and field.nullable
+                and pdf[field.name].isnull().any()
+            ):
                 dtype[field.name] = pandas_type
 
         for f, t in dtype.items():
@@ -1674,8 +1738,9 @@ class DataFrame(object):
             # pylint: disable=fixme
             # TODO: handle nested timestamps, such as ArrayType(TimestampType())?
             if isinstance(field.dataType, TimestampType):
-                pdf[field.name] = \
-                    _check_series_convert_timestamps_local_tz(pdf[field.name], timezone)
+                pdf[field.name] = _check_series_convert_timestamps_local_tz(
+                    pdf[field.name], timezone
+                )
         return pdf
 
     def groupby(self, *cols):

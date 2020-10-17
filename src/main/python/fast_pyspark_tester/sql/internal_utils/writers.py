@@ -18,8 +18,8 @@ from fast_pyspark_tester.utils import portable_hash, get_json_encoder
 class InternalWriter(object):
     def __init__(self, df):
         self._df = df
-        self._source = "parquet"
-        self._mode = "errorifexists"
+        self._source = 'parquet'
+        self._mode = 'errorifexists'
         self._options = {}
         self._partitioning_col_names = None
         self._num_buckets = None
@@ -52,7 +52,7 @@ class InternalWriter(object):
         return self
 
     def save(self, writer_class, path=None):
-        self.option("path", path)
+        self.option('path', path)
         return writer_class(
             self._df,
             self._mode,
@@ -60,7 +60,7 @@ class InternalWriter(object):
             self._partitioning_col_names,
             self._num_buckets,
             self._bucket_col_names,
-            self._sort_col_names
+            self._sort_col_names,
         ).save()
 
 
@@ -91,9 +91,7 @@ class WriteInFolder(Aggregation):
             ref_value = Row(*row_value)
             ref_value.__fields__ = schema.names
             self.ref_value = ref_value
-        self.items.append(
-            self.writer.preformat(row_value, schema)
-        )
+        self.items.append(self.writer.preformat(row_value, schema))
 
     def mergeStats(self, other, schema):
         self.items += other.items
@@ -101,24 +99,27 @@ class WriteInFolder(Aggregation):
             self.ref_value = other.ref_value
 
     def eval(self, row, schema):
-        return self.writer.write(
-            self.items,
-            self.ref_value,
-            self.pre_evaluation_schema
-        )
+        return self.writer.write(self.items, self.ref_value, self.pre_evaluation_schema)
 
     def __str__(self):
-        return "write_in_folder({0})".format(self.column)
+        return 'write_in_folder({0})'.format(self.column)
 
 
 class DataWriter(object):
     default_options = dict(
-        dateFormat="yyyy-MM-dd",
-        timestampFormat="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+        dateFormat='yyyy-MM-dd', timestampFormat="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
     )
 
-    def __init__(self, df, mode, options, partitioning_col_names, num_buckets,
-                 bucket_col_names, sort_col_names):
+    def __init__(
+        self,
+        df,
+        mode,
+        options,
+        partitioning_col_names,
+        num_buckets,
+        bucket_col_names,
+        sort_col_names,
+    ):
         """
 
         :param df: fast_pyspark_tester.sql.DataFrame
@@ -131,7 +132,9 @@ class DataWriter(object):
         """
         self.mode = mode
         self.options = Options(self.default_options, options)
-        self.partitioning_col_names = partitioning_col_names if partitioning_col_names else []
+        self.partitioning_col_names = (
+            partitioning_col_names if partitioning_col_names else []
+        )
         self.num_buckets = num_buckets
         self.bucket_col_names = bucket_col_names if partitioning_col_names else []
         self.sort_col_names = sort_col_names if partitioning_col_names else []
@@ -142,7 +145,7 @@ class DataWriter(object):
 
     @property
     def path(self):
-        return self.options["path"].rstrip("/")
+        return self.options['path'].rstrip('/')
 
     @property
     def compression(self):
@@ -156,11 +159,11 @@ class DataWriter(object):
         output_path = self.path
         mode = self.mode
         if os.path.exists(output_path):
-            if mode == "ignore":
+            if mode == 'ignore':
                 return
-            if mode in ("error", "errorifexists"):
-                raise AnalysisException("path {0} already exists.;".format(output_path))
-            if mode == "overwrite":
+            if mode in ('error', 'errorifexists'):
+                raise AnalysisException('path {0} already exists.;'.format(output_path))
+            if mode == 'overwrite':
                 shutil.rmtree(output_path)
                 os.makedirs(output_path)
         else:
@@ -168,9 +171,9 @@ class DataWriter(object):
 
         self.apply_on_aggregated_data(col(WriteInFolder(writer=self))).collect()
 
-        success_path = os.path.join(output_path, "_SUCCESS")
+        success_path = os.path.join(output_path, '_SUCCESS')
 
-        with open(success_path, "w"):
+        with open(success_path, 'w'):
             pass
 
     def preformat(self, row, schema):
@@ -188,16 +191,16 @@ class DataWriter(object):
 class CSVWriter(DataWriter):
     def check_options(self):
         unsupported_options = {
-            "compression",
-            "encoding",
-            "chartoescapequoteescaping",
-            "escape",
-            "escapequotes"
+            'compression',
+            'encoding',
+            'chartoescapequoteescaping',
+            'escape',
+            'escapequotes',
         }
         options_requested_but_not_supported = set(self.options) & unsupported_options
         if options_requested_but_not_supported:
             raise NotImplementedError(
-                "Pysparkling does not support yet the following options: {0}".format(
+                'Pysparkling does not support yet the following options: {0}'.format(
                     options_requested_but_not_supported
                 )
             )
@@ -207,15 +210,13 @@ class CSVWriter(DataWriter):
             value = self.nullValue
         else:
             value = cast_to_string(
-                value,
-                from_type=field.dataType,
-                options=self.options
+                value, from_type=field.dataType, options=self.options
             )
         if self.ignoreLeadingWhiteSpace:
             value = value.rstrip()
         if self.ignoreTrailingWhiteSpace:
             value = value.lstrip()
-        if value == "":
+        if value == '':
             return self.emptyValue
         return value
 
@@ -227,40 +228,40 @@ class CSVWriter(DataWriter):
 
     @property
     def sep(self):
-        return self.options.get("sep", ",")
+        return self.options.get('sep', ',')
 
     @property
     def quote(self):
-        quote = self.options.get("quote", '"')
-        return "\u0000" if quote == "" else quote
+        quote = self.options.get('quote', '"')
+        return '\u0000' if quote == '' else quote
 
     @property
     def escape(self):
-        return self.options.get("escape", "\\")
+        return self.options.get('escape', '\\')
 
     @property
     def header(self):
-        return self.options.get("header", "false") != "false"
+        return self.options.get('header', 'false') != 'false'
 
     @property
     def nullValue(self):
-        return self.options.get("nullvalue", "")
+        return self.options.get('nullvalue', '')
 
     @property
     def escapeQuotes(self):
-        return self.options.get("escapequotes", "true") != "false"
+        return self.options.get('escapequotes', 'true') != 'false'
 
     @property
     def quoteAll(self):
-        return self.options.get("quoteall", "false") != "false"
+        return self.options.get('quoteall', 'false') != 'false'
 
     @property
     def ignoreLeadingWhiteSpace(self):
-        return self.options.get("ignoreleadingwhiteSpace", 'false') != "false"
+        return self.options.get('ignoreleadingwhiteSpace', 'false') != 'false'
 
     @property
     def ignoreTrailingWhiteSpace(self):
-        return self.options.get("ignoretrailingwhiteSpace", 'false') != "false"
+        return self.options.get('ignoretrailingwhiteSpace', 'false') != 'false'
 
     @property
     def charToEscapeQuoteEscaping(self):
@@ -268,11 +269,11 @@ class CSVWriter(DataWriter):
 
     @property
     def emptyValue(self):
-        return self.options.get("emptyvalue", '""')
+        return self.options.get('emptyvalue', '""')
 
     @property
     def lineSep(self):
-        return self.options.get("linesep", "\n")
+        return self.options.get('linesep', '\n')
 
     def write(self, items, ref_value, schema):
         self.check_options()
@@ -282,13 +283,13 @@ class CSVWriter(DataWriter):
             return 0
 
         partition_parts = [
-            "{0}={1}".format(col_name, ref_value[col_name])
+            '{0}={1}'.format(col_name, ref_value[col_name])
             for col_name in self.partitioning_col_names
         ]
-        file_path = "/".join(
+        file_path = '/'.join(
             [output_path]
             + partition_parts
-            + ["part-00000-{0}.csv".format(portable_hash(ref_value))]
+            + ['part-00000-{0}.csv'.format(portable_hash(ref_value))]
         )
 
         # pylint: disable=W0511
@@ -300,13 +301,13 @@ class CSVWriter(DataWriter):
         #  - escape
         #  - escapeQuotes
 
-        with open(file_path, "w") as f:
+        with open(file_path, 'w') as f:
             writer = csv.writer(
                 f,
                 delimiter=self.sep,
                 quotechar=self.quote,
                 quoting=csv.QUOTE_ALL if self.quoteAll else csv.QUOTE_MINIMAL,
-                lineterminator=self.lineSep
+                lineterminator=self.lineSep,
             )
             if self.header:
                 writer.writerow(schema.names)
@@ -315,39 +316,57 @@ class CSVWriter(DataWriter):
 
 
 class JSONWriter(DataWriter):
-    def __init__(self, df, mode, options, partitioning_col_names,
-                 num_buckets, bucket_col_names, sort_col_names):
-        super(JSONWriter, self).__init__(df, mode, options, partitioning_col_names,
-                                         num_buckets, bucket_col_names, sort_col_names)
+    def __init__(
+        self,
+        df,
+        mode,
+        options,
+        partitioning_col_names,
+        num_buckets,
+        bucket_col_names,
+        sort_col_names,
+    ):
+        super(JSONWriter, self).__init__(
+            df,
+            mode,
+            options,
+            partitioning_col_names,
+            num_buckets,
+            bucket_col_names,
+            sort_col_names,
+        )
 
         self.encoder = get_json_encoder(self.options)
 
     def check_options(self):
         unsupported_options = {
-            "compression",
-            "encoding",
-            "chartoescapequoteescaping",
-            "escape",
-            "escapequotes"
+            'compression',
+            'encoding',
+            'chartoescapequoteescaping',
+            'escape',
+            'escapequotes',
         }
         options_requested_but_not_supported = set(self.options) & unsupported_options
         if options_requested_but_not_supported:
             raise NotImplementedError(
-                "Pysparkling does not support yet the following options: {0}".format(
+                'Pysparkling does not support yet the following options: {0}'.format(
                     options_requested_but_not_supported
                 )
             )
 
     @property
     def lineSep(self):
-        return self.options.get("linesep", "\n")
+        return self.options.get('linesep', '\n')
 
     def preformat(self, row, schema):
-        return json.dumps(
-            collections.OrderedDict(zip(schema.names, row)),
-            cls=self.encoder,
-            separators=(',', ':')
-        ) + self.lineSep
+        return (
+            json.dumps(
+                collections.OrderedDict(zip(schema.names, row)),
+                cls=self.encoder,
+                separators=(',', ':'),
+            )
+            + self.lineSep
+        )
 
     def write(self, items, ref_value, schema):
         self.check_options()
@@ -357,15 +376,17 @@ class JSONWriter(DataWriter):
             return 0
 
         partition_parts = [
-            "{0}={1}".format(col_name, ref_value[col_name])
+            '{0}={1}'.format(col_name, ref_value[col_name])
             for col_name in self.partitioning_col_names
         ]
-        partition_folder = "/".join([output_path] + partition_parts)
-        file_path = "{0}/part-00000-{1}.json".format(partition_folder, portable_hash(ref_value))
+        partition_folder = '/'.join([output_path] + partition_parts)
+        file_path = '{0}/part-00000-{1}.json'.format(
+            partition_folder, portable_hash(ref_value)
+        )
 
         if not os.path.exists(partition_folder):
             os.makedirs(partition_folder)
 
-        with open(file_path, "a") as f:
+        with open(file_path, 'a') as f:
             f.writelines(items)
         return len(items)

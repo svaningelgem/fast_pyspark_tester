@@ -1,7 +1,6 @@
 """Provides a Python implementation of RDDs."""
 
-from __future__ import (division, absolute_import, print_function,
-                        unicode_literals)
+from __future__ import division, absolute_import, print_function, unicode_literals
 
 import math
 from builtins import range, zip
@@ -26,17 +25,22 @@ except ImportError:
 from . import fileio
 from .utils import portable_hash
 from .exceptions import FileAlreadyExistsException, ContextIsLockedException
-from .samplers import (BernoulliSampler, PoissonSampler,
-                       BernoulliSamplerPerKey, PoissonSamplerPerKey)
+from .samplers import (
+    BernoulliSampler,
+    PoissonSampler,
+    BernoulliSamplerPerKey,
+    PoissonSamplerPerKey,
+)
 from .stat_counter import StatCounter
 
 maxint = sys.maxint if hasattr(sys, 'maxint') else sys.maxsize  # pylint: disable=no-member
+
 
 log = logging.getLogger(__name__)
 
 
 def _hash(v):
-    return portable_hash(v) & 0xffffffff
+    return portable_hash(v) & 0xFFFFFFFF
 
 
 class RDD(object):
@@ -63,8 +67,7 @@ class RDD(object):
         self._rdd_id = ctx.newRddId()
 
     def __getstate__(self):
-        r = {k: v if k not in ('_p',) else None
-             for k, v in self.__dict__.items()}
+        r = {k: v if k not in ('_p',) else None for k, v in self.__dict__.items()}
         return r
 
     def compute(self, split, task_context):
@@ -117,9 +120,7 @@ class RDD(object):
         """
         return self.context.runJob(
             self,
-            lambda tc, i: functools.reduce(
-                seqOp, i, copy.deepcopy(zeroValue)
-            ),
+            lambda tc, i: functools.reduce(seqOp, i, copy.deepcopy(zeroValue)),
             resultHandler=lambda l: functools.reduce(
                 combOp, l, copy.deepcopy(zeroValue)
             ),
@@ -172,15 +173,16 @@ class RDD(object):
                 r[k] = seqFunc(r[k], v)
             return r
 
-        def combFuncByKey(l):
+        def combFuncByKey(l_):
             r = defaultdict(lambda: copy.deepcopy(zeroValue))
-            for p in l:
+            for p in l_:
                 for k, v in p.items():
                     r[k] = combFunc(r[k], v)
             return r
 
-        local_result = self.context.runJob(self, seqFuncByKey,
-                                           resultHandler=combFuncByKey)
+        local_result = self.context.runJob(
+            self, seqFuncByKey, resultHandler=combFuncByKey
+        )
 
         return self.context.parallelize(local_result.items())
 
@@ -317,11 +319,15 @@ class RDD(object):
         number_of_big_groups = current_num_partitions % new_num_partitions
         number_of_small_groups = new_num_partitions - number_of_big_groups
 
-        partition_mapping = ([p for p in range(number_of_big_groups)
-                              for _ in range(big_group_size)] +
-                             [p for p in range(number_of_big_groups,
-                                               number_of_big_groups + number_of_small_groups)
-                              for _ in range(small_group_size)])
+        partition_mapping = [
+            p for p in range(number_of_big_groups) for _ in range(big_group_size)
+        ] + [
+            p
+            for p in range(
+                number_of_big_groups, number_of_big_groups + number_of_small_groups
+            )
+            for _ in range(small_group_size)
+        ]
         new_partitions = {i: [] for i in range(new_num_partitions)}
 
         def partitioned():
@@ -361,10 +367,12 @@ class RDD(object):
 
         d_self = defaultdict(list, self.groupByKey().collect())
         d_other = defaultdict(list, other.groupByKey().collect())
-        return self.context.parallelize([
-            (k, [list(d_self[k]), list(d_other[k])])
-            for k in set(d_self.keys()) | set(d_other.keys())
-        ])
+        return self.context.parallelize(
+            [
+                (k, [list(d_self[k]), list(d_other[k])])
+                for k in set(d_self.keys()) | set(d_other.keys())
+            ]
+        )
 
     def collect(self):
         """returns the entire dataset as a list
@@ -378,11 +386,7 @@ class RDD(object):
         >>> Context().parallelize([1, 2, 3]).collect()
         [1, 2, 3]
         """
-        return self.context.runJob(
-            self,
-            unit_map,
-            resultHandler=unit_collect,
-        )
+        return self.context.runJob(self, unit_map, resultHandler=unit_collect,)
 
     def collectAsMap(self):
         """returns a dictionary for a pair dataset
@@ -411,8 +415,9 @@ class RDD(object):
         >>> Context().parallelize([1, 2, 3], 2).count()
         3
         """
-        return self.context.runJob(self, lambda tc, i: sum(1 for _ in i),
-                                   resultHandler=sum)
+        return self.context.runJob(
+            self, lambda tc, i: sum(1 for _ in i), resultHandler=sum
+        )
 
     def countApprox(self):
         """same as :func:`~fast_pyspark_tester.RDD.count()`
@@ -466,8 +471,7 @@ class RDD(object):
                 r[v] += 1
             return r
 
-        return self.context.runJob(self, map_func,
-                                   resultHandler=sum_counts_by_keys)
+        return self.context.runJob(self, map_func, resultHandler=sum_counts_by_keys)
 
     def distinct(self, numPartitions=None):
         """returns only distinct elements
@@ -486,8 +490,9 @@ class RDD(object):
         if numPartitions is None:
             numPartitions = self.getNumPartitions()
 
-        return self.context.parallelize(list(set(self.toLocalIterator())),
-                                        numPartitions)
+        return self.context.parallelize(
+            list(set(self.toLocalIterator())), numPartitions
+        )
 
     def filter(self, f):
         """filter elements
@@ -629,8 +634,7 @@ class RDD(object):
         >>> len(a)
         3
         """
-        self.context.runJob(self, lambda tc, x: [f(xx) for xx in x],
-                            resultHandler=None)
+        self.context.runJob(self, lambda tc, x: [f(xx) for xx in x], resultHandler=None)
 
     def foreachPartition(self, f):
         """applies ``f`` to every partition
@@ -641,8 +645,7 @@ class RDD(object):
         :param f: Apply a function to every partition.
         :rtype: None
         """
-        self.context.runJob(self, lambda tc, x: f(x),
-                            resultHandler=None)
+        self.context.runJob(self, lambda tc, x: f(x), resultHandler=None)
 
     def fullOuterJoin(self, other, numPartitions=None):
         """returns the full outer join of two RDDs
@@ -672,11 +675,13 @@ class RDD(object):
 
         grouped = self.cogroup(other, numPartitions)
 
-        return grouped.flatMap(lambda kv: [
-            (kv[0], (v_self, v_other))
-            for v_self in (kv[1][0] if kv[1][0] else [None])
-            for v_other in (kv[1][1] if kv[1][1] else [None])
-        ])
+        return grouped.flatMap(
+            lambda kv: [
+                (kv[0], (v_self, v_other))
+                for v_self in (kv[1][0] if kv[1][0] else [None])
+                for v_other in (kv[1][1] if kv[1][1] else [None])
+            ]
+        )
 
     def getNumPartitions(self):
         """returns the number of partitions
@@ -758,8 +763,10 @@ class RDD(object):
             stats = self.stats()
             min_v = stats.min()
             max_v = stats.max()
-            buckets = [min_v + float(i) * (max_v - min_v) / num_buckets
-                       for i in range(num_buckets + 1)]
+            buckets = [
+                min_v + float(i) * (max_v - min_v) / num_buckets
+                for i in range(num_buckets + 1)
+            ]
         h = [0 for _ in buckets]
         for x in self.toLocalIterator():
             for i, b in enumerate(zip(buckets[:-1], buckets[1:])):
@@ -825,10 +832,9 @@ class RDD(object):
         d1 = dict(self.collect())
         d2 = dict(other.collect())
         keys = set(d1.keys()) & set(d2.keys())
-        return self.context.parallelize((
-            (k, (d1[k], d2[k]))
-            for k in keys
-        ), numPartitions)
+        return self.context.parallelize(
+            ((k, (d1[k], d2[k])) for k in keys), numPartitions
+        )
 
     def keyBy(self, f):
         """key by f
@@ -882,11 +888,13 @@ class RDD(object):
 
         d_other = other.groupByKey().collectAsMap()
 
-        return self.groupByKey().flatMap(lambda kv: [
-            (kv[0], (v_self, v_other))
-            for v_self in kv[1]
-            for v_other in (d_other[kv[0]] if kv[0] in d_other else [None])
-        ])
+        return self.groupByKey().flatMap(
+            lambda kv: [
+                (kv[0], (v_self, v_other))
+                for v_self in kv[1]
+                for v_other in (d_other[kv[0]] if kv[0] in d_other else [None])
+            ]
+        )
 
     def _leftSemiJoin(self, other):
         """left semi join
@@ -910,11 +918,9 @@ class RDD(object):
 
         d_other = other.groupByKey().collectAsMap()
 
-        return self.groupByKey().flatMap(lambda kv: [
-            (kv[0], (v_self, ()))
-            for v_self in kv[1]
-            if kv[0] in d_other
-        ])
+        return self.groupByKey().flatMap(
+            lambda kv: [(kv[0], (v_self, ())) for v_self in kv[1] if kv[0] in d_other]
+        )
 
     def _leftAntiJoin(self, other):
         """left anti join
@@ -940,11 +946,11 @@ class RDD(object):
 
         d_other = other.groupByKey().collectAsMap()
 
-        return self.groupByKey().flatMap(lambda kv: [
-            (kv[0], (v_self, None))
-            for v_self in kv[1]
-            if kv[0] not in d_other
-        ])
+        return self.groupByKey().flatMap(
+            lambda kv: [
+                (kv[0], (v_self, None)) for v_self in kv[1] if kv[0] not in d_other
+            ]
+        )
 
     def lookup(self, key):
         """Return all the (key, value) pairs where the given key matches.
@@ -974,11 +980,9 @@ class RDD(object):
         >>> Context().parallelize([1, 2, 3]).map(lambda x: x+1).collect()
         [2, 3, 4]
         """
-        return MapPartitionsRDD(
-            self,
-            MapF(f),
-            preservesPartitioning=True,
-        ).setName('{}:{}'.format(self.name(), f))
+        return MapPartitionsRDD(self, MapF(f), preservesPartitioning=True,).setName(
+            '{}:{}'.format(self.name(), f)
+        )
 
     def mapPartitions(self, f, preservesPartitioning=False):
         """map partitions
@@ -997,9 +1001,7 @@ class RDD(object):
         [3, 7]
         """
         return MapPartitionsRDD(
-            self,
-            lambda tc, i, x: f(x),
-            preservesPartitioning=preservesPartitioning,
+            self, lambda tc, i, x: f(x), preservesPartitioning=preservesPartitioning,
         ).setName('{}:{}'.format(self.name(), f))
 
     def mapPartitionsWithIndex(self, f, preservesPartitioning=False):
@@ -1019,9 +1021,7 @@ class RDD(object):
         3
         """
         return MapPartitionsRDD(
-            self,
-            lambda tc, i, x: f(i, x),
-            preservesPartitioning=preservesPartitioning,
+            self, lambda tc, i, x: f(i, x), preservesPartitioning=preservesPartitioning,
         ).setName('{}:{}'.format(self.name(), f))
 
     def mapValues(self, f):
@@ -1152,9 +1152,12 @@ class RDD(object):
         if env is None:
             env = {}
 
-        return self.context.parallelize(subprocess.check_output(
-            [command] + x if isinstance(x, list) else [command, x]
-        ) for x in self.collect())
+        return self.context.parallelize(
+            subprocess.check_output(
+                [command] + x if isinstance(x, list) else [command, x]
+            )
+            for x in self.collect()
+        )
 
     def randomSplit(self, weights, seed=None):
         """Split the RDD into a few RDDs according to the given weights.
@@ -1190,7 +1193,7 @@ class RDD(object):
                 if lb <= r < ub:
                     lists[i].append(e)
 
-        return [self.context.parallelize(l) for l in lists]
+        return [self.context.parallelize(l_) for l_ in lists]
 
     def reduce(self, f):
         """reduce
@@ -1218,18 +1221,16 @@ class RDD(object):
             try:
                 return functools.reduce(f, (v for v in values if v is not _empty))
             except TypeError as e:
-                if e.args[0] == "reduce() of empty sequence with no initial value":
+                if e.args[0] == 'reduce() of empty sequence with no initial value':
                     return _empty
                 raise e
 
         result = self.context.runJob(
-            self,
-            lambda tc, x: reducer(x),
-            resultHandler=reducer
+            self, lambda tc, x: reducer(x), resultHandler=reducer
         )
 
         if result is _empty:
-            raise ValueError("Can not reduce() empty RDD")
+            raise ValueError('Can not reduce() empty RDD')
 
         return result
 
@@ -1252,9 +1253,9 @@ class RDD(object):
         >>> rdd.reduceByKey(lambda a, b: a+b).collect()
         [(0, 1), (1, 4)]
         """
-        return (self
-                .groupByKey(numPartitions)
-                .mapValues(lambda x: functools.reduce(f, x)))
+        return self.groupByKey(numPartitions).mapValues(
+            lambda x: functools.reduce(f, x)
+        )
 
     def reduceByKeyLocally(self, f):
         """reduce by key and return a dictionnary
@@ -1313,8 +1314,7 @@ class RDD(object):
         return self.coalesce(numPartitions, shuffle=True)
 
     def repartitionAndSortWithinPartitions(
-            self, numPartitions=None, partitionFunc=None,
-            ascending=True, keyfunc=None,
+        self, numPartitions=None, partitionFunc=None, ascending=True, keyfunc=None,
     ):
         """Repartition and sort within each partition.
 
@@ -1340,9 +1340,9 @@ class RDD(object):
         def partition_sort(data):
             return sorted(data, key=keyfunc, reverse=not ascending)
 
-        return (self
-                .partitionBy(numPartitions, partitionFunc)
-                .mapPartitions(partition_sort))
+        return self.partitionBy(numPartitions, partitionFunc).mapPartitions(
+            partition_sort
+        )
 
     def rightOuterJoin(self, other, numPartitions=None):
         """right outer join
@@ -1367,11 +1367,13 @@ class RDD(object):
 
         d_self = self.groupByKey().collectAsMap()
 
-        return other.groupByKey().flatMap(lambda kv: [
-            (kv[0], (v_self, v_other))
-            for v_other in kv[1]
-            for v_self in (d_self[kv[0]] if kv[0] in d_self else [None])
-        ])
+        return other.groupByKey().flatMap(
+            lambda kv: [
+                (kv[0], (v_self, v_other))
+                for v_other in kv[1]
+                for v_self in (d_self[kv[0]] if kv[0] in d_self else [None])
+            ]
+        )
 
     def sample(self, withReplacement, fraction, seed=None):
         """randomly sample
@@ -1397,11 +1399,13 @@ class RDD(object):
         >>> len(sampled_with_replacement) in (5067, 5111)  # w/o, w/ numpy
         True
         """
-        sampler = (PoissonSampler(fraction)
-                   if withReplacement else BernoulliSampler(fraction))
+        sampler = (
+            PoissonSampler(fraction) if withReplacement else BernoulliSampler(fraction)
+        )
 
         return PartitionwiseSampledRDD(
-            self, sampler, preservesPartitioning=True, seed=seed)
+            self, sampler, preservesPartitioning=True, seed=seed
+        )
 
     def sampleByKey(self, withReplacement, fractions, seed=None):
         """randomly sample by key
@@ -1435,11 +1439,15 @@ class RDD(object):
         >>> max(sample["b"]) <= 999 and min(sample["b"]) >= 0
         True
         """
-        sampler = (PoissonSamplerPerKey(fractions)
-                   if withReplacement else BernoulliSamplerPerKey(fractions))
+        sampler = (
+            PoissonSamplerPerKey(fractions)
+            if withReplacement
+            else BernoulliSamplerPerKey(fractions)
+        )
 
         return PartitionwiseSampledRDD(
-            self, sampler, preservesPartitioning=True, seed=seed)
+            self, sampler, preservesPartitioning=True, seed=seed
+        )
 
     def sampleStdev(self):
         """sample standard deviation
@@ -1506,14 +1514,16 @@ class RDD(object):
         """
 
         if fileio.File(path).exists():
-            raise FileAlreadyExistsException(
-                'Output {0} already exists.'.format(path)
-            )
+            raise FileAlreadyExistsException('Output {0} already exists.'.format(path))
 
         codec_suffix = ''
-        if path.endswith(tuple('.' + ending
-                               for endings, _ in fileio.codec.FILE_ENDINGS
-                               for ending in endings)):
+        if path.endswith(
+            tuple(
+                '.' + ending
+                for endings, _ in fileio.codec.FILE_ENDINGS
+                for ending in endings
+            )
+        ):
             codec_suffix = path[path.rfind('.'):]
 
         def _map(path, obj):
@@ -1529,8 +1539,9 @@ class RDD(object):
         self.context.runJob(
             self,
             lambda tc, x: _map(
-                os.path.join(path, 'part-{0:05d}{1}'.format(tc.partitionId(),
-                                                            codec_suffix)),
+                os.path.join(
+                    path, 'part-{0:05d}{1}'.format(tc.partitionId(), codec_suffix)
+                ),
                 list(x),
             ),
             resultHandler=list,
@@ -1553,8 +1564,7 @@ class RDD(object):
         :rtype: RDD
         """
         if fileio.TextFile(path).exists():
-            raise FileAlreadyExistsException(
-                'Output {0} already exists.'.format(path))
+            raise FileAlreadyExistsException('Output {0} already exists.'.format(path))
 
         def to_stringio(data):
             stringio = io.StringIO()
@@ -1569,17 +1579,22 @@ class RDD(object):
             return self
 
         codec_suffix = ''
-        if path.endswith(tuple('.' + ending
-                               for endings, _ in fileio.codec.FILE_ENDINGS
-                               for ending in endings)):
+        if path.endswith(
+            tuple(
+                '.' + ending
+                for endings, _ in fileio.codec.FILE_ENDINGS
+                for ending in endings
+            )
+        ):
             codec_suffix = path[path.rfind('.'):]
 
         self.context.runJob(
             self.mapPartitions(to_stringio),
             lambda tc, stringio: (
                 fileio.TextFile(
-                    os.path.join(path, 'part-{0:05d}{1}'.format(
-                        tc.partitionId(), codec_suffix))
+                    os.path.join(
+                        path, 'part-{0:05d}{1}'.format(tc.partitionId(), codec_suffix)
+                    )
                 ).dump(stringio)
             ),
             resultHandler=list,
@@ -1626,12 +1641,10 @@ class RDD(object):
             numPartitions = self.getNumPartitions()
 
         return self.context.parallelize(
-            sorted(self.collect(), key=keyfunc, reverse=not ascending),
-            numPartitions,
+            sorted(self.collect(), key=keyfunc, reverse=not ascending), numPartitions,
         )
 
-    def sortByKey(self, ascending=True, numPartitions=None,
-                  keyfunc=itemgetter(0)):
+    def sortByKey(self, ascending=True, numPartitions=None, keyfunc=itemgetter(0)):
         """sort by key
 
         :param ascending: Sort order.
@@ -1677,9 +1690,7 @@ class RDD(object):
         True
         """
         return self.aggregate(
-            StatCounter(),
-            lambda a, b: a.merge(b),
-            lambda a, b: a.mergeStats(b),
+            StatCounter(), lambda a, b: a.merge(b), lambda a, b: a.mergeStats(b),
         )
 
     def stdev(self):
@@ -1735,7 +1746,11 @@ class RDD(object):
             _, (val1, val2) = pair
             return val1 and not val2
 
-        return self.cogroup(other, numPartitions).filter(filter_func).flatMapValues(lambda x: x[0])
+        return (
+            self.cogroup(other, numPartitions)
+            .filter(filter_func)
+            .flatMapValues(lambda x: x[0])
+        )
 
     def sum(self):
         """sum of all the elements
@@ -1749,8 +1764,7 @@ class RDD(object):
         >>> Context().parallelize([0, 4, 7, 4, 10]).sum()
         25
         """
-        return self.context.runJob(self, lambda tc, x: sum(x),
-                                   resultHandler=sum)
+        return self.context.runJob(self, lambda tc, x: sum(x), resultHandler=sum)
 
     def sumApprox(self):
         """same as :func:`~fast_pyspark_tester.RDD.sum()`
@@ -1785,10 +1799,9 @@ class RDD(object):
             self,
             lambda tc, i: i,
             allowLocal=True,
-            resultHandler=lambda l: list(itertools.islice(
-                itertools.chain.from_iterable(l),
-                n,
-            )),
+            resultHandler=lambda l: list(
+                itertools.islice(itertools.chain.from_iterable(l), n,)
+            ),
         )
 
     def takeSample(self, withReplacement, num, seed=None):
@@ -1829,7 +1842,7 @@ class RDD(object):
         numStDev = 10.0
 
         if num < 0:
-            raise ValueError("Sample size cannot be negative.")
+            raise ValueError('Sample size cannot be negative.')
         if num == 0:
             return []
 
@@ -1847,10 +1860,11 @@ class RDD(object):
 
         maxSampleSize = sys.maxsize - int(numStDev * math.sqrt(sys.maxsize))
         if num > maxSampleSize:
-            raise ValueError(
-                "Sample size cannot be greater than %d." % maxSampleSize)
+            raise ValueError('Sample size cannot be greater than %d.' % maxSampleSize)
 
-        fraction = RDD._computeFractionForSampleSize(num, initial_count, withReplacement)
+        fraction = RDD._computeFractionForSampleSize(
+            num, initial_count, withReplacement
+        )
         samples = self.sample(withReplacement, fraction, seed).collect()
 
         # If the first sample didn't turn out large enough, keep trying to take samples;
@@ -1913,7 +1927,9 @@ class RDD(object):
 
         delta = 0.00005
         gamma = -math.log(delta) / total
-        return min(1, fraction + gamma + math.sqrt(gamma * gamma + 2 * gamma * fraction))
+        return min(
+            1, fraction + gamma + math.sqrt(gamma * gamma + 2 * gamma * fraction)
+        )
 
     def takeOrdered(self, n, key=lambda x: x):
         """
@@ -1939,7 +1955,8 @@ class RDD(object):
         30
         """
         return self.context.runJob(
-            self, lambda tc, i: list(i),
+            self,
+            lambda tc, i: list(i),
             resultHandler=lambda l: (x for p in l for x in p),
         )
 
@@ -2088,6 +2105,7 @@ class RDD(object):
         # pylint: disable=import-outside-toplevel
         from fast_pyspark_tester import Context
         from fast_pyspark_tester.sql.session import SparkSession
+
         sparkSession = SparkSession._instantiatedSession or SparkSession(Context())
         return sparkSession.createDataFrame(self, schema, sampleRatio)
 
@@ -2107,16 +2125,18 @@ class MapPartitionsRDD(RDD):
         self.preservesPartitioning = preservesPartitioning
 
     def compute(self, split, task_context):
-        return self.f(task_context, split.index,
-                      self.prev.compute(split, task_context._create_child()))
+        return self.f(
+            task_context,
+            split.index,
+            self.prev.compute(split, task_context._create_child()),
+        )
 
     def partitions(self):
         return self.prev.partitions()
 
 
 class PartitionwiseSampledRDD(RDD):
-    def __init__(self, prev, sampler, preservesPartitioning=False,
-                 seed=None):
+    def __init__(self, prev, sampler, preservesPartitioning=False, seed=None):
         """RDD with sampled partitions.
 
         :param RDD prev: previous RDD
@@ -2191,6 +2211,7 @@ class EmptyRDD(RDD):
 
 # pickle-able helpers
 
+
 class MapF(object):
     def __init__(self, f):
         self.f = f
@@ -2203,13 +2224,13 @@ def unit_map(task_context, elements):
     return list(elements)
 
 
-def unit_collect(l):
-    return [x for p in l for x in p]
+def unit_collect(l_):
+    return [x for p in l_ for x in p]
 
 
 def sum_counts_by_keys(list_of_pairlists):
     r = defaultdict(int)  # calling int results in a zero
-    for l in list_of_pairlists:
-        for key, count in l.items():
+    for l_ in list_of_pairlists:
+        for key, count in l_.items():
             r[key] += count
     return r

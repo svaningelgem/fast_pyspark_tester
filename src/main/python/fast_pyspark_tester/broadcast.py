@@ -39,6 +39,7 @@ class Broadcast(object):
     ...
     AttributeError: can't set attribute
     """
+
     def __init__(self, sc=None, value=None):
         self._value = value
 
@@ -48,7 +49,7 @@ class Broadcast(object):
         return self._value
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     """
     Execute doctests with
 

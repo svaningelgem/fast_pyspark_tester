@@ -19,7 +19,7 @@ class ArraysOverlap(Expression):
         return False
 
     def __str__(self):
-        return "array_overlap({0}, {1})".format(self.array1, self.array2)
+        return 'array_overlap({0}, {1})'.format(self.array1, self.array2)
 
 
 class ArrayContains(Expression):
@@ -35,7 +35,7 @@ class ArrayContains(Expression):
         return self.value in array_eval
 
     def __str__(self):
-        return "array_contains({0}, {1})".format(self.array, self.value)
+        return 'array_contains({0}, {1})'.format(self.array, self.value)
 
 
 class ArrayColumn(Expression):
@@ -47,7 +47,7 @@ class ArrayColumn(Expression):
         return [col.eval(row, schema) for col in self.columns]
 
     def __str__(self):
-        return "array({0})".format(", ".join(str(col) for col in self.columns))
+        return 'array({0})'.format(', '.join(str(col) for col in self.columns))
 
 
 class MapColumn(Expression):
@@ -64,7 +64,7 @@ class MapColumn(Expression):
         )
 
     def __str__(self):
-        return "map({0})".format(", ".join(str(col) for col in self.columns))
+        return 'map({0})'.format(', '.join(str(col) for col in self.columns))
 
 
 class MapFromArraysColumn(Expression):
@@ -74,15 +74,10 @@ class MapFromArraysColumn(Expression):
         self.values = values
 
     def eval(self, row, schema):
-        return dict(
-            zip(self.keys.eval(row, schema), self.values.eval(row, schema))
-        )
+        return dict(zip(self.keys.eval(row, schema), self.values.eval(row, schema)))
 
     def __str__(self):
-        return "map_from_arrays({0}, {1})".format(
-            self.keys,
-            self.values
-        )
+        return 'map_from_arrays({0}, {1})'.format(self.keys, self.values)
 
 
 class Size(UnaryExpression):
@@ -91,14 +86,13 @@ class Size(UnaryExpression):
         if isinstance(column_value, (list, dict)):
             return len(column_value)
         raise AnalysisException(
-            "{0} value should be an array or a map, got {1}".format(
-                self.column,
-                type(column_value)
+            '{0} value should be an array or a map, got {1}'.format(
+                self.column, type(column_value)
             )
         )
 
     def __str__(self):
-        return "size({0})".format(self.column)
+        return 'size({0})'.format(self.column)
 
 
 class ArraySort(UnaryExpression):
@@ -106,7 +100,7 @@ class ArraySort(UnaryExpression):
         return sorted(self.column.eval(row, schema))
 
     def __str__(self):
-        return "array_sort({0})".format(self.column)
+        return 'array_sort({0})'.format(self.column)
 
 
 class ArrayMin(UnaryExpression):
@@ -114,7 +108,7 @@ class ArrayMin(UnaryExpression):
         return min(self.column.eval(row, schema))
 
     def __str__(self):
-        return "array_min({0})".format(self.column)
+        return 'array_min({0})'.format(self.column)
 
 
 class ArrayMax(UnaryExpression):
@@ -122,7 +116,7 @@ class ArrayMax(UnaryExpression):
         return max(self.column.eval(row, schema))
 
     def __str__(self):
-        return "array_max({0})".format(self.column)
+        return 'array_max({0})'.format(self.column)
 
 
 class Slice(Expression):
@@ -136,7 +130,7 @@ class Slice(Expression):
         return self.x.eval(row, schema)[self.start, self.start + self.length]
 
     def __str__(self):
-        return "slice({0}, {1}, {2})".format(self.x, self.start, self.length)
+        return 'slice({0}, {1}, {2})'.format(self.x, self.start, self.length)
 
 
 class ArrayRepeat(Expression):
@@ -150,7 +144,7 @@ class ArrayRepeat(Expression):
         return [value for _ in range(self.count)]
 
     def __str__(self):
-        return "array_repeat({0}, {1})".format(self.col, self.count)
+        return 'array_repeat({0}, {1})'.format(self.col, self.count)
 
 
 class Sequence(Expression):
@@ -165,15 +159,12 @@ class Sequence(Expression):
         stop_value = self.stop.eval(row, schema)
         if self.step is not None:
             step_value = self.step.eval(row, schema)
-            if ((step_value < stop_value and step_value <= 0) or
-                    (step_value > stop_value and step_value >= 0)):
+            if (step_value < stop_value and step_value <= 0) or (
+                step_value > stop_value and step_value >= 0
+            ):
                 raise Exception(
-                    "requirement failed: Illegal sequence boundaries: "
-                    "{0} to {1} by {2}".format(
-                        start_value,
-                        stop_value,
-                        step_value
-                    )
+                    'requirement failed: Illegal sequence boundaries: '
+                    '{0} to {1} by {2}'.format(start_value, stop_value, step_value)
                 )
         else:
             step_value = 1 if start_value < stop_value else -1
@@ -181,12 +172,12 @@ class Sequence(Expression):
         return list(range(start_value, stop_value, step_value))
 
     def __str__(self):
-        return "array_join({0}, {1}{2})".format(
+        return 'array_join({0}, {1}{2})'.format(
             self.start,
             self.stop,
             # Spark use the same logic of not displaying step
             # if it is None, even if it was explicitly set
-            ", {0}".format(self.step) if self.step is not None else ""
+            ', {0}'.format(self.step) if self.step is not None else '',
         )
 
 
@@ -200,16 +191,19 @@ class ArrayJoin(Expression):
     def eval(self, row, schema):
         column_eval = self.column.eval(row, schema)
         return self.delimiter.join(
-            value if value is not None else self.nullReplacement for value in column_eval
+            value if value is not None else self.nullReplacement
+            for value in column_eval
         )
 
     def __str__(self):
-        return "array_join({0}, {1}{2})".format(
+        return 'array_join({0}, {1}{2})'.format(
             self.column,
             self.delimiter,
             # Spark use the same logic of not displaying nullReplacement
             # if it is None, even if it was explicitly set
-            ", {0}".format(self.nullReplacement) if self.nullReplacement is not None else ""
+            ', {0}'.format(self.nullReplacement)
+            if self.nullReplacement is not None
+            else '',
         )
 
 
@@ -223,10 +217,7 @@ class SortArray(Expression):
         return sorted(self.col.eval(row, schema), reverse=not self.asc)
 
     def __str__(self):
-        return "sort_array({0}, {1})".format(
-            self.col,
-            self.asc
-        )
+        return 'sort_array({0}, {1})'.format(self.col, self.asc)
 
 
 class ArraysZip(Expression):
@@ -237,25 +228,19 @@ class ArraysZip(Expression):
     def eval(self, row, schema):
         return [
             list(combination)
-            for combination in zip(
-                *(c.eval(row, schema) for c in self.cols)
-            )
+            for combination in zip(*(c.eval(row, schema) for c in self.cols))
         ]
 
     def __str__(self):
-        return "arrays_zip({0})".format(", ".join(self.cols))
+        return 'arrays_zip({0})'.format(', '.join(self.cols))
 
 
 class Flatten(UnaryExpression):
     def eval(self, row, schema):
-        return [
-            value
-            for array in self.column.eval(row, schema)
-            for value in array
-        ]
+        return [value for array in self.column.eval(row, schema) for value in array]
 
     def __str__(self):
-        return "flatten({0})".format(self.column)
+        return 'flatten({0})'.format(self.column)
 
 
 class ArrayPosition(Expression):
@@ -274,7 +259,7 @@ class ArrayPosition(Expression):
         return col_eval.find(self.value) + 1
 
     def __str__(self):
-        return "array_position({0}, {1})".format(self.col, self.value)
+        return 'array_position({0}, {1})'.format(self.col, self.value)
 
 
 class ElementAt(Expression):
@@ -290,7 +275,7 @@ class ElementAt(Expression):
         return col_eval.get(self.extraction)
 
     def __str__(self):
-        return "element_at({0}, {1})".format(self.col, self.extraction)
+        return 'element_at({0}, {1})'.format(self.col, self.extraction)
 
 
 class ArrayRemove(Expression):
@@ -304,7 +289,7 @@ class ArrayRemove(Expression):
         return [value for value in array if value != self.element]
 
     def __str__(self):
-        return "array_remove({0}, {1})".format(self.col, self.element)
+        return 'array_remove({0}, {1})'.format(self.col, self.element)
 
 
 class ArrayDistinct(UnaryExpression):
@@ -312,7 +297,7 @@ class ArrayDistinct(UnaryExpression):
         return list(set(self.column.eval(row, schema)))
 
     def __str__(self):
-        return "array_distinct({0})".format(self.column)
+        return 'array_distinct({0})'.format(self.column)
 
 
 class ArrayIntersect(Expression):
@@ -325,7 +310,7 @@ class ArrayIntersect(Expression):
         return list(set(self.col1.eval(row, schema)) & set(self.col2.eval(row, schema)))
 
     def __str__(self):
-        return "array_intersect({0}, {1})".format(self.col1, self.col2)
+        return 'array_intersect({0}, {1})'.format(self.col1, self.col2)
 
 
 class ArrayUnion(Expression):
@@ -338,7 +323,7 @@ class ArrayUnion(Expression):
         return list(set(self.col1.eval(row, schema)) | set(self.col2.eval(row, schema)))
 
     def __str__(self):
-        return "array_union({0}, {1})".format(self.col1, self.col2)
+        return 'array_union({0}, {1})'.format(self.col1, self.col2)
 
 
 class ArrayExcept(Expression):
@@ -351,12 +336,31 @@ class ArrayExcept(Expression):
         return list(set(self.col1.eval(row, schema)) - set(self.col2.eval(row, schema)))
 
     def __str__(self):
-        return "array_except({0}, {1})".format(self.col1, self.col2)
+        return 'array_except({0}, {1})'.format(self.col1, self.col2)
 
 
 __all__ = [
-    "ArraysZip", "ArrayRepeat", "Flatten", "ArrayMax", "ArrayMin", "SortArray", "Size",
-    "ArrayExcept", "ArrayUnion", "ArrayIntersect", "ArrayDistinct", "ArrayRemove", "ArraySort",
-    "ElementAt", "ArrayPosition", "ArrayJoin", "ArraysOverlap", "ArrayContains",
-    "MapFromArraysColumn", "MapColumn", "ArrayColumn", "Slice", "Sequence"
+    'ArraysZip',
+    'ArrayRepeat',
+    'Flatten',
+    'ArrayMax',
+    'ArrayMin',
+    'SortArray',
+    'Size',
+    'ArrayExcept',
+    'ArrayUnion',
+    'ArrayIntersect',
+    'ArrayDistinct',
+    'ArrayRemove',
+    'ArraySort',
+    'ElementAt',
+    'ArrayPosition',
+    'ArrayJoin',
+    'ArraysOverlap',
+    'ArrayContains',
+    'MapFromArraysColumn',
+    'MapColumn',
+    'ArrayColumn',
+    'Slice',
+    'Sequence',
 ]

@@ -68,18 +68,14 @@ class Hdfs(FileSystem):
         for fn, file_status in c.list(folder_path, status=True):
             file_local_path = '{0}{1}'.format(folder_path, fn)
             file_path = format_file_uri(scheme, domain, file_local_path)
-            part_file_expr = expr + ("" if expr.endswith("/") else "/") + 'part*'
+            part_file_expr = expr + ('' if expr.endswith('/') else '/') + 'part*'
 
             if fnmatch(file_path, expr):
-                if file_status["type"] != "DIRECTORY":
+                if file_status['type'] != 'DIRECTORY':
                     files.append(file_path)
                 else:
                     files += Hdfs._get_folder_part_files(
-                        c,
-                        scheme,
-                        domain,
-                        file_local_path,
-                        part_file_expr
+                        c, scheme, domain, file_local_path, part_file_expr
                     )
             elif fnmatch(file_path, part_file_expr):
                 files.append(file_path)
@@ -90,7 +86,10 @@ class Hdfs(FileSystem):
         files = []
         for fn, file_status in c.list(folder_local_path, status=True):
             sub_file_path = format_file_uri(scheme, domain, folder_local_path, fn)
-            if fnmatch(sub_file_path, expr_with_part) and file_status["type"] != "DIRECTORY":
+            if (
+                fnmatch(sub_file_path, expr_with_part)
+                and file_status['type'] != 'DIRECTORY'
+            ):
                 files.append(sub_file_path)
         return files
 
@@ -111,20 +110,16 @@ class Hdfs(FileSystem):
         for fn, file_status in c.list(folder_path, status=True):
             file_local_path = '{0}{1}'.format(folder_path, fn)
             if expr is None or fnmatch(file_local_path, expr):
-                if file_status["type"] == "DIRECTORY":
+                if file_status['type'] == 'DIRECTORY':
                     file_paths += cls._get_folder_files_by_expr(
-                        c,
-                        scheme,
-                        domain,
-                        file_local_path + "/",
-                        expr=None
+                        c, scheme, domain, file_local_path + '/', expr=None
                     )
                 else:
                     file_path = format_file_uri(scheme, domain, file_local_path)
                     file_paths.append(file_path)
-            elif file_status["type"] == "DIRECTORY":
+            elif file_status['type'] == 'DIRECTORY':
                 file_paths += cls._get_folder_files_by_expr(
-                    c, scheme, domain, file_local_path + "/", expr
+                    c, scheme, domain, file_local_path + '/', expr
                 )
         return file_paths
 

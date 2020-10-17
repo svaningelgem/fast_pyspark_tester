@@ -8,6 +8,7 @@ class FileSystem(object):
 
     :param str file_name: File name.
     """
+
     def __init__(self, file_name):
         self.file_name = file_name
 
@@ -32,8 +33,10 @@ class FileSystem(object):
 
         :rtype: bool
         """
-        log.warning('Could not determine whether {0} exists due to '
-                    'unhandled scheme.'.format(self.file_name))
+        log.warning(
+            'Could not determine whether {0} exists due to '
+            'unhandled scheme.'.format(self.file_name)
+        )
 
     def load(self):
         """Load a file to a stream.

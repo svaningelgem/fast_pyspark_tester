@@ -1,7 +1,11 @@
 from fast_pyspark_tester import Row
 from fast_pyspark_tester.sql.casts import get_caster
-from fast_pyspark_tester.sql.expressions.expressions import Expression, UnaryExpression, \
-    NullSafeBinaryOperation, TypeSafeBinaryOperation
+from fast_pyspark_tester.sql.expressions.expressions import (
+    Expression,
+    UnaryExpression,
+    NullSafeBinaryOperation,
+    TypeSafeBinaryOperation,
+)
 from fast_pyspark_tester.sql.types import StructType
 
 
@@ -10,7 +14,7 @@ class Negate(UnaryExpression):
         return not self.column.eval(row, schema)
 
     def __str__(self):
-        return "(- {0})".format(self.column)
+        return '(- {0})'.format(self.column)
 
 
 class Add(NullSafeBinaryOperation):
@@ -18,7 +22,7 @@ class Add(NullSafeBinaryOperation):
         return value1 + value2
 
     def __str__(self):
-        return "({0} + {1})".format(self.arg1, self.arg2)
+        return '({0} + {1})'.format(self.arg1, self.arg2)
 
 
 class Minus(NullSafeBinaryOperation):
@@ -26,7 +30,7 @@ class Minus(NullSafeBinaryOperation):
         return value1 - value2
 
     def __str__(self):
-        return "({0} - {1})".format(self.arg1, self.arg2)
+        return '({0} - {1})'.format(self.arg1, self.arg2)
 
 
 class Time(NullSafeBinaryOperation):
@@ -34,7 +38,7 @@ class Time(NullSafeBinaryOperation):
         return value1 * value2
 
     def __str__(self):
-        return "({0} * {1})".format(self.arg1, self.arg2)
+        return '({0} * {1})'.format(self.arg1, self.arg2)
 
 
 class Divide(NullSafeBinaryOperation):
@@ -42,7 +46,7 @@ class Divide(NullSafeBinaryOperation):
         return value1 / value2 if value2 != 0 else None
 
     def __str__(self):
-        return "({0} / {1})".format(self.arg1, self.arg2)
+        return '({0} / {1})'.format(self.arg1, self.arg2)
 
 
 class Mod(NullSafeBinaryOperation):
@@ -50,7 +54,7 @@ class Mod(NullSafeBinaryOperation):
         return value1 % value2
 
     def __str__(self):
-        return "({0} % {1})".format(self.arg1, self.arg2)
+        return '({0} % {1})'.format(self.arg1, self.arg2)
 
 
 class Pow(NullSafeBinaryOperation):
@@ -58,7 +62,7 @@ class Pow(NullSafeBinaryOperation):
         return float(value1 ** value2)
 
     def __str__(self):
-        return "POWER({0}, {1})".format(self.arg1, self.arg2)
+        return 'POWER({0}, {1})'.format(self.arg1, self.arg2)
 
 
 class Pmod(NullSafeBinaryOperation):
@@ -66,7 +70,7 @@ class Pmod(NullSafeBinaryOperation):
         return value1 % value2
 
     def __str__(self):
-        return "pmod({0} % {1})".format(self.arg1, self.arg2)
+        return 'pmod({0} % {1})'.format(self.arg1, self.arg2)
 
 
 class Equal(TypeSafeBinaryOperation):
@@ -74,7 +78,7 @@ class Equal(TypeSafeBinaryOperation):
         return value_1 == value_2
 
     def __str__(self):
-        return "({0} = {1})".format(self.arg1, self.arg2)
+        return '({0} = {1})'.format(self.arg1, self.arg2)
 
 
 class LessThan(TypeSafeBinaryOperation):
@@ -82,7 +86,7 @@ class LessThan(TypeSafeBinaryOperation):
         return value_1 < value_2
 
     def __str__(self):
-        return "({0} < {1})".format(self.arg1, self.arg2)
+        return '({0} < {1})'.format(self.arg1, self.arg2)
 
 
 class LessThanOrEqual(TypeSafeBinaryOperation):
@@ -90,7 +94,7 @@ class LessThanOrEqual(TypeSafeBinaryOperation):
         return value_1 <= value_2
 
     def __str__(self):
-        return "({0} <= {1})".format(self.arg1, self.arg2)
+        return '({0} <= {1})'.format(self.arg1, self.arg2)
 
 
 class GreaterThan(TypeSafeBinaryOperation):
@@ -98,7 +102,7 @@ class GreaterThan(TypeSafeBinaryOperation):
         return value_1 > value_2
 
     def __str__(self):
-        return "({0} > {1})".format(self.arg1, self.arg2)
+        return '({0} > {1})'.format(self.arg1, self.arg2)
 
 
 class GreaterThanOrEqual(TypeSafeBinaryOperation):
@@ -106,7 +110,7 @@ class GreaterThanOrEqual(TypeSafeBinaryOperation):
         return value_1 >= value_2
 
     def __str__(self):
-        return "({0} >= {1})".format(self.arg1, self.arg2)
+        return '({0} >= {1})'.format(self.arg1, self.arg2)
 
 
 class And(TypeSafeBinaryOperation):
@@ -114,7 +118,7 @@ class And(TypeSafeBinaryOperation):
         return value_1 and value_2
 
     def __str__(self):
-        return "({0} AND {1})".format(self.arg1, self.arg2)
+        return '({0} AND {1})'.format(self.arg1, self.arg2)
 
 
 class Or(TypeSafeBinaryOperation):
@@ -122,7 +126,7 @@ class Or(TypeSafeBinaryOperation):
         return value_1 or value_2
 
     def __str__(self):
-        return "({0} OR {1})".format(self.arg1, self.arg2)
+        return '({0} OR {1})'.format(self.arg1, self.arg2)
 
 
 class Invert(UnaryExpression):
@@ -133,7 +137,7 @@ class Invert(UnaryExpression):
         return not value
 
     def __str__(self):
-        return "(NOT {0})".format(self.column)
+        return '(NOT {0})'.format(self.column)
 
 
 class BitwiseOr(Expression):
@@ -146,7 +150,7 @@ class BitwiseOr(Expression):
         return self.arg1.eval(row, schema) | self.arg2.eval(row, schema)
 
     def __str__(self):
-        return "({0} | {1})".format(self.arg1, self.arg2)
+        return '({0} | {1})'.format(self.arg1, self.arg2)
 
 
 class BitwiseAnd(Expression):
@@ -159,7 +163,7 @@ class BitwiseAnd(Expression):
         return self.arg1.eval(row, schema) & self.arg2.eval(row, schema)
 
     def __str__(self):
-        return "({0} & {1})".format(self.arg1, self.arg2)
+        return '({0} & {1})'.format(self.arg1, self.arg2)
 
 
 class BitwiseXor(Expression):
@@ -172,7 +176,7 @@ class BitwiseXor(Expression):
         return self.arg1.eval(row, schema) ^ self.arg2.eval(row, schema)
 
     def __str__(self):
-        return "({0} ^ {1})".format(self.arg1, self.arg2)
+        return '({0} ^ {1})'.format(self.arg1, self.arg2)
 
 
 class BitwiseNot(UnaryExpression):
@@ -180,7 +184,7 @@ class BitwiseNot(UnaryExpression):
         return ~(self.column.eval(row, schema))
 
     def __str__(self):
-        return "~{0}".format(self.column)
+        return '~{0}'.format(self.column)
 
 
 class EqNullSafe(Expression):
@@ -193,7 +197,7 @@ class EqNullSafe(Expression):
         return self.arg1.eval(row, schema) == self.arg2.eval(row, schema)
 
     def __str__(self):
-        return "({0} <=> {1})".format(self.arg1, self.arg2)
+        return '({0} <=> {1})'.format(self.arg1, self.arg2)
 
 
 class GetField(Expression):
@@ -205,10 +209,7 @@ class GetField(Expression):
     def eval(self, row, schema):
         item_eval = self.item.eval(row, schema)
         if isinstance(item_eval, Row):
-            item_value = dict(zip(
-                item_eval.__fields__,
-                item_eval
-            ))
+            item_value = dict(zip(item_eval.__fields__, item_eval))
         elif isinstance(item_eval, dict):
             item_value = item_eval
         else:
@@ -217,11 +218,13 @@ class GetField(Expression):
         return item_value.get(field_value)
 
     def __str__(self):
-        if (hasattr(self.item.expr, "field")
-                and hasattr(self.item.expr.field, "dataType")
-                and isinstance(self.item.expr.field.dataType, StructType)):
-            return "{0}.{1}".format(self.item, self.field)
-        return "{0}[{1}]".format(self.item, self.field)
+        if (
+            hasattr(self.item.expr, 'field')
+            and hasattr(self.item.expr.field, 'dataType')
+            and isinstance(self.item.expr.field.dataType, StructType)
+        ):
+            return '{0}.{1}'.format(self.item, self.field)
+        return '{0}[{1}]'.format(self.item, self.field)
 
 
 class Contains(Expression):
@@ -234,7 +237,7 @@ class Contains(Expression):
         return self.value.eval(row, schema) in self.expr.eval(row, schema)
 
     def __str__(self):
-        return "contains({0}, {1})".format(self.expr, self.value)
+        return 'contains({0}, {1})'.format(self.expr, self.value)
 
 
 class StartsWith(Expression):
@@ -247,7 +250,7 @@ class StartsWith(Expression):
         return str(self.arg1.eval(row, schema)).startswith(self.substr)
 
     def __str__(self):
-        return "startswith({0}, {1})".format(self.arg1, self.substr)
+        return 'startswith({0}, {1})'.format(self.arg1, self.substr)
 
 
 class EndsWith(Expression):
@@ -260,7 +263,7 @@ class EndsWith(Expression):
         return str(self.arg1.eval(row, schema)).endswith(self.substr)
 
     def __str__(self):
-        return "endswith({0}, {1})".format(self.arg1, self.substr)
+        return 'endswith({0}, {1})'.format(self.arg1, self.substr)
 
 
 class IsIn(Expression):
@@ -273,9 +276,8 @@ class IsIn(Expression):
         return self.arg1.eval(row, schema) in self.cols
 
     def __str__(self):
-        return "({0} IN ({1}))".format(
-            self.arg1,
-            ", ".join(str(col) for col in self.cols)
+        return '({0} IN ({1}))'.format(
+            self.arg1, ', '.join(str(col) for col in self.cols)
         )
 
 
@@ -284,7 +286,7 @@ class IsNotNull(UnaryExpression):
         return self.column.eval(row, schema) is not None
 
     def __str__(self):
-        return "({0} IS NOT NULL)".format(self.column)
+        return '({0} IS NOT NULL)'.format(self.column)
 
 
 class IsNull(UnaryExpression):
@@ -292,7 +294,7 @@ class IsNull(UnaryExpression):
         return self.column.eval(row, schema) is None
 
     def __str__(self):
-        return "({0} IS NULL)".format(self.column)
+        return '({0} IS NULL)'.format(self.column)
 
 
 class Cast(Expression):
@@ -308,7 +310,7 @@ class Cast(Expression):
         return self.caster(self.column.eval(row, schema))
 
     def __str__(self):
-        return "{0}".format(self.column)
+        return '{0}'.format(self.column)
 
 
 class Substring(Expression):
@@ -319,10 +321,12 @@ class Substring(Expression):
         self.length = length
 
     def eval(self, row, schema):
-        return str(self.expr.eval(row, schema))[self.start - 1:self.start - 1 + self.length]
+        return str(self.expr.eval(row, schema))[
+            self.start - 1:self.start - 1 + self.length
+        ]
 
     def __str__(self):
-        return "substring({0}, {1}, {2})".format(self.expr, self.start, self.length)
+        return 'substring({0}, {1}, {2})'.format(self.expr, self.start, self.length)
 
 
 class Alias(Expression):
@@ -351,35 +355,35 @@ class Alias(Expression):
 
 
 __all__ = [
-    "Negate",
-    "Add",
-    "Minus",
-    "Time",
-    "Divide",
-    "Mod",
-    "Pow",
-    "Pmod",
-    "Equal",
-    "LessThan",
-    "LessThanOrEqual",
-    "GreaterThan",
-    "GreaterThanOrEqual",
-    "And",
-    "Or",
-    "Invert",
-    "BitwiseOr",
-    "BitwiseAnd",
-    "BitwiseXor",
-    "BitwiseNot",
-    "EqNullSafe",
-    "GetField",
-    "Contains",
-    "StartsWith",
-    "EndsWith",
-    "IsIn",
-    "IsNotNull",
-    "Cast",
-    "Substring",
-    "IsNull",
-    "Alias"
+    'Negate',
+    'Add',
+    'Minus',
+    'Time',
+    'Divide',
+    'Mod',
+    'Pow',
+    'Pmod',
+    'Equal',
+    'LessThan',
+    'LessThanOrEqual',
+    'GreaterThan',
+    'GreaterThanOrEqual',
+    'And',
+    'Or',
+    'Invert',
+    'BitwiseOr',
+    'BitwiseAnd',
+    'BitwiseXor',
+    'BitwiseNot',
+    'EqNullSafe',
+    'GetField',
+    'Contains',
+    'StartsWith',
+    'EndsWith',
+    'IsIn',
+    'IsNotNull',
+    'Cast',
+    'Substring',
+    'IsNull',
+    'Alias',
 ]

@@ -9,6 +9,7 @@ class SimpleStatAggregation(Aggregation):
         # Top level import would cause cyclic dependencies
         # pylint: disable=import-outside-toplevel
         from fast_pyspark_tester.stat_counter import ColumnStatHelper
+
         super(SimpleStatAggregation, self).__init__(column)
         self.column = column
         self.stat_helper = ColumnStatHelper(column)
@@ -31,6 +32,7 @@ class Count(SimpleStatAggregation):
         # Top level import would cause cyclic dependencies
         # pylint: disable=import-outside-toplevel
         from fast_pyspark_tester.stat_counter import ColumnStatHelper
+
         if isinstance(column.expr, StarOperator):
             column = Column(Literal(1))
         super(Count, self).__init__(column)
@@ -41,7 +43,7 @@ class Count(SimpleStatAggregation):
         return self.stat_helper.count
 
     def __str__(self):
-        return "count({0})".format(self.column)
+        return 'count({0})'.format(self.column)
 
 
 class Max(SimpleStatAggregation):
@@ -49,7 +51,7 @@ class Max(SimpleStatAggregation):
         return self.stat_helper.max
 
     def __str__(self):
-        return "max({0})".format(self.column)
+        return 'max({0})'.format(self.column)
 
 
 class Min(SimpleStatAggregation):
@@ -57,7 +59,7 @@ class Min(SimpleStatAggregation):
         return self.stat_helper.min
 
     def __str__(self):
-        return "min({0})".format(self.column)
+        return 'min({0})'.format(self.column)
 
 
 class Sum(SimpleStatAggregation):
@@ -65,7 +67,7 @@ class Sum(SimpleStatAggregation):
         return self.stat_helper.sum
 
     def __str__(self):
-        return "sum({0})".format(self.column)
+        return 'sum({0})'.format(self.column)
 
 
 class Avg(SimpleStatAggregation):
@@ -73,7 +75,7 @@ class Avg(SimpleStatAggregation):
         return self.stat_helper.mean
 
     def __str__(self):
-        return "avg({0})".format(self.column)
+        return 'avg({0})'.format(self.column)
 
 
 class VarSamp(SimpleStatAggregation):
@@ -81,7 +83,7 @@ class VarSamp(SimpleStatAggregation):
         return self.stat_helper.variance_samp
 
     def __str__(self):
-        return "var_samp({0})".format(self.column)
+        return 'var_samp({0})'.format(self.column)
 
 
 class VarPop(SimpleStatAggregation):
@@ -89,7 +91,7 @@ class VarPop(SimpleStatAggregation):
         return self.stat_helper.variance_pop
 
     def __str__(self):
-        return "var_pop({0})".format(self.column)
+        return 'var_pop({0})'.format(self.column)
 
 
 class StddevSamp(SimpleStatAggregation):
@@ -97,7 +99,7 @@ class StddevSamp(SimpleStatAggregation):
         return self.stat_helper.stddev_samp
 
     def __str__(self):
-        return "stddev_samp({0})".format(self.column)
+        return 'stddev_samp({0})'.format(self.column)
 
 
 class StddevPop(SimpleStatAggregation):
@@ -105,7 +107,7 @@ class StddevPop(SimpleStatAggregation):
         return self.stat_helper.stddev_pop
 
     def __str__(self):
-        return "stddev_pop({0})".format(self.column)
+        return 'stddev_pop({0})'.format(self.column)
 
 
 class Skewness(SimpleStatAggregation):
@@ -113,7 +115,7 @@ class Skewness(SimpleStatAggregation):
         return self.stat_helper.skewness
 
     def __str__(self):
-        return "skewness({0})".format(self.column)
+        return 'skewness({0})'.format(self.column)
 
 
 class Kurtosis(SimpleStatAggregation):
@@ -121,10 +123,19 @@ class Kurtosis(SimpleStatAggregation):
         return self.stat_helper.kurtosis
 
     def __str__(self):
-        return "kurtosis({0})".format(self.column)
+        return 'kurtosis({0})'.format(self.column)
 
 
 __all__ = [
-    "Avg", "VarPop", "VarSamp", "Sum", "StddevPop", "StddevSamp",
-    "Skewness", "Min", "Max", "Kurtosis", "Count"
+    'Avg',
+    'VarPop',
+    'VarSamp',
+    'Sum',
+    'StddevPop',
+    'StddevSamp',
+    'Skewness',
+    'Min',
+    'Max',
+    'Kurtosis',
+    'Count',
 ]

@@ -19,9 +19,7 @@ class Http(FileSystem):
 
     def __init__(self, file_name):
         if requests is None:
-            raise FileSystemNotSupported(
-                'http not supported. Install "requests".'
-            )
+            raise FileSystemNotSupported('http not supported. Install "requests".')
 
         super(Http, self).__init__(file_name)
         self.headers = None

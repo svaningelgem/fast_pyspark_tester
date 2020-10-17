@@ -11,9 +11,9 @@ def simple_textFile():
     print(SC.parallelize([1, 2, 3]).name())
 
 
-def indent_line(l):
+def indent_line(l_):
     print('============== INDENTING LINE ================')
-    return '--- ' + l
+    return '--- ' + l_
 
 
 def lazy_execution():
@@ -37,14 +37,14 @@ def create_key_value_txt():
     r = SC.parallelize([('a', 1), ('b', 2)], 1)
     r.saveAsTextFile('tests/pyspark/key_value.txt')
     r.saveAsHadoopFile(
-        "tests/pyspark/key_value.txt.bz2",
-        "org.apache.hadoop.mapred.TextOutputFormat",
-        compressionCodecClass="org.apache.hadoop.io.compress.BZip2Codec",
+        'tests/pyspark/key_value.txt.bz2',
+        'org.apache.hadoop.mapred.TextOutputFormat',
+        compressionCodecClass='org.apache.hadoop.io.compress.BZip2Codec',
     )
     r.saveAsHadoopFile(
-        "tests/pyspark/key_value.txt.gz",
-        "org.apache.hadoop.mapred.TextOutputFormat",
-        compressionCodecClass="org.apache.hadoop.io.compress.GzipCodec",
+        'tests/pyspark/key_value.txt.gz',
+        'org.apache.hadoop.mapred.TextOutputFormat',
+        compressionCodecClass='org.apache.hadoop.io.compress.GzipCodec',
     )
     # r.saveAsHadoopFile(
     #     "tests/pyspark/key_value.txt.lzo",

@@ -85,11 +85,7 @@ class DStream(object):
 
         :rtype: DStream
         """
-        return (
-            self
-            .mapPartitions(lambda p: [sum(1 for _ in p)])
-            .reduce(operator.add)
-        )
+        return self.mapPartitions(lambda p: [sum(1 for _ in p)]).reduce(operator.add)
 
     def countByValue(self):
         """Apply countByValue to every RDD.abs
@@ -116,8 +112,8 @@ class DStream(object):
         [(1, 2), (2, 1), (5, 3)]
         """
         return self.transform(
-            lambda rdd: self._context._context.parallelize(
-                rdd.countByValue().items()))
+            lambda rdd: self._context._context.parallelize(rdd.countByValue().items())
+        )
 
     def countByWindow(self, windowDuration, slideDuration=None):
         """Applies count() after window().
@@ -161,8 +157,7 @@ class DStream(object):
         :rtype: DStream
         """
         return self.mapPartitions(
-            lambda p: (e for pp in p for e in f(pp)),
-            preservesPartitioning,
+            lambda p: (e for pp in p for e in f(pp)), preservesPartitioning,
         )
 
     def flatMapValues(self, f):
@@ -300,12 +295,9 @@ class DStream(object):
         [3]
         [8]
         """
-        return (
-            self
-            .mapPartitions(lambda p: (f(e) for e in p), preservesPartitioning)
-            .transform(lambda rdd:
-                       rdd.setName('{}:{}'.format(rdd.prev.name(), f)))
-        )
+        return self.mapPartitions(
+            lambda p: (f(e) for e in p), preservesPartitioning
+        ).transform(lambda rdd: rdd.setName('{}:{}'.format(rdd.prev.name(), f)))
 
     def mapPartitions(self, f, preservesPartitioning=False):
         """Map partitions.
@@ -313,12 +305,9 @@ class DStream(object):
         :param f: mapping function
         :rtype: DStream
         """
-        return (
-            self
-            .mapPartitionsWithIndex(lambda i, p: f(p), preservesPartitioning)
-            .transform(lambda rdd:
-                       rdd.setName('{}:{}'.format(rdd.prev.name(), f)))
-        )
+        return self.mapPartitionsWithIndex(
+            lambda i, p: f(p), preservesPartitioning
+        ).transform(lambda rdd: rdd.setName('{}:{}'.format(rdd.prev.name(), f)))
 
     def mapPartitionsWithIndex(self, f, preservesPartitioning=False):
         """Apply a map function that takes an index and the data.
@@ -384,8 +373,7 @@ class DStream(object):
         # avoid RDD.reduce() which does not return an RDD
         return self.transform(
             lambda rdd: (
-                rdd
-                .map(lambda i: (None, i))
+                rdd.map(lambda i: (None, i))
                 .reduceByKey(func)
                 .map(lambda none_i: none_i[1])
             )
@@ -424,8 +412,9 @@ class DStream(object):
 
         """
         return self.transform(
-            lambda rdd: (rdd.repartition(numPartitions)
-                         if not isinstance(rdd, EmptyRDD) else rdd)
+            lambda rdd: (
+                rdd.repartition(numPartitions) if not isinstance(rdd, EmptyRDD) else rdd
+            )
         )
 
     def rightOuterJoin(self, other, numPartitions=None):
@@ -450,8 +439,7 @@ class DStream(object):
         [('a', (4, 1)), ('b', (None, 3))]
         [('c', (7, 8))]
         """
-        return CogroupedDStream(self, other, numPartitions,
-                                op='rightOuterJoin')
+        return CogroupedDStream(self, other, numPartitions, op='rightOuterJoin')
 
     def saveAsTextFiles(self, prefix, suffix=None):
         """Save every RDD as a text file (or sets of text files).
@@ -478,9 +466,11 @@ class DStream(object):
         ['hello', 'world', '1', '2']
         """
         self.foreachRDD(
-            lambda time_, rdd:
-            rdd.saveAsTextFile('{}-{:.0f}{}'.format(
-                prefix, time_ * 1000, suffix if suffix is not None else ''))
+            lambda time_, rdd: rdd.saveAsTextFile(
+                '{}-{:.0f}{}'.format(
+                    prefix, time_ * 1000, suffix if suffix is not None else ''
+                )
+            )
         )
 
     def slice(self, begin, end):
@@ -490,9 +480,11 @@ class DStream(object):
         :param datetime.datetime|int end: datetiem or unix timestamp
         :rtype: DStream
         """
-        return self.transform(lambda time_, rdd:
-                              rdd if begin <= time_ <= end
-                              else EmptyRDD(self._context._context))
+        return self.transform(
+            lambda time_, rdd: rdd
+            if begin <= time_ <= end
+            else EmptyRDD(self._context._context)
+        )
 
     def transform(self, func):
         """Return a new DStream where each RDD is transformed by ``f``.
@@ -500,9 +492,11 @@ class DStream(object):
         :param f: Function that transforms an RDD.
         :rtype: DStream
         """
+
         if func.__code__.co_argcount == 1:
+            # Convert a method that only accepts 1 argument into one that is acceptable for the TransformedDStream.
             one_arg_func = func
-            func = lambda _, rdd: one_arg_func(rdd)
+            func = lambda _, rdd: one_arg_func(rdd)  # noqa: E731
 
         return TransformedDStream(self, func)
 
@@ -517,7 +511,7 @@ class DStream(object):
         """
         if func.__code__.co_argcount == 2:
             two_arg_func = func
-            func = lambda _, rdd_a, rdd_b: two_arg_func(rdd_a, rdd_b)
+            func = lambda _, rdd_a, rdd_b: two_arg_func(rdd_a, rdd_b)  # noqa: E731
 
         return TransformedWithDStream(self, func, other)
 
@@ -544,6 +538,7 @@ class DStream(object):
         [3, 4]
         [5, 6]
         """
+
         def union_rdds(rdd_a, rdd_b):
             return self._context._context.union((rdd_a, rdd_b))
 
@@ -643,8 +638,7 @@ class TransformedDStream(DStream):
 
 class TransformedWithDStream(DStream):
     def __init__(self, prev, func, other_prev):
-        super(TransformedWithDStream, self).__init__(
-            prev._stream, prev._context)
+        super(TransformedWithDStream, self).__init__(prev._stream, prev._context)
         self._prev = prev
         self._func = func
         self._other_prev = other_prev
@@ -656,9 +650,9 @@ class TransformedWithDStream(DStream):
         self._prev._step(time_)
         self._other_prev._step(time_)
         self._current_time = time_
-        self._current_rdd = self._func(time_,
-                                       self._prev._current_rdd,
-                                       self._other_prev._current_rdd)
+        self._current_rdd = self._func(
+            time_, self._prev._current_rdd, self._other_prev._current_rdd
+        )
 
 
 class WindowedDStream(DStream):
@@ -669,10 +663,10 @@ class WindowedDStream(DStream):
             slideDuration = self._context.batch_duration
 
         self._prev = prev
-        self._window_duration = int(round(
-            windowDuration / self._context.batch_duration))
-        self._slide_duration = int(round(
-            slideDuration / self._context.batch_duration))
+        self._window_duration = int(
+            round(windowDuration / self._context.batch_duration)
+        )
+        self._slide_duration = int(round(slideDuration / self._context.batch_duration))
         self._slide_counter = 0
         self._window = []
 
@@ -712,7 +706,8 @@ class CogroupedDStream(DStream):
         self._prev2._step(time_)
         self._current_time = time_
         self._current_rdd = getattr(self._prev1._current_rdd, self._op)(
-            self._prev2._current_rdd, self._num_partitions)
+            self._prev2._current_rdd, self._num_partitions
+        )
 
 
 class StatefulDStream(DStream):

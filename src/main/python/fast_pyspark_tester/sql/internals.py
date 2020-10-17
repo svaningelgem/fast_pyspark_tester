@@ -7,19 +7,54 @@ from copy import deepcopy
 from functools import partial
 
 from fast_pyspark_tester import StorageLevel
-from fast_pyspark_tester.sql.functions import array, map_from_arrays, lit, rand, count, struct, collect_set
+from fast_pyspark_tester.sql.functions import (
+    array,
+    map_from_arrays,
+    lit,
+    rand,
+    count,
+    struct,
+    collect_set,
+)
 from fast_pyspark_tester.sql.internal_utils.column import resolve_column
-from fast_pyspark_tester.sql.internal_utils.joins import CROSS_JOIN, LEFT_JOIN, RIGHT_JOIN, \
-    FULL_JOIN, INNER_JOIN, LEFT_ANTI_JOIN, LEFT_SEMI_JOIN
-from fast_pyspark_tester.sql.schema_utils import infer_schema_from_rdd, get_schema_from_cols, merge_schemas
-from fast_pyspark_tester.sql.types import StructType, create_row, row_from_keyed_values, StructField, \
-    StringType, DataType, Row, LongType
+from fast_pyspark_tester.sql.internal_utils.joins import (
+    CROSS_JOIN,
+    LEFT_JOIN,
+    RIGHT_JOIN,
+    FULL_JOIN,
+    INNER_JOIN,
+    LEFT_ANTI_JOIN,
+    LEFT_SEMI_JOIN,
+)
+from fast_pyspark_tester.sql.schema_utils import (
+    infer_schema_from_rdd,
+    get_schema_from_cols,
+    merge_schemas,
+)
+from fast_pyspark_tester.sql.types import (
+    StructType,
+    create_row,
+    row_from_keyed_values,
+    StructField,
+    StringType,
+    DataType,
+    Row,
+    LongType,
+)
 from fast_pyspark_tester.sql.column import parse
 from fast_pyspark_tester.sql.utils import IllegalArgumentException
 from fast_pyspark_tester.stat_counter import RowStatHelper, CovarianceCounter
-from fast_pyspark_tester.utils import get_keyfunc, compute_weighted_percentiles, \
-    reservoir_sample_and_size, pad_cell, str_half_width, format_cell, merge_rows, \
-    merge_rows_joined_on_values, portable_hash
+from fast_pyspark_tester.utils import (
+    get_keyfunc,
+    compute_weighted_percentiles,
+    reservoir_sample_and_size,
+    pad_cell,
+    str_half_width,
+    format_cell,
+    merge_rows,
+    merge_rows_joined_on_values,
+    portable_hash,
+)
 
 
 class FieldIdGenerator(object):
@@ -36,6 +71,7 @@ class FieldIdGenerator(object):
     - Allows deep copies which are needed for aggregation
     - Support distributed computation, e.g. multiprocessing
     """
+
     _id = 0
 
     @classmethod
@@ -46,7 +82,7 @@ class FieldIdGenerator(object):
     @classmethod
     def bind_schema(cls, schema):
         for field in schema.fields:
-            if not hasattr(field, "id"):
+            if not hasattr(field, 'id'):
                 field.id = cls.next()
             if isinstance(field, StructType):
                 cls.bind_schema(field)
@@ -55,7 +91,7 @@ class FieldIdGenerator(object):
     @classmethod
     def unbind_schema(cls, schema):
         for field in schema.fields:
-            delattr(field, "id")
+            delattr(field, 'id')
             if isinstance(field, StructType):
                 cls.unbind_schema(field)
         return schema
@@ -68,16 +104,16 @@ class DataFrameInternal(object):
         """
         if convert_to_row:
             if cols is None:
-                cols = ["_c{0}".format(i) for i in range(200)]
+                cols = ['_c{0}'.format(i) for i in range(200)]
             rdd = rdd.map(partial(create_row, cols))
 
         self._sc = sc
         self._rdd = rdd
         if schema is None and convert_to_row is False:
             raise NotImplementedError(
-                "Schema cannot be None when creating DataFrameInternal from another. "
-                "As a user you should not see this error, feel free to report a bug at "
-                "https://github.com/svenkreiss/pysparkling/issues"
+                'Schema cannot be None when creating DataFrameInternal from another. '
+                'As a user you should not see this error, feel free to report a bug at '
+                'https://github.com/svenkreiss/pysparkling/issues'
             )
         if schema is not None:
             self._set_schema(schema)
@@ -94,11 +130,7 @@ class DataFrameInternal(object):
         return FieldIdGenerator.unbind_schema(schema)
 
     def _with_rdd(self, rdd, schema):
-        return DataFrameInternal(
-            self._sc,
-            rdd,
-            schema=schema
-        )
+        return DataFrameInternal(self._sc, rdd, schema=schema)
 
     def rdd(self):
         return self._rdd
@@ -109,10 +141,9 @@ class DataFrameInternal(object):
             start, end = 0, start
 
         rdd = sc.parallelize(
-            ([i] for i in range(start, end, step)),
-            numSlices=numPartitions
+            ([i] for i in range(start, end, step)), numSlices=numPartitions
         )
-        return DataFrameInternal(sc, rdd, ["id"], True)
+        return DataFrameInternal(sc, rdd, ['id'], True)
 
     def count(self):
         return self._rdd.count()
@@ -154,33 +185,34 @@ class DataFrameInternal(object):
     def sample(self, withReplacement=None, fraction=None, seed=None):
         return self._with_rdd(
             self._rdd.sample(
-                withReplacement=withReplacement,
-                fraction=fraction,
-                seed=seed
+                withReplacement=withReplacement, fraction=fraction, seed=seed
             ),
-            self.bound_schema
+            self.bound_schema,
         )
 
     def randomSplit(self, weights, seed):
         return self._with_rdd(
-            self._rdd.randomSplit(weights=weights, seed=seed),
-            self.bound_schema
+            self._rdd.randomSplit(weights=weights, seed=seed), self.bound_schema
         )
 
     @property
     def storageLevel(self):
-        return getattr(self._rdd, "storageLevel", StorageLevel(False, False, False, False))
+        return getattr(
+            self._rdd, 'storageLevel', StorageLevel(False, False, False, False)
+        )
 
     def is_cached(self):
-        return hasattr(self._rdd, "storageLevel")
+        return hasattr(self._rdd, 'storageLevel')
 
     def simple_repartition(self, numPartitions):
         return self._with_rdd(self._rdd.repartition(numPartitions), self.bound_schema)
 
     def repartitionByValues(self, numPartitions, partitioner=None):
         return self._with_rdd(
-            self._rdd.map(lambda x: (x, x)).partitionBy(numPartitions, partitioner).values(),
-            self.bound_schema
+            self._rdd.map(lambda x: (x, x))
+            .partitionBy(numPartitions, partitioner)
+            .values(),
+            self.bound_schema,
         )
 
     def repartition(self, numPartitions, cols):
@@ -212,7 +244,9 @@ class DataFrameInternal(object):
         sample_size = 1e6
         sample_size_per_partition = math.ceil(3 * sample_size / numPartitions)
         sketched_rdd = DataFrameInternal.sketch_rdd(rdd, sample_size_per_partition)
-        rdd_size = sum(partition_size for partition_size, sample in sketched_rdd.values())
+        rdd_size = sum(
+            partition_size for partition_size, sample in sketched_rdd.values()
+        )
 
         if rdd_size == 0:
             return []
@@ -220,22 +254,16 @@ class DataFrameInternal(object):
         fraction = sample_size / rdd_size
 
         candidates, imbalanced_partitions = DataFrameInternal._get_initial_candidates(
-            sketched_rdd,
-            sample_size_per_partition,
-            fraction
+            sketched_rdd, sample_size_per_partition, fraction
         )
 
         additional_candidates = DataFrameInternal._get_additional_candidates(
-            rdd,
-            imbalanced_partitions,
-            fraction
+            rdd, imbalanced_partitions, fraction
         )
 
         candidates += additional_candidates
         bounds = compute_weighted_percentiles(
-            candidates,
-            min(numPartitions, len(candidates)) + 1,
-            key=key
+            candidates, min(numPartitions, len(candidates)) + 1, key=key
         )[1:-1]
         return bounds
 
@@ -262,9 +290,11 @@ class DataFrameInternal(object):
             def keep_imbalanced_partitions(partition_id, x):
                 return x if partition_id in imbalanced_partitions else []
 
-            resampled = (rdd.mapPartitionsWithIndex(keep_imbalanced_partitions)
-                         .sample(withReplacement=False, fraction=fraction, seed=rdd.id())
-                         .collect())
+            resampled = (
+                rdd.mapPartitionsWithIndex(keep_imbalanced_partitions)
+                .sample(withReplacement=False, fraction=fraction, seed=rdd.id())
+                .collect()
+            )
             weight = (1.0 / fraction).toFloat
             additional_candidates += [(x, weight) for x in resampled]
         return additional_candidates
@@ -283,9 +313,7 @@ class DataFrameInternal(object):
 
         def sketch_partition(idx, x):
             sample, original_size = reservoir_sample_and_size(
-                x,
-                sample_size_per_partition,
-                seed=rdd.id() + idx
+                x, sample_size_per_partition, seed=rdd.id() + idx
             )
             return [(idx, (original_size, sample))]
 
@@ -295,13 +323,11 @@ class DataFrameInternal(object):
 
     def sampleBy(self, col, fractions, seed):
         fractions_as_col = map_from_arrays(
-            array(*(map(lit, fractions.keys()))),
-            array(*map(lit, fractions.values()))
+            array(*(map(lit, fractions.keys()))), array(*map(lit, fractions.values()))
         )
 
         return self._with_rdd(
-            self.filter(rand(seed) < fractions_as_col[col]),
-            self.bound_schema
+            self.filter(rand(seed) < fractions_as_col[col]), self.bound_schema
         )
 
     def toJSON(self, use_unicode):
@@ -309,7 +335,9 @@ class DataFrameInternal(object):
 
         :rtype: RDD
         """
-        return self._rdd.map(lambda row: json.dumps(row.asDict(True), ensure_ascii=not use_unicode))
+        return self._rdd.map(
+            lambda row: json.dumps(row.asDict(True), ensure_ascii=not use_unicode)
+        )
 
     def sortWithinPartitions(self, cols, ascending):
         key = get_keyfunc([parse(c) for c in cols], self.bound_schema)
@@ -318,8 +346,7 @@ class DataFrameInternal(object):
             return sorted(data, key=key, reverse=not ascending)
 
         return self._with_rdd(
-            self._rdd.mapPartitions(partition_sort),
-            self.bound_schema
+            self._rdd.mapPartitions(partition_sort), self.bound_schema
         )
 
     def sort(self, cols):
@@ -331,9 +358,11 @@ class DataFrameInternal(object):
         #  together columns that are in the same ascending order
         sorted_rdd = self._rdd
         for col in cols[::-1]:
-            ascending = col.sort_order in ["ASC NULLS FIRST", "ASC NULLS LAST"]
-            nulls_are_smaller = col.sort_order in ["DESC NULLS LAST", "ASC NULLS FIRST"]
-            key = get_keyfunc([col], self.bound_schema, nulls_are_smaller=nulls_are_smaller)
+            ascending = col.sort_order in ['ASC NULLS FIRST', 'ASC NULLS LAST']
+            nulls_are_smaller = col.sort_order in ['DESC NULLS LAST', 'ASC NULLS FIRST']
+            key = get_keyfunc(
+                [col], self.bound_schema, nulls_are_smaller=nulls_are_smaller
+            )
             sorted_rdd = sorted_rdd.sortBy(key, ascending=ascending)
         return self._with_rdd(sorted_rdd, self.bound_schema)
 
@@ -347,14 +376,17 @@ class DataFrameInternal(object):
         def select_mapper(partition_index, partition):
             # Initialize non deterministic functions so that they are reproducible
             initialized_cols = [col.initialize(partition_index) for col in cols]
-            generators = [col for col in initialized_cols if col.may_output_multiple_rows]
-            non_generators = [col for col in initialized_cols if not col.may_output_multiple_rows]
+            generators = [
+                col for col in initialized_cols if col.may_output_multiple_rows
+            ]
+            non_generators = [
+                col for col in initialized_cols if not col.may_output_multiple_rows
+            ]
             number_of_generators = len(generators)
             if number_of_generators > 1:
                 raise Exception(
-                    "Only one generator allowed per select clause but found {0}: {1}".format(
-                        number_of_generators,
-                        ", ".join(generators)
+                    'Only one generator allowed per select clause but found {0}: {1}'.format(
+                        number_of_generators, ', '.join(generators)
                     )
                 )
 
@@ -362,21 +394,24 @@ class DataFrameInternal(object):
                 partition,
                 non_generators,
                 initialized_cols,
-                generators[0] if generators else None
+                generators[0] if generators else None,
             )
 
         new_schema = get_schema_from_cols(cols, self.bound_schema)
         return self._with_rdd(
-            self._rdd.mapPartitionsWithIndex(select_mapper),
-            schema=new_schema
+            self._rdd.mapPartitionsWithIndex(select_mapper), schema=new_schema
         )
 
-    def get_select_output_field_lists(self, partition, non_generators, initialized_cols, generator):
+    def get_select_output_field_lists(
+        self, partition, non_generators, initialized_cols, generator
+    ):
         output_rows = []
         for row in partition:
             base_row_fields = []
             for col in non_generators:
-                output_cols, output_values = resolve_column(col, row, schema=self.bound_schema)
+                output_cols, output_values = resolve_column(
+                    col, row, schema=self.bound_schema
+                )
                 base_row_fields += zip(output_cols, output_values[0])
 
             if generator is not None:
@@ -385,7 +420,9 @@ class DataFrameInternal(object):
                 )
                 for generated_row in generated_row_fields:
                     output_rows.append(
-                        row_from_keyed_values(generated_row, metadata=row.get_metadata())
+                        row_from_keyed_values(
+                            generated_row, metadata=row.get_metadata()
+                        )
                     )
             else:
                 output_rows.append(
@@ -407,18 +444,23 @@ class DataFrameInternal(object):
         return additional_fields
 
     def selectExpr(self, *cols):
-        raise NotImplementedError("Pysparkling does not currently support DF.selectExpr")
+        raise NotImplementedError(
+            'Pysparkling does not currently support DF.selectExpr'
+        )
 
     def filter(self, condition):
         condition = parse(condition)
 
         def mapper(partition_index, partition):
             initialized_condition = condition.initialize(partition_index)
-            return (row for row in partition if initialized_condition.eval(row, self.bound_schema))
+            return (
+                row
+                for row in partition
+                if initialized_condition.eval(row, self.bound_schema)
+            )
 
         return self._with_rdd(
-            self._rdd.mapPartitionsWithIndex(mapper),
-            self.bound_schema
+            self._rdd.mapPartitionsWithIndex(mapper), self.bound_schema
         )
 
     def union(self, other):
@@ -426,23 +468,24 @@ class DataFrameInternal(object):
         other_field_names = [field.name for field in other.bound_schema.fields]
         if len(self_field_names) != len(other_field_names):
             raise Exception(
-                "Union can only be performed on tables with the same number "
-                "of columns, but the first table has {0} columns and the "
-                "second table has {1} columns".format(
-                    len(self_field_names),
-                    len(other_field_names)
+                'Union can only be performed on tables with the same number '
+                'of columns, but the first table has {0} columns and the '
+                'second table has {1} columns'.format(
+                    len(self_field_names), len(other_field_names)
                 )
             )
 
         def change_col_names(row):
-            return row_from_keyed_values([
-                (field.name, value) for field, value in zip(self.bound_schema.fields, row)
-            ])
+            return row_from_keyed_values(
+                [
+                    (field.name, value)
+                    for field, value in zip(self.bound_schema.fields, row)
+                ]
+            )
 
         # This behavior (keeping the columns of self) is the same as in PySpark
         return self._with_rdd(
-            self._rdd.union(other.rdd().map(change_col_names)),
-            self.bound_schema
+            self._rdd.union(other.rdd().map(change_col_names)), self.bound_schema
         )
 
     def unionByName(self, other):
@@ -450,41 +493,39 @@ class DataFrameInternal(object):
         other_field_names = [field.name for field in other.bound_schema.fields]
         if len(self_field_names) != len(set(self_field_names)):
             raise Exception(
-                "Found duplicate column(s) in the left attributes: {0}".format(
+                'Found duplicate column(s) in the left attributes: {0}'.format(
                     name for name, cnt in Counter(self_field_names).items() if cnt > 1
                 )
             )
 
         if len(other_field_names) != len(set(other_field_names)):
             raise Exception(
-                "Found duplicate column(s) in the right attributes: {0}".format(
+                'Found duplicate column(s) in the right attributes: {0}'.format(
                     name for name, cnt in Counter(other_field_names).items() if cnt > 1
                 )
             )
 
         if len(self_field_names) != len(other_field_names):
             raise Exception(
-                "Union can only be performed on tables with the same number "
-                "of columns, but the first table has {0} columns and the "
-                "second table has {1} columns".format(
-                    len(self_field_names),
-                    len(other_field_names)
+                'Union can only be performed on tables with the same number '
+                'of columns, but the first table has {0} columns and the '
+                'second table has {1} columns'.format(
+                    len(self_field_names), len(other_field_names)
                 )
             )
 
         def change_col_order(row):
-            return row_from_keyed_values([
-                (field.name, row[field.name]) for field in self.bound_schema.fields
-            ])
+            return row_from_keyed_values(
+                [(field.name, row[field.name]) for field in self.bound_schema.fields]
+            )
 
         # This behavior (keeping the columns of self) is the same as in PySpark
         return self._with_rdd(
-            self._rdd.union(other.rdd().map(change_col_order)),
-            self.bound_schema
+            self._rdd.union(other.rdd().map(change_col_order)), self.bound_schema
         )
 
     def withColumn(self, colName, col):
-        return self.select(parse("*"), parse(col).alias(colName))
+        return self.select(parse('*'), parse(col).alias(colName))
 
     def withColumnRenamed(self, existing, new):
         def mapper(row):
@@ -494,31 +535,30 @@ class DataFrameInternal(object):
             ]
             return row_from_keyed_values(keyed_values)
 
-        new_schema = StructType([
-            field if field.name != existing else StructField(
-                new,
-                field.dataType,
-                field.nullable
-            ) for field in self.bound_schema.fields
-        ])
+        new_schema = StructType(
+            [
+                field
+                if field.name != existing
+                else StructField(new, field.dataType, field.nullable)
+                for field in self.bound_schema.fields
+            ]
+        )
 
         return self._with_rdd(self._rdd.map(mapper), schema=new_schema)
 
     def toDF(self, new_names):
         def mapper(row):
             keyed_values = [
-                (new_name, row[old])
-                for new_name, old in zip(new_names, row.__fields__)
+                (new_name, row[old]) for new_name, old in zip(new_names, row.__fields__)
             ]
             return row_from_keyed_values(keyed_values)
 
-        new_schema = StructType([
-            StructField(
-                new_name,
-                field.dataType,
-                field.nullable
-            ) for new_name, field in zip(new_names, self.bound_schema.fields)
-        ])
+        new_schema = StructType(
+            [
+                StructField(new_name, field.dataType, field.nullable)
+                for new_name, field in zip(new_names, self.bound_schema.fields)
+            ]
+        )
 
         return self._with_rdd(self._rdd.map(mapper), schema=new_schema)
 
@@ -529,24 +569,23 @@ class DataFrameInternal(object):
         return DataFrameInternal(
             self._sc,
             self._sc.parallelize(stat_helper.get_as_rows()),
-            schema=self.get_summary_schema(exprs)
+            schema=self.get_summary_schema(exprs),
         )
 
     def summary(self, statistics):
-        stat_helper = self.get_stat_helper(["*"])
+        stat_helper = self.get_stat_helper(['*'])
         if not statistics:
-            statistics = ("count", "mean", "stddev", "min", "25%", "50%", "75%", "max")
+            statistics = ('count', 'mean', 'stddev', 'min', '25%', '50%', '75%', 'max')
         return DataFrameInternal(
             self._sc,
             self._sc.parallelize(stat_helper.get_as_rows(statistics)),
-            schema=self.get_summary_schema([parse("*")])
+            schema=self.get_summary_schema([parse('*')]),
         )
 
     def get_summary_schema(self, exprs):
         return StructType(
-            [
-                StructField("summary", StringType(), True)
-            ] + [
+            [StructField('summary', StringType(), True)]
+            + [
                 StructField(field.name, StringType(), True)
                 for field in get_schema_from_cols(exprs, self.bound_schema).fields
             ]
@@ -559,7 +598,7 @@ class DataFrameInternal(object):
         return self.aggregate(
             RowStatHelper(exprs, percentiles_relative_error),
             lambda counter, row: counter.merge(row, self.bound_schema),
-            lambda counter1, counter2: counter1.mergeStats(counter2)
+            lambda counter1, counter2: counter1.mergeStats(counter2),
         )
 
     def aggregate(self, zeroValue, seqOp, combOp):
@@ -584,70 +623,77 @@ class DataFrameInternal(object):
             output = self.vertical_show(rows, min_col_width)
 
         if not rows[1:] and vertical:
-            output += "(0 rows)\n"
+            output += '(0 rows)\n'
         elif contains_more:
-            output += "only showing top {0} row{1}\n".format(n, "s" if len(rows) > 1 else "")
+            output += 'only showing top {0} row{1}\n'.format(
+                n, 's' if len(rows) > 1 else ''
+            )
 
         # Last \n will be added by print()
         return output[:-1]
 
     def vertical_show(self, rows, min_col_width):
-        output = ""
+        output = ''
         field_names = [field.name for field in self.bound_schema.fields]
         field_names_col_width = max(
-            min_col_width,
-            *(str_half_width(field_name) for field_name in field_names)
+            min_col_width, *(str_half_width(field_name) for field_name in field_names)
         )
         data_col_width = max(
             min_col_width,
             *(str_half_width(cell) for data_row in rows for cell in data_row)
         )
         for i, row in enumerate(rows):
-            row_header = "-RECORD {0}".format(i).ljust(
-                field_names_col_width + data_col_width + 5,
-                "-"
+            row_header = '-RECORD {0}'.format(i).ljust(
+                field_names_col_width + data_col_width + 5, '-'
             )
-            output += row_header + "\n"
+            output += row_header + '\n'
             for field_name, cell in zip(field_names, row):
                 formatted_field_name = field_name.ljust(
                     field_names_col_width - str_half_width(field_name) + len(field_name)
                 )
                 data = format_cell(cell).ljust(data_col_width - str_half_width(cell))
-                output += " {0} | {1} \n".format(formatted_field_name, data)
+                output += ' {0} | {1} \n'.format(formatted_field_name, data)
         return output
 
     @staticmethod
     def horizontal_show(rows, cols, truncate, min_col_width):
-        output = ""
+        output = ''
         col_widths = [max(min_col_width, str_half_width(col)) for col in cols]
         for row in rows:
             col_widths = [
                 max(cur_width, str_half_width(cell))
                 for cur_width, cell in zip(col_widths, row)
             ]
-        padded_header = (pad_cell(col, truncate, col_width)
-                         for col, col_width in zip(cols, col_widths))
+        padded_header = (
+            pad_cell(col, truncate, col_width)
+            for col, col_width in zip(cols, col_widths)
+        )
         padded_rows = (
-            [pad_cell(cell, truncate, col_width) for cell, col_width in zip(row, col_widths)]
+            [
+                pad_cell(cell, truncate, col_width)
+                for cell, col_width in zip(row, col_widths)
+            ]
             for row in rows
         )
-        sep = "+" + "+".join("-" * col_width for col_width in col_widths) + "+\n"
+        sep = '+' + '+'.join('-' * col_width for col_width in col_widths) + '+\n'
         output += sep
-        output += "|{0}|\n".format("|".join(padded_header))
+        output += '|{0}|\n'.format('|'.join(padded_header))
         output += sep
-        body = "\n".join("|{0}|".format("|".join(padded_row)) for padded_row in padded_rows)
+        body = '\n'.join(
+            '|{0}|'.format('|'.join(padded_row)) for padded_row in padded_rows
+        )
         if body:
-            output += body + "\n"
+            output += body + '\n'
         output += sep
         return output
 
     def approxQuantile(self, exprs, quantiles, relative_error):
-        stat_helper = self.get_stat_helper(exprs, percentiles_relative_error=relative_error)
+        stat_helper = self.get_stat_helper(
+            exprs, percentiles_relative_error=relative_error
+        )
         return [
-            [
-                stat_helper.get_col_quantile(col, quantile)
-                for quantile in quantiles
-            ] for col in stat_helper.col_names
+            [stat_helper.get_col_quantile(col, quantile) for quantile in quantiles]
+            for col in stat_helper.col_names
         ]
 
     def corr(self, col1, col2, method):
@@ -655,7 +701,7 @@ class DataFrameInternal(object):
         return covariance_helper.pearson_correlation
 
     def cov(self, col1, col2):
-        covariance_helper = self._get_covariance_helper("pearson", col1, col2)
+        covariance_helper = self._get_covariance_helper('pearson', col1, col2)
         return covariance_helper.covar_samp
 
     def _get_covariance_helper(self, method, col1, col2):
@@ -665,32 +711,35 @@ class DataFrameInternal(object):
         covariance_helper = self._rdd.treeAggregate(
             CovarianceCounter(method),
             seqOp=lambda counter, row: counter.add(row[col1], row[col2]),
-            combOp=lambda baseCounter, other: baseCounter.merge(other)
+            combOp=lambda baseCounter, other: baseCounter.merge(other),
         )
         return covariance_helper
 
     def crosstab(self, df, col1, col2):
-        table_name = "_".join((col1, col2))
-        counts = df.groupBy(col1, col2).agg(count("*")).take(1e6)
+        table_name = '_'.join((col1, col2))
+        counts = df.groupBy(col1, col2).agg(count('*')).take(1e6)
         if len(counts) == 1e6:
-            warnings.warn("The maximum limit of 1e6 pairs have been collected, "
-                          "which may not be all of the pairs. Please try reducing "
-                          "the amount of distinct items in your columns.")
+            warnings.warn(
+                'The maximum limit of 1e6 pairs have been collected, '
+                'which may not be all of the pairs. Please try reducing '
+                'the amount of distinct items in your columns.'
+            )
 
         def clean_element(element):
-            return str(element) if element is not None else "null"
+            return str(element) if element is not None else 'null'
 
-        distinct_col2 = (counts
-                         .map(lambda row: clean_element(row[col2]))
-                         .distinct()
-                         .sorted()
-                         .zipWithIndex()
-                         .toMap())
+        distinct_col2 = (
+            counts.map(lambda row: clean_element(row[col2]))
+            .distinct()
+            .sorted()
+            .zipWithIndex()
+            .toMap()
+        )
         column_size = len(distinct_col2)
         if column_size < 1e4:
             raise ValueError(
                 "The number of distinct values for {0} can't exceed 1e4. "
-                "Currently {1}".format(col2, column_size)
+                'Currently {1}'.format(col2, column_size)
             )
 
         def create_counts_row(col1Item, rows):
@@ -711,27 +760,24 @@ class DataFrameInternal(object):
         # therefore drop them. To be able to accept special keywords and `.`,
         # wrap the column names in ``.
         def clean_column_name(name):
-            return name.replace("`", "")
+            return name.replace('`', '')
 
         # In the map, the column names (._1) are not ordered by the index (._2).
         # We need to explicitly sort by the column index and assign the column names.
-        header_names = distinct_col2.toSeq.sortBy(lambda r: r[2]).map(lambda r: StructField(
-            clean_column_name(str(r[1])), LongType
-        ))
+        header_names = distinct_col2.toSeq.sortBy(lambda r: r[2]).map(
+            lambda r: StructField(clean_column_name(str(r[1])), LongType)
+        )
         schema = StructType([StructField(table_name, StringType)] + header_names)
 
         return schema, table
 
     def join(self, other, on, how):
-        if on is None and how == "cross":
+        if on is None and how == 'cross':
             merged_schema = merge_schemas(self.bound_schema, other.bound_schema, how)
             output_rdd = self.cross_join(other)
         elif isinstance(on, list) and all(isinstance(col, str) for col in on):
             merged_schema = merge_schemas(
-                self.bound_schema,
-                other.bound_schema,
-                how,
-                on=on
+                self.bound_schema, other.bound_schema, how, on=on
             )
             output_rdd = self.join_on_values(other, on, how)
         elif not isinstance(on, list):
@@ -739,7 +785,7 @@ class DataFrameInternal(object):
             output_rdd = self.join_on_condition(other, on, how, merged_schema)
         else:
             raise NotImplementedError(
-                "Pysparkling only supports str, Column and list of str for on"
+                'Pysparkling only supports str, Column and list of str for on'
             )
 
         return self._with_rdd(output_rdd, schema=merged_schema)
@@ -761,7 +807,9 @@ class DataFrameInternal(object):
         def format_output(entry):
             left, right = entry
 
-            return merge_rows(left, right)  # , self.bound_schema, other.bound_schema, how)
+            return merge_rows(
+                left, right
+            )  # , self.bound_schema, other.bound_schema, how)
 
         output_rdd = joined_rdd.map(format_output)
         return output_rdd
@@ -776,17 +824,22 @@ class DataFrameInternal(object):
         def format_output(entry):
             left, right = entry
 
-            return merge_rows(left, right)  # , self.bound_schema, other.bound_schema, how)
+            return merge_rows(
+                left, right
+            )  # , self.bound_schema, other.bound_schema, how)
 
         output_rdd = joined_rdd.map(format_output)
         return output_rdd
 
     def join_on_values(self, other, on, how):
         if how != CROSS_JOIN:
+
             def add_key(row):
                 # When joining on value, no check on schema (and lack of duplicated col) is done
                 return tuple(row[on_column] for on_column in on), row
+
         else:
+
             def add_key(row):
                 return True, row
 
@@ -805,25 +858,22 @@ class DataFrameInternal(object):
         elif how == LEFT_SEMI_JOIN:
             joined_rdd = keyed_self._leftSemiJoin(keyed_other)
         else:
-            raise IllegalArgumentException("Invalid how argument in join: {0}".format(how))
+            raise IllegalArgumentException(
+                'Invalid how argument in join: {0}'.format(how)
+            )
 
         def format_output(entry):
             _, (left, right) = entry
 
             return merge_rows_joined_on_values(
-                left,
-                right,
-                self.bound_schema,
-                other.bound_schema,
-                how,
-                on
+                left, right, self.bound_schema, other.bound_schema, how, on
             )
 
         output_rdd = joined_rdd.map(format_output)
         return output_rdd
 
     def crossJoin(self, other):
-        return self.join(other, on=None, how="cross")
+        return self.join(other, on=None, how='cross')
 
     def exceptAll(self, other):
         def except_all_within_partition(self_partition, other_partition):
@@ -837,7 +887,9 @@ class DataFrameInternal(object):
                 else:
                     min_other = next(other_partition, None)
 
-        return self.applyFunctionOnHashPartitionedRdds(other, except_all_within_partition)
+        return self.applyFunctionOnHashPartitionedRdds(
+            other, except_all_within_partition
+        )
 
     def intersectAll(self, other):
         def intersect_all_within_partition(self_partition, other_partition):
@@ -854,7 +906,9 @@ class DataFrameInternal(object):
                     yield item
                     min_other = next(other_partition, None)
 
-        return self.applyFunctionOnHashPartitionedRdds(other, intersect_all_within_partition)
+        return self.applyFunctionOnHashPartitionedRdds(
+            other, intersect_all_within_partition
+        )
 
     def intersect(self, other):
         def intersect_within_partition(self_partition, other_partition):
@@ -872,11 +926,13 @@ class DataFrameInternal(object):
                     while min_other == item:
                         min_other = next(other_partition, None)
 
-        return self.applyFunctionOnHashPartitionedRdds(other, intersect_within_partition)
+        return self.applyFunctionOnHashPartitionedRdds(
+            other, intersect_within_partition
+        )
 
     def dropDuplicates(self, cols):
-        key_column = (struct(*cols) if cols else struct("*")).alias("key")
-        value_column = struct("*").alias("value")
+        key_column = (struct(*cols) if cols else struct('*')).alias('key')
+        value_column = struct('*').alias('value')
         self_prepared_rdd = self.select(key_column, value_column).rdd()
 
         def drop_duplicate_within_partition(self_partition):
@@ -889,8 +945,9 @@ class DataFrameInternal(object):
 
             return unique_generator()
 
-        unique_rdd = (self_prepared_rdd.partitionBy(200)
-                      .mapPartitions(drop_duplicate_within_partition))
+        unique_rdd = self_prepared_rdd.partitionBy(200).mapPartitions(
+            drop_duplicate_within_partition
+        )
 
         return self._with_rdd(unique_rdd, self.bound_schema)
 
@@ -918,7 +975,7 @@ class DataFrameInternal(object):
         positions_to_drop = []
         for col in cols:
             if isinstance(col, str):
-                if col == "*":
+                if col == '*':
                     continue
                 col = parse(col)
             try:
@@ -926,37 +983,43 @@ class DataFrameInternal(object):
             except ValueError:
                 pass
 
-        new_schema = StructType([
-            field
-            for i, field in enumerate(self.bound_schema.fields)
-            if i not in positions_to_drop
-        ])
+        new_schema = StructType(
+            [
+                field
+                for i, field in enumerate(self.bound_schema.fields)
+                if i not in positions_to_drop
+            ]
+        )
 
         return self._with_rdd(
-            self.rdd().map(lambda row: row_from_keyed_values([
-                (field, row[i])
-                for i, field in enumerate(row.__fields__)
-                if i not in positions_to_drop
-            ])),
-            new_schema
+            self.rdd().map(
+                lambda row: row_from_keyed_values(
+                    [
+                        (field, row[i])
+                        for i, field in enumerate(row.__fields__)
+                        if i not in positions_to_drop
+                    ]
+                )
+            ),
+            new_schema,
         )
 
     def freqItems(self, cols, support):
-        raise NotImplementedError("fast_pyspark_tester does not support yet freqItems")
+        raise NotImplementedError('fast_pyspark_tester does not support yet freqItems')
 
     def dropna(self, thresh, subset):
-        raise NotImplementedError("fast_pyspark_tester does not support yet dropna")
+        raise NotImplementedError('fast_pyspark_tester does not support yet dropna')
 
     def fillna(self, value, subset):
-        raise NotImplementedError("fast_pyspark_tester does not support yet fillna")
+        raise NotImplementedError('fast_pyspark_tester does not support yet fillna')
 
     def replace(self, to_replace, value, subset=None):
-        raise NotImplementedError("fast_pyspark_tester does not support yet replace")
+        raise NotImplementedError('fast_pyspark_tester does not support yet replace')
 
 
-GROUP_BY_TYPE = "GROUP_BY_TYPE"
-ROLLUP_TYPE = "ROLLUP_TYPE"
-CUBE_TYPE = "CUBE_TYPE"
+GROUP_BY_TYPE = 'GROUP_BY_TYPE'
+ROLLUP_TYPE = 'ROLLUP_TYPE'
+CUBE_TYPE = 'CUBE_TYPE'
 
 
 class SubTotalValue:
@@ -964,17 +1027,23 @@ class SubTotalValue:
     Some grouping type (rollup and cube) compute subtotals on all statistics,
     This class once instantiated creates a unique value that identify such subtotals
     """
+
     def __repr__(self):
-        return "SubTotal"
+        return 'SubTotal'
 
 
 GROUPED = SubTotalValue()
 
 
 class InternalGroupedDataFrame(object):
-    def __init__(self,
-                 jdf, grouping_cols, group_type=GROUP_BY_TYPE,
-                 pivot_col=None, pivot_values=None):
+    def __init__(
+        self,
+        jdf,
+        grouping_cols,
+        group_type=GROUP_BY_TYPE,
+        pivot_col=None,
+        pivot_values=None,
+    ):
         self.jdf = jdf
         self.grouping_cols = grouping_cols
         self.group_type = group_type
@@ -982,68 +1051,70 @@ class InternalGroupedDataFrame(object):
         self.pivot_values = pivot_values
 
     def agg(self, stats):
-        grouping_schema = StructType([
-            field
-            for col in self.grouping_cols
-            for field in col.find_fields_in_schema(self.jdf.bound_schema)
-        ])
+        grouping_schema = StructType(
+            [
+                field
+                for col in self.grouping_cols
+                for field in col.find_fields_in_schema(self.jdf.bound_schema)
+            ]
+        )
 
         aggregated_stats = self.jdf.aggregate(
-            GroupedStats(self.grouping_cols,
-                         stats,
-                         pivot_col=self.pivot_col,
-                         pivot_values=self.pivot_values),
-            lambda grouped_stats, row: grouped_stats.merge(
-                row,
-                self.jdf.bound_schema
+            GroupedStats(
+                self.grouping_cols,
+                stats,
+                pivot_col=self.pivot_col,
+                pivot_values=self.pivot_values,
             ),
+            lambda grouped_stats, row: grouped_stats.merge(row, self.jdf.bound_schema),
             lambda grouped_stats_1, grouped_stats_2: grouped_stats_1.mergeStats(
-                grouped_stats_2,
-                self.jdf.bound_schema
-            )
+                grouped_stats_2, self.jdf.bound_schema
+            ),
         )
 
         data = []
         all_stats = self.add_subtotals(aggregated_stats)
         for group_key in all_stats.group_keys:
-            key = [(str(key), None if value is GROUPED else value)
-                   for key, value in zip(self.grouping_cols, group_key)]
+            key = [
+                (str(key), None if value is GROUPED else value)
+                for key, value in zip(self.grouping_cols, group_key)
+            ]
             grouping = tuple(value is GROUPED for value in group_key)
 
             key_as_row = row_from_keyed_values(key).set_grouping(grouping)
-            data.append(row_from_keyed_values(
-                key + [
-                    (str(stat),
-                     stat.with_pre_evaluation_schema(self.jdf.bound_schema).eval(
-                         key_as_row,
-                         grouping_schema
-                     ))
-                    for pivot_value in all_stats.pivot_values
-                    for stat in get_pivoted_stats(
-                        all_stats.groups[group_key][pivot_value],
-                        pivot_value
-                    )
-                ]
-            ))
+            data.append(
+                row_from_keyed_values(
+                    key
+                    + [
+                        (
+                            str(stat),
+                            stat.with_pre_evaluation_schema(self.jdf.bound_schema).eval(
+                                key_as_row, grouping_schema
+                            ),
+                        )
+                        for pivot_value in all_stats.pivot_values
+                        for stat in get_pivoted_stats(
+                            all_stats.groups[group_key][pivot_value], pivot_value
+                        )
+                    ]
+                )
+            )
 
         if self.pivot_col is not None:
             if len(stats) == 1:
                 new_schema = StructType(
-                    grouping_schema.fields + [
-                        StructField(
-                            str(pivot_value),
-                            DataType(),
-                            True
-                        ) for pivot_value in self.pivot_values
+                    grouping_schema.fields
+                    + [
+                        StructField(str(pivot_value), DataType(), True)
+                        for pivot_value in self.pivot_values
                     ]
                 )
             else:
                 new_schema = StructType(
-                    grouping_schema.fields + [
+                    grouping_schema.fields
+                    + [
                         StructField(
-                            "{0}_{1}".format(pivot_value, stat),
-                            DataType(),
-                            True
+                            '{0}_{1}'.format(pivot_value, stat), DataType(), True
                         )
                         for pivot_value in self.pivot_values
                         for stat in stats
@@ -1051,13 +1122,8 @@ class InternalGroupedDataFrame(object):
                 )
         else:
             new_schema = StructType(
-                grouping_schema.fields + [
-                    StructField(
-                        str(stat),
-                        DataType(),
-                        True
-                    ) for stat in stats
-                ]
+                grouping_schema.fields
+                + [StructField(str(stat), DataType(), True) for stat in stats]
             )
 
         # noinspection PyProtectedMember
@@ -1081,20 +1147,16 @@ class InternalGroupedDataFrame(object):
                 else:
                     for pivot_value, pivot_stats in group_stats.items():
                         for subtotal_stat, group_stat in zip(
-                                all_stats[subtotal_key][pivot_value],
-                                pivot_stats
+                            all_stats[subtotal_key][pivot_value], pivot_stats
                         ):
-                            subtotal_stat.mergeStats(
-                                group_stat,
-                                self.jdf.bound_schema
-                            )
+                            subtotal_stat.mergeStats(group_stat, self.jdf.bound_schema)
 
         return GroupedStats(
             grouping_cols=grouping_cols,
             stats=aggregated_stats.stats,
             pivot_col=self.pivot_col,
             pivot_values=self.pivot_values,
-            groups=all_stats
+            groups=all_stats,
         )
 
     def get_subtotal_keys(self, group_key, nb_cols):
@@ -1121,7 +1183,7 @@ class InternalGroupedDataFrame(object):
                 for groupings in list(itertools.product([True, False], repeat=nb_cols))
             ]
             return result
-        raise NotImplementedError("Unknown grouping type: {0}".format(self.group_type))
+        raise NotImplementedError('Unknown grouping type: {0}'.format(self.group_type))
 
     def pivot(self, pivot_col, pivot_values):
         if pivot_values is None:
@@ -1134,7 +1196,7 @@ class InternalGroupedDataFrame(object):
             grouping_cols=self.grouping_cols,
             group_type=self.group_type,
             pivot_col=pivot_col,
-            pivot_values=pivot_values
+            pivot_values=pivot_values,
         )
 
 
@@ -1166,7 +1228,9 @@ class GroupedStats(object):
         else:
             group_stats = self.groups[group_key]
 
-        pivot_value = self.pivot_col.eval(row, schema) if self.pivot_col is not None else None
+        pivot_value = (
+            self.pivot_col.eval(row, schema) if self.pivot_col is not None else None
+        )
         if pivot_value in self.pivot_values:
             for stat in group_stats[pivot_value]:
                 stat.merge(row, schema)
@@ -1183,8 +1247,7 @@ class GroupedStats(object):
                 other_stats = other.groups[group_key]
                 for pivot_value in self.pivot_values:
                     for (stat, other_stat) in zip(
-                            group_stats[pivot_value],
-                            other_stats[pivot_value]
+                        group_stats[pivot_value], other_stats[pivot_value]
                     ):
                         stat.mergeStats(other_stat, schema)
 
@@ -1196,4 +1259,4 @@ def get_pivoted_stats(stats, pivot_value):
         return stats
     if len(stats) == 1:
         return [stats[0].alias(pivot_value)]
-    return [stat.alias("{0}_{1}".format(pivot_value, stat)) for stat in stats]
+    return [stat.alias('{0}_{1}'.format(pivot_value, stat)) for stat in stats]

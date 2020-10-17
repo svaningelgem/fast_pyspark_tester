@@ -1,13 +1,13 @@
 """
 The following constants are used to identify join types
 """
-INNER_JOIN = "inner"
-CROSS_JOIN = "cross"
-FULL_JOIN = "full"
-LEFT_JOIN = "left"
-RIGHT_JOIN = "right"
-LEFT_SEMI_JOIN = "leftsemi"
-LEFT_ANTI_JOIN = "leftanti"
+INNER_JOIN = 'inner'
+CROSS_JOIN = 'cross'
+FULL_JOIN = 'full'
+LEFT_JOIN = 'left'
+RIGHT_JOIN = 'right'
+LEFT_SEMI_JOIN = 'leftsemi'
+LEFT_ANTI_JOIN = 'leftanti'
 
 JOIN_TYPES = dict(
     inner=INNER_JOIN,

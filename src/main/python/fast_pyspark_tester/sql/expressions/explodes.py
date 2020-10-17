@@ -19,7 +19,7 @@ class Explode(UnaryExpression):
         return [[value] for value in values]
 
     def __str__(self):
-        return "col"
+        return 'col'
 
 
 class ExplodeOuter(Explode):
@@ -30,7 +30,7 @@ class ExplodeOuter(Explode):
         return [[value] for value in values]
 
     def __str__(self):
-        return "col"
+        return 'col'
 
 
 class PosExplode(UnaryExpression):
@@ -41,7 +41,7 @@ class PosExplode(UnaryExpression):
         return list(enumerate(values))
 
     def __str__(self):
-        return "posexplode"
+        return 'posexplode'
 
     @property
     def may_output_multiple_rows(self):
@@ -53,8 +53,8 @@ class PosExplode(UnaryExpression):
 
     def output_fields(self, schema):
         return [
-            StructField("pos", IntegerType(), False),
-            StructField("col", DataType(), False)
+            StructField('pos', IntegerType(), False),
+            StructField('col', DataType(), False),
         ]
 
 
@@ -66,7 +66,7 @@ class PosExplodeOuter(PosExplode):
         return list(enumerate(values))
 
     def __str__(self):
-        return "posexplode_outer"
+        return 'posexplode_outer'
 
 
-__all__ = ["PosExplodeOuter", "PosExplode", "ExplodeOuter", "Explode"]
+__all__ = ['PosExplodeOuter', 'PosExplode', 'ExplodeOuter', 'Explode']

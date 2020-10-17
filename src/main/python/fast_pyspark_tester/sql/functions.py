@@ -1,36 +1,186 @@
 import math
 
 from fast_pyspark_tester.sql.column import Column, parse
-from fast_pyspark_tester.sql.expressions.aggregate.collectors import CollectSet, ApproxCountDistinct, \
-    CollectList, CountDistinct, First, Last, SumDistinct
-from fast_pyspark_tester.sql.expressions.aggregate.covariance_aggregations import Corr, CovarPop, CovarSamp
-from fast_pyspark_tester.sql.expressions.aggregate.stat_aggregations import Count, Avg, Kurtosis, Max, \
-    Min, Skewness, StddevSamp, StddevPop, Sum, VarSamp, VarPop
-from fast_pyspark_tester.sql.expressions.arrays import ArrayColumn, MapFromArraysColumn, MapColumn, \
-    ArrayContains, ArraysOverlap, Slice, ArrayJoin, ArrayPosition, ElementAt, ArraySort, \
-    ArrayRemove, ArrayDistinct, ArrayIntersect, ArrayUnion, ArrayExcept, Size, SortArray, \
-    ArrayMin, ArrayMax, Flatten, Sequence, ArrayRepeat, ArraysZip
+from fast_pyspark_tester.sql.expressions.aggregate.collectors import (
+    CollectSet,
+    ApproxCountDistinct,
+    CollectList,
+    CountDistinct,
+    First,
+    Last,
+    SumDistinct,
+)
+from fast_pyspark_tester.sql.expressions.aggregate.covariance_aggregations import (
+    Corr,
+    CovarPop,
+    CovarSamp,
+)
+from fast_pyspark_tester.sql.expressions.aggregate.stat_aggregations import (
+    Count,
+    Avg,
+    Kurtosis,
+    Max,
+    Min,
+    Skewness,
+    StddevSamp,
+    StddevPop,
+    Sum,
+    VarSamp,
+    VarPop,
+)
+from fast_pyspark_tester.sql.expressions.arrays import (
+    ArrayColumn,
+    MapFromArraysColumn,
+    MapColumn,
+    ArrayContains,
+    ArraysOverlap,
+    Slice,
+    ArrayJoin,
+    ArrayPosition,
+    ElementAt,
+    ArraySort,
+    ArrayRemove,
+    ArrayDistinct,
+    ArrayIntersect,
+    ArrayUnion,
+    ArrayExcept,
+    Size,
+    SortArray,
+    ArrayMin,
+    ArrayMax,
+    Flatten,
+    Sequence,
+    ArrayRepeat,
+    ArraysZip,
+)
 from fast_pyspark_tester.sql.expressions.csvs import SchemaOfCsv
-from fast_pyspark_tester.sql.expressions.dates import AddMonths, CurrentDate, CurrentTimestamp, \
-    DateFormat, DateAdd, DateSub, DateDiff, Year, Quarter, Month, DayOfWeek, DayOfMonth, \
-    DayOfYear, Hour, LastDay, Minute, MonthsBetween, NextDay, Second, WeekOfYear, FromUnixTime, \
-    UnixTimestamp, ParseToTimestamp, ParseToDate, TruncDate, TruncTimestamp, FromUTCTimestamp, \
-    ToUTCTimestamp
-from fast_pyspark_tester.sql.expressions.explodes import Explode, ExplodeOuter, PosExplode, PosExplodeOuter
+from fast_pyspark_tester.sql.expressions.dates import (
+    AddMonths,
+    CurrentDate,
+    CurrentTimestamp,
+    DateFormat,
+    DateAdd,
+    DateSub,
+    DateDiff,
+    Year,
+    Quarter,
+    Month,
+    DayOfWeek,
+    DayOfMonth,
+    DayOfYear,
+    Hour,
+    LastDay,
+    Minute,
+    MonthsBetween,
+    NextDay,
+    Second,
+    WeekOfYear,
+    FromUnixTime,
+    UnixTimestamp,
+    ParseToTimestamp,
+    ParseToDate,
+    TruncDate,
+    TruncTimestamp,
+    FromUTCTimestamp,
+    ToUTCTimestamp,
+)
+from fast_pyspark_tester.sql.expressions.explodes import (
+    Explode,
+    ExplodeOuter,
+    PosExplode,
+    PosExplodeOuter,
+)
 from fast_pyspark_tester.sql.expressions.jsons import StructsToJson
-from fast_pyspark_tester.sql.expressions.mappers import CaseWhen, Rand, CreateStruct, Grouping, \
-    GroupingID, Coalesce, InputFileName, IsNaN, MonotonicallyIncreasingID, NaNvl, Randn, \
-    SparkPartitionID, Sqrt, Abs, Acos, Asin, Atan, Atan2, Bin, Cbrt, Ceil, Conv, Cos, Cosh, Exp, \
-    ExpM1, Factorial, Floor, Greatest, Hex, Unhex, Hypot, Least, Log, Log10, Log1p, Log2, Rint, \
-    Round, Bround, Signum, Sin, Sinh, Tan, Tanh, ToDegrees, ToRadians, Ascii, Base64, ConcatWs, \
-    FormatNumber, Length, Lower, RegExpExtract, RegExpReplace, UnBase64, StringSplit, \
-    SubstringIndex, Upper, Concat, Reverse, MapKeys, MapValues, MapEntries, MapFromEntries, \
-    MapConcat
+from fast_pyspark_tester.sql.expressions.mappers import (
+    CaseWhen,
+    Rand,
+    CreateStruct,
+    Grouping,
+    GroupingID,
+    Coalesce,
+    InputFileName,
+    IsNaN,
+    MonotonicallyIncreasingID,
+    NaNvl,
+    Randn,
+    SparkPartitionID,
+    Sqrt,
+    Abs,
+    Acos,
+    Asin,
+    Atan,
+    Atan2,
+    Bin,
+    Cbrt,
+    Ceil,
+    Conv,
+    Cos,
+    Cosh,
+    Exp,
+    ExpM1,
+    Factorial,
+    Floor,
+    Greatest,
+    Hex,
+    Unhex,
+    Hypot,
+    Least,
+    Log,
+    Log10,
+    Log1p,
+    Log2,
+    Rint,
+    Round,
+    Bround,
+    Signum,
+    Sin,
+    Sinh,
+    Tan,
+    Tanh,
+    ToDegrees,
+    ToRadians,
+    Ascii,
+    Base64,
+    ConcatWs,
+    FormatNumber,
+    Length,
+    Lower,
+    RegExpExtract,
+    RegExpReplace,
+    UnBase64,
+    StringSplit,
+    SubstringIndex,
+    Upper,
+    Concat,
+    Reverse,
+    MapKeys,
+    MapValues,
+    MapEntries,
+    MapFromEntries,
+    MapConcat,
+)
 from fast_pyspark_tester.sql.expressions.literals import Literal
-from fast_pyspark_tester.sql.expressions.operators import IsNull, BitwiseNot, Pow, Pmod, Substring
-from fast_pyspark_tester.sql.expressions.strings import InitCap, StringInStr, Levenshtein, StringLocate, \
-    StringLPad, StringLTrim, StringRPad, StringRepeat, StringRTrim, SoundEx, StringTranslate, \
-    StringTrim
+from fast_pyspark_tester.sql.expressions.operators import (
+    IsNull,
+    BitwiseNot,
+    Pow,
+    Pmod,
+    Substring,
+)
+from fast_pyspark_tester.sql.expressions.strings import (
+    InitCap,
+    StringInStr,
+    Levenshtein,
+    StringLocate,
+    StringLPad,
+    StringLTrim,
+    StringRPad,
+    StringRepeat,
+    StringRTrim,
+    SoundEx,
+    StringTranslate,
+    StringTrim,
+)
 from fast_pyspark_tester.sql.expressions.userdefined import UserDefinedFunction
 from fast_pyspark_tester.sql.types import DataType
 from fast_pyspark_tester.sql.utils import AnalysisException
@@ -255,10 +405,7 @@ def corr(column1, column2):
     """
     :rtype: Column
     """
-    return col(Corr(
-        column1=parse(column1),
-        column2=parse(column2)
-    ))
+    return col(Corr(column1=parse(column1), column2=parse(column2)))
 
 
 def when(condition, value):
@@ -417,20 +564,14 @@ def covar_pop(column1, column2):
     """
     :rtype: Column
     """
-    return col(CovarPop(
-        column1=parse(column1),
-        column2=parse(column2)
-    ))
+    return col(CovarPop(column1=parse(column1), column2=parse(column2)))
 
 
 def covar_samp(column1, column2):
     """
     :rtype: Column
     """
-    return col(CovarSamp(
-        column1=parse(column1),
-        column2=parse(column2)
-    ))
+    return col(CovarSamp(column1=parse(column1), column2=parse(column2)))
 
 
 def first(e, ignoreNulls=False):
@@ -641,60 +782,77 @@ def var_pop(e):
 # // Window functions
 # //////////////////////////////////////////////////////////////////////////////////////////////
 
+
 def cume_dist():
     """
     :rtype: Column
     """
-    raise NotImplementedError("window functions are not yet supported by fast_pyspark_tester")
+    raise NotImplementedError(
+        'window functions are not yet supported by fast_pyspark_tester'
+    )
 
 
 def dense_rank():
     """
     :rtype: Column
     """
-    raise NotImplementedError("window functions are not yet supported by fast_pyspark_tester")
+    raise NotImplementedError(
+        'window functions are not yet supported by fast_pyspark_tester'
+    )
 
 
 def lag(e, offset, defaultValue=None):
     """
     :rtype: Column
     """
-    raise NotImplementedError("window functions are not yet supported by fast_pyspark_tester")
+    raise NotImplementedError(
+        'window functions are not yet supported by fast_pyspark_tester'
+    )
 
 
 def lead(e, offset, defaultValue=None):
     """
     :rtype: Column
     """
-    raise NotImplementedError("window functions are not yet supported by fast_pyspark_tester")
+    raise NotImplementedError(
+        'window functions are not yet supported by fast_pyspark_tester'
+    )
 
 
 def ntile(n):
     """
     :rtype: Column
     """
-    raise NotImplementedError("window functions are not yet supported by fast_pyspark_tester")
+    raise NotImplementedError(
+        'window functions are not yet supported by fast_pyspark_tester'
+    )
 
 
 def percent_rank():
     """
     :rtype: Column
     """
-    raise NotImplementedError("window functions are not yet supported by fast_pyspark_tester")
+    raise NotImplementedError(
+        'window functions are not yet supported by fast_pyspark_tester'
+    )
 
 
 def rank():
     """
     :rtype: Column
     """
-    raise NotImplementedError("window functions are not yet supported by fast_pyspark_tester")
+    raise NotImplementedError(
+        'window functions are not yet supported by fast_pyspark_tester'
+    )
 
 
 def row_number():
     """
     :rtype: Column
     """
-    raise NotImplementedError("window functions are not yet supported by fast_pyspark_tester")
+    raise NotImplementedError(
+        'window functions are not yet supported by fast_pyspark_tester'
+    )
 
 
 def create_map(*exprs):
@@ -958,11 +1116,11 @@ def unhex(column):
     return col(Unhex(parse(column)))
 
 
-def hypot(l, r):
+def hypot(l_, r):
     """
     :rtype: Column
     """
-    return col(Hypot(parse(l), parse(r)))
+    return col(Hypot(parse(l_), parse(r)))
 
 
 def least(*exprs):
@@ -1007,11 +1165,11 @@ def log2(e):
 
 # noinspection PyShadowingBuiltins
 # pylint: disable=W0622
-def pow(l, r):
+def pow(l_, r):
     """
     :rtype: Column
     """
-    return col(Pow(parse(l), parse(r)))
+    return col(Pow(parse(l_), parse(r)))
 
 
 def pmod(dividend, divisor):
@@ -1084,21 +1242,21 @@ def shiftLeft(e, numBits):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def shiftRight(e, numBits):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def shiftRightUnsigned(e, numBits):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def signum(e):
@@ -1151,29 +1309,29 @@ def radians(e):
 
 
 def md5(e):
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def sha1(e):
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def sha2(e, numBits):
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def crc32(e):
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 # noinspection PyShadowingBuiltins
 # pylint: disable=W0622
 def hash(*exprs):
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def xxhash64(*exprs):
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 # noinspection PyShadowingBuiltins
@@ -1233,14 +1391,14 @@ def decode(value, charset):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def encode(value, charset):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def format_number(x, d):
@@ -1266,7 +1424,7 @@ def format_string(format, *exprs):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def initcap(e):
@@ -1309,7 +1467,7 @@ def lower(e):
     return col(Lower(parse(e)))
 
 
-def levenshtein(l, r):
+def levenshtein(l_, r):
     """
     :rtype: Column
 
@@ -1324,7 +1482,7 @@ def levenshtein(l, r):
     +----------------------------+
 
     """
-    return col(Levenshtein(parse(l), parse(r)))
+    return col(Levenshtein(parse(l_), parse(r)))
 
 
 # noinspection PyShadowingBuiltins
@@ -1855,7 +2013,7 @@ def weekofyear(e):
     return col(WeekOfYear(e))
 
 
-def from_unixtime(ut, f="yyyy-MM-dd HH:mm:ss"):
+def from_unixtime(ut, f='yyyy-MM-dd HH:mm:ss'):
     """
     :rtype: Column
 
@@ -1877,7 +2035,7 @@ def from_unixtime(ut, f="yyyy-MM-dd HH:mm:ss"):
     return col(FromUnixTime(parse(ut), f))
 
 
-def unix_timestamp(s=None, p="yyyy-MM-dd HH:mm:ss"):
+def unix_timestamp(s=None, p='yyyy-MM-dd HH:mm:ss'):
     """
     :rtype: Column
 
@@ -2080,8 +2238,8 @@ def to_utc_timestamp(ts, tz):
     return col(ToUTCTimestamp(ts, tz))
 
 
-def window(timeColumn, windowDuration, slideDuration=None, startTime="0 second"):
-    raise NotImplementedError("Pysparkling does not support yet this function")
+def window(timeColumn, windowDuration, slideDuration=None, startTime='0 second'):
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def array_contains(column, value):
@@ -2210,28 +2368,28 @@ def get_json_object(e, path):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def json_tuple(json, *fields):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def from_json(e, schema, options=None):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def schema_of_json(json, options=None):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def to_json(e, options=None):
@@ -2306,7 +2464,7 @@ def shuffle(e):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def reverse(e):
@@ -2327,11 +2485,9 @@ def sequence(start, stop, step=None):
     """
     :rtype: Column
     """
-    return col(Sequence(
-        parse(start),
-        parse(stop),
-        parse(step) if step is not None else None
-    ))
+    return col(
+        Sequence(parse(start), parse(stop), parse(step) if step is not None else None)
+    )
 
 
 def array_repeat(e, count):
@@ -2402,7 +2558,7 @@ def from_csv(e, schema, options=None):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def schema_of_csv(csv, options=None):
@@ -2423,8 +2579,8 @@ def schema_of_csv(csv, options=None):
         csv = lit(csv)
     elif not isinstance(csv, Column) or not isinstance(csv.expr, Literal):
         raise AnalysisException(
-            "type mismatch: The input csv should be a string literal and not null; "
-            "however, got {0}.".format(csv)
+            'type mismatch: The input csv should be a string literal and not null; '
+            'however, got {0}.'.format(csv)
         )
     return col(SchemaOfCsv(parse(csv), options))
 
@@ -2433,7 +2589,7 @@ def to_csv(e, options=None):
     """
     :rtype: Column
     """
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def udf(f, returnType=DataType()):
@@ -2468,9 +2624,11 @@ def udf(f, returnType=DataType()):
 
     def wrapper(*args, **kwargs):
         if kwargs:
-            raise TypeError("wrapper() got an unexpected keyword argument '{0}'".format(
-                list(kwargs.keys())
-            ))
+            raise TypeError(
+                "wrapper() got an unexpected keyword argument '{0}'".format(
+                    list(kwargs.keys())
+                )
+            )
         exprs = [parse(arg) for arg in args]
         return col(UserDefinedFunction(f, returnType, *exprs))
 
@@ -2478,8 +2636,8 @@ def udf(f, returnType=DataType()):
 
 
 def pandas_udf(f=None, returnType=None, functionType=None):
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')
 
 
 def callUDF(udfName, *cols):
-    raise NotImplementedError("Pysparkling does not support yet this function")
+    raise NotImplementedError('Pysparkling does not support yet this function')

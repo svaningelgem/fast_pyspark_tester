@@ -8,9 +8,9 @@ from fast_pyspark_tester.sql.expressions.expressions import Expression, UnaryExp
 from fast_pyspark_tester.sql.types import DateType, TimestampType, FloatType
 from fast_pyspark_tester.utils import parse_tz
 
-GMT_TIMEZONE = pytz.timezone("GMT")
+GMT_TIMEZONE = pytz.timezone('GMT')
 
-DAYS_OF_WEEK = ("MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN")
+DAYS_OF_WEEK = ('MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN')
 
 
 class AddMonths(Expression):
@@ -20,11 +20,12 @@ class AddMonths(Expression):
         self.num_months = num_months
 
     def eval(self, row, schema):
-        return (self.start_date.cast(DateType()).eval(row, schema)
-                + relativedelta(months=self.num_months))
+        return self.start_date.cast(DateType()).eval(row, schema) + relativedelta(
+            months=self.num_months
+        )
 
     def __str__(self):
-        return "add_months({0}, {1})".format(self.start_date, self.num_months)
+        return 'add_months({0}, {1})'.format(self.start_date, self.num_months)
 
 
 class DateAdd(Expression):
@@ -38,7 +39,7 @@ class DateAdd(Expression):
         return self.start_date.cast(DateType()).eval(row, schema) + self.timedelta
 
     def __str__(self):
-        return "date_add({0}, {1})".format(self.start_date, self.num_days)
+        return 'date_add({0}, {1})'.format(self.start_date, self.num_days)
 
 
 class DateSub(Expression):
@@ -52,7 +53,7 @@ class DateSub(Expression):
         return self.start_date.cast(DateType()).eval(row, schema) - self.timedelta
 
     def __str__(self):
-        return "date_sub({0}, {1})".format(self.start_date, self.num_days)
+        return 'date_sub({0}, {1})'.format(self.start_date, self.num_days)
 
 
 class Year(UnaryExpression):
@@ -60,7 +61,7 @@ class Year(UnaryExpression):
         return self.column.cast(DateType()).eval(row, schema).year
 
     def __str__(self):
-        return "year({0})".format(self.column)
+        return 'year({0})'.format(self.column)
 
 
 class Month(UnaryExpression):
@@ -68,7 +69,7 @@ class Month(UnaryExpression):
         return self.column.cast(DateType()).eval(row, schema).month
 
     def __str__(self):
-        return "month({0})".format(self.column)
+        return 'month({0})'.format(self.column)
 
 
 class Quarter(UnaryExpression):
@@ -77,7 +78,7 @@ class Quarter(UnaryExpression):
         return 1 + int((month - 1) / 3)
 
     def __str__(self):
-        return "quarter({0})".format(self.column)
+        return 'quarter({0})'.format(self.column)
 
 
 class Hour(UnaryExpression):
@@ -85,7 +86,7 @@ class Hour(UnaryExpression):
         return self.column.cast(TimestampType()).eval(row, schema).hour
 
     def __str__(self):
-        return "hour({0})".format(self.column)
+        return 'hour({0})'.format(self.column)
 
 
 class Minute(UnaryExpression):
@@ -93,7 +94,7 @@ class Minute(UnaryExpression):
         return self.column.cast(TimestampType()).eval(row, schema).minute
 
     def __str__(self):
-        return "minute({0})".format(self.column)
+        return 'minute({0})'.format(self.column)
 
 
 class Second(UnaryExpression):
@@ -101,7 +102,7 @@ class Second(UnaryExpression):
         return self.column.cast(TimestampType()).eval(row, schema).second
 
     def __str__(self):
-        return "second({0})".format(self.column)
+        return 'second({0})'.format(self.column)
 
 
 class DayOfMonth(UnaryExpression):
@@ -109,7 +110,7 @@ class DayOfMonth(UnaryExpression):
         return self.column.cast(DateType()).eval(row, schema).day
 
     def __str__(self):
-        return "dayofmonth({0})".format(self.column)
+        return 'dayofmonth({0})'.format(self.column)
 
 
 class DayOfYear(UnaryExpression):
@@ -119,7 +120,7 @@ class DayOfYear(UnaryExpression):
         return 1 + day_from_the_first.days
 
     def __str__(self):
-        return "dayofyear({0})".format(self.column)
+        return 'dayofyear({0})'.format(self.column)
 
 
 class LastDay(UnaryExpression):
@@ -129,7 +130,7 @@ class LastDay(UnaryExpression):
         return first_of_next_month - datetime.timedelta(days=1)
 
     def __str__(self):
-        return "last_day({0})".format(self.column)
+        return 'last_day({0})'.format(self.column)
 
 
 class WeekOfYear(UnaryExpression):
@@ -137,7 +138,7 @@ class WeekOfYear(UnaryExpression):
         return self.column.cast(DateType()).eval(row, schema).isocalendar()[1]
 
     def __str__(self):
-        return "weekofyear({0})".format(self.column)
+        return 'weekofyear({0})'.format(self.column)
 
 
 class DayOfWeek(UnaryExpression):
@@ -146,7 +147,7 @@ class DayOfWeek(UnaryExpression):
         return date.isoweekday() + 1 if date.isoweekday() != 7 else 1
 
     def __str__(self):
-        return "dayofweek({0})".format(self.column)
+        return 'dayofweek({0})'.format(self.column)
 
 
 class NextDay(Expression):
@@ -169,7 +170,7 @@ class NextDay(Expression):
         return value + datetime.timedelta(days=delta)
 
     def __str__(self):
-        return "next_day({0}, {1})".format(self.column, self.day_of_week)
+        return 'next_day({0}, {1})'.format(self.column, self.day_of_week)
 
 
 class MonthsBetween(Expression):
@@ -183,37 +184,39 @@ class MonthsBetween(Expression):
         value_1 = self.column1.cast(TimestampType()).eval(row, schema)
         value_2 = self.column2.cast(TimestampType()).eval(row, schema)
 
-        if (not isinstance(value_1, datetime.datetime)
-                or not isinstance(value_2, datetime.datetime)):
+        if not isinstance(value_1, datetime.datetime) or not isinstance(
+            value_2, datetime.datetime
+        ):
             return None
 
         one_day = datetime.timedelta(days=1)
-        value_1_is_the_last_of_its_month = (value_1.month != (value_1 + one_day).month)
-        value_2_is_the_last_of_its_month = (value_2.month != (value_2 + one_day).month)
+        value_1_is_the_last_of_its_month = value_1.month != (value_1 + one_day).month
+        value_2_is_the_last_of_its_month = value_2.month != (value_2 + one_day).month
         if value_1.day == value_2.day or (
-                value_1_is_the_last_of_its_month and
-                value_2_is_the_last_of_its_month
+            value_1_is_the_last_of_its_month and value_2_is_the_last_of_its_month
         ):
             # Special cases where time of day is not consider
-            diff = ((value_1.year - value_2.year) * 12 +
-                    (value_1.month - value_2.month))
+            diff = (value_1.year - value_2.year) * 12 + (value_1.month - value_2.month)
         else:
-            day_offset = (value_1.day - value_2.day +
-                          (value_1.hour - value_2.hour) / 24 +
-                          (value_1.minute - value_2.minute) / 1440 +
-                          (value_1.second - value_2.second) / 86400)
-            diff = ((value_1.year - value_2.year) * 12 +
-                    (value_1.month - value_2.month) * 1 +
-                    day_offset / 31)
+            day_offset = (
+                value_1.day
+                - value_2.day
+                + (value_1.hour - value_2.hour) / 24
+                + (value_1.minute - value_2.minute) / 1440
+                + (value_1.second - value_2.second) / 86400
+            )
+            diff = (
+                (value_1.year - value_2.year) * 12
+                + (value_1.month - value_2.month) * 1
+                + day_offset / 31
+            )
         if self.round_off:
             return float(round(diff, 8))
         return float(diff)
 
     def __str__(self):
-        return "months_between({0}, {1}, {2})".format(
-            self.column1,
-            self.column2,
-            str(self.round_off).lower()
+        return 'months_between({0}, {1}, {2})'.format(
+            self.column1, self.column2, str(self.round_off).lower()
         )
 
 
@@ -227,14 +230,15 @@ class DateDiff(Expression):
         value_1 = self.column1.cast(DateType()).eval(row, schema)
         value_2 = self.column2.cast(DateType()).eval(row, schema)
 
-        if (not isinstance(value_1, datetime.date)
-                or not isinstance(value_2, datetime.date)):
+        if not isinstance(value_1, datetime.date) or not isinstance(
+            value_2, datetime.date
+        ):
             return None
 
         return (value_1 - value_2).days
 
     def __str__(self):
-        return "datediff({0}, {1})".format(self.column1, self.column2)
+        return 'datediff({0}, {1})'.format(self.column1, self.column2)
 
 
 class FromUnixTime(Expression):
@@ -249,7 +253,7 @@ class FromUnixTime(Expression):
         return self.formatter(datetime.datetime.fromtimestamp(timestamp))
 
     def __str__(self):
-        return "from_unixtime({0}, {1})".format(self.column, self.format)
+        return 'from_unixtime({0}, {1})'.format(self.column, self.format)
 
 
 class DateFormat(Expression):
@@ -264,7 +268,7 @@ class DateFormat(Expression):
         return self.formatter(timestamp)
 
     def __str__(self):
-        return "date_format({0}, {1})".format(self.column, self.format)
+        return 'date_format({0}, {1})'.format(self.column, self.format)
 
 
 class CurrentTimestamp(Expression):
@@ -280,7 +284,7 @@ class CurrentTimestamp(Expression):
         self.current_timestamp = datetime.datetime.now()
 
     def __str__(self):
-        return "current_timestamp()"
+        return 'current_timestamp()'
 
 
 class CurrentDate(Expression):
@@ -296,7 +300,7 @@ class CurrentDate(Expression):
         self.current_timestamp = datetime.datetime.now()
 
     def __str__(self):
-        return "current_date()"
+        return 'current_date()'
 
 
 class UnixTimestamp(Expression):
@@ -311,7 +315,7 @@ class UnixTimestamp(Expression):
         return self.parser(datetime_as_string)
 
     def __str__(self):
-        return "unix_timestamp({0}, {1})".format(self.column, self.format)
+        return 'unix_timestamp({0}, {1})'.format(self.column, self.format)
 
 
 class ParseToTimestamp(Expression):
@@ -328,7 +332,7 @@ class ParseToTimestamp(Expression):
     def __str__(self):
         return "to_timestamp('{0}'{1})".format(
             self.column,
-            ", '{0}'".format(self.format) if self.format is not None else ""
+            ", '{0}'".format(self.format) if self.format is not None else '',
         )
 
 
@@ -346,7 +350,7 @@ class ParseToDate(Expression):
     def __str__(self):
         return "to_date('{0}'{1})".format(
             self.column,
-            ", '{0}'".format(self.format) if self.format is not None else ""
+            ", '{0}'".format(self.format) if self.format is not None else '',
         )
 
 
@@ -365,7 +369,7 @@ class TruncDate(Expression):
         return None
 
     def __str__(self):
-        return "trunc({0}, {1})".format(self.column, self.level)
+        return 'trunc({0}, {1})'.format(self.column, self.level)
 
 
 class TruncTimestamp(Expression):
@@ -407,15 +411,22 @@ class TruncTimestamp(Expression):
         if self.level in ('hour',):
             return datetime.datetime(value.year, value.month, value.day, value.hour)
         if self.level in ('minute',):
-            return datetime.datetime(value.year, value.month, value.day, value.hour, value.minute)
+            return datetime.datetime(
+                value.year, value.month, value.day, value.hour, value.minute
+            )
         if self.level in ('second',):
             return datetime.datetime(
-                value.year, value.month, value.day, value.hour, value.minute, value.second
+                value.year,
+                value.month,
+                value.day,
+                value.hour,
+                value.minute,
+                value.second,
             )
         return None
 
     def __str__(self):
-        return "date_trunc({0}, {1})".format(self.level, self.column)
+        return 'date_trunc({0}, {1})'.format(self.level, self.column)
 
 
 class FromUTCTimestamp(Expression):
@@ -434,7 +445,7 @@ class FromUTCTimestamp(Expression):
         return local_date.replace(tzinfo=None)
 
     def __str__(self):
-        return "from_utc_timestamp({0}, {1})".format(self.column, self.tz)
+        return 'from_utc_timestamp({0}, {1})'.format(self.column, self.tz)
 
 
 class ToUTCTimestamp(Expression):
@@ -453,13 +464,36 @@ class ToUTCTimestamp(Expression):
         return gmt_date.replace(tzinfo=None)
 
     def __str__(self):
-        return "to_utc_timestamp({0}, {1})".format(self.column, self.tz)
+        return 'to_utc_timestamp({0}, {1})'.format(self.column, self.tz)
 
 
 __all__ = [
-    "ToUTCTimestamp", "FromUTCTimestamp", "TruncTimestamp", "TruncDate", "ParseToDate",
-    "ParseToTimestamp", "UnixTimestamp", "CurrentTimestamp", "FromUnixTime", "WeekOfYear",
-    "NextDay", "MonthsBetween", "LastDay", "DayOfYear", "DayOfMonth", "DayOfWeek", "Month",
-    "Quarter", "Year", "DateDiff", "DateSub", "DateAdd", "DateFormat", "CurrentDate",
-    "AddMonths", "Hour", "Minute", "Second"
+    'ToUTCTimestamp',
+    'FromUTCTimestamp',
+    'TruncTimestamp',
+    'TruncDate',
+    'ParseToDate',
+    'ParseToTimestamp',
+    'UnixTimestamp',
+    'CurrentTimestamp',
+    'FromUnixTime',
+    'WeekOfYear',
+    'NextDay',
+    'MonthsBetween',
+    'LastDay',
+    'DayOfYear',
+    'DayOfMonth',
+    'DayOfWeek',
+    'Month',
+    'Quarter',
+    'Year',
+    'DateDiff',
+    'DateSub',
+    'DateAdd',
+    'DateFormat',
+    'CurrentDate',
+    'AddMonths',
+    'Hour',
+    'Minute',
+    'Second',
 ]

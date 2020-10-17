@@ -12,10 +12,9 @@ class UserDefinedFunction(Expression):
         return self.f(*(expr.eval(row, schema) for expr in self.exprs))
 
     def __str__(self):
-        return "{0}({1})".format(
-            self.f.__name__,
-            ", ".join(str(expr) for expr in self.exprs)
+        return '{0}({1})'.format(
+            self.f.__name__, ', '.join(str(expr) for expr in self.exprs)
         )
 
 
-__all__ = ["UserDefinedFunction"]
+__all__ = ['UserDefinedFunction']

@@ -72,9 +72,7 @@ class Emitter(object):
 
     def json(self):
         s, v = self.r()
-        return (json.dumps({
-            'sensor{}'.format(s): v,
-        }) + '\n').encode('utf8')
+        return (json.dumps({f'sensor{{{s}}}': v}) + '\n').encode('utf8')
 
     def bello(self):
         # 5 bytes
@@ -87,18 +85,21 @@ class Emitter(object):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('-n', type=int, default=1000,
-                        help='number of connections')
-    parser.add_argument('--values', type=int, default=1,
-                        help='number of values per connection')
-    parser.add_argument('--port', type=int, default=8123,
-                        help='target port number')
-    parser.add_argument('--format', default='hello',
-                        help='format of the messages: hello (default), '
-                             'text, json, bello (binary hello), '
-                             'struct (binary)')
-    parser.add_argument('--delay', type=float, default=0.5,
-                        help='wait before start sending messages')
+    parser.add_argument('-n', type=int, default=1000, help='number of connections')
+    parser.add_argument(
+        '--values', type=int, default=1, help='number of values per connection'
+    )
+    parser.add_argument('--port', type=int, default=8123, help='target port number')
+    parser.add_argument(
+        '--format',
+        default='hello',
+        help='format of the messages: hello (default), '
+        'text, json, bello (binary hello), '
+        'struct (binary)',
+    )
+    parser.add_argument(
+        '--delay', type=float, default=0.5, help='wait before start sending messages'
+    )
     args = parser.parse_args()
 
     time.sleep(args.delay)

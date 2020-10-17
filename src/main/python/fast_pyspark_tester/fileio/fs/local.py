@@ -50,7 +50,7 @@ class Local(FileSystem):
                     os.path.join(root, f)
                     for root, _, files in os.walk(match)
                     for f in files
-                    if not f.startswith(("_", "."))
+                    if not f.startswith(('_', '.'))
                 ]
         return file_paths
 
@@ -68,8 +68,9 @@ class Local(FileSystem):
             return io.BytesIO(f.read())
 
     def load_text(self, encoding='utf8', encoding_errors='ignore'):
-        with io.open(self.file_path, 'r',
-                     encoding=encoding, errors=encoding_errors) as f:
+        with io.open(
+            self.file_path, 'r', encoding=encoding, errors=encoding_errors
+        ) as f:
             return io.StringIO(f.read())
 
     def dump(self, stream):

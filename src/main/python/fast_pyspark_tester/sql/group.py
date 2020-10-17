@@ -1,7 +1,17 @@
 from fast_pyspark_tester.sql.column import Column
 from fast_pyspark_tester.sql.dataframe import DataFrame
+
 # pylint: disable=W0622
-from fast_pyspark_tester.sql.functions import count, mean, parse, avg, max, min, sum, lit
+from fast_pyspark_tester.sql.functions import (
+    count,
+    mean,
+    parse,
+    avg,
+    max,
+    min,
+    sum,
+    lit,
+)
 
 
 class GroupedData(object):
@@ -36,7 +46,7 @@ class GroupedData(object):
 
         """
         if not exprs:
-            raise ValueError("exprs should not be empty")
+            raise ValueError('exprs should not be empty')
 
         if len(exprs) == 1 and isinstance(exprs[0], dict):
             # pylint: disable=W0511
@@ -45,7 +55,7 @@ class GroupedData(object):
         else:
             # Columns
             if not all(isinstance(c, Column) for c in exprs):
-                raise ValueError("all exprs should be Column")
+                raise ValueError('all exprs should be Column')
 
             # noinspection PyProtectedMember
             jdf = self._jgd.agg([parse(e) for e in exprs])
@@ -53,7 +63,7 @@ class GroupedData(object):
         return DataFrame(jdf, self.sql_ctx)
 
     def count(self):
-        return self.agg(count(lit(1)).alias("count"))
+        return self.agg(count(lit(1)).alias('count'))
 
     # pylint: disable=W0511
     # todo: avg, max, etc should work when cols is left empty

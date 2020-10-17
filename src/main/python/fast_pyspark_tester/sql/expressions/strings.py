@@ -10,7 +10,7 @@ class StringTrim(UnaryExpression):
         return self.column.eval(row, schema).strip()
 
     def __str__(self):
-        return "trim({0})".format(self.column)
+        return 'trim({0})'.format(self.column)
 
 
 class StringLTrim(UnaryExpression):
@@ -18,7 +18,7 @@ class StringLTrim(UnaryExpression):
         return self.column.eval(row, schema).lstrip()
 
     def __str__(self):
-        return "ltrim({0})".format(self.column)
+        return 'ltrim({0})'.format(self.column)
 
 
 class StringRTrim(UnaryExpression):
@@ -26,7 +26,7 @@ class StringRTrim(UnaryExpression):
         return self.column.eval(row, schema).rstrip()
 
     def __str__(self):
-        return "rtrim({0})".format(self.column)
+        return 'rtrim({0})'.format(self.column)
 
 
 class StringInStr(Expression):
@@ -40,10 +40,7 @@ class StringInStr(Expression):
         return int(self.substr in value)
 
     def __str__(self):
-        return "instr({0}, {1})".format(
-            self.substr,
-            self.column
-        )
+        return 'instr({0}, {1})'.format(self.substr, self.column)
 
 
 class StringLocate(Expression):
@@ -60,10 +57,10 @@ class StringLocate(Expression):
         return value.index(self.substr, self.start) + 1
 
     def __str__(self):
-        return "locate({0}, {1}{2})".format(
+        return 'locate({0}, {1}{2})'.format(
             self.substr,
             self.column,
-            ", {0}".format(self.start) if self.start is not None else ""
+            ', {0}'.format(self.start) if self.start is not None else '',
         )
 
 
@@ -78,14 +75,10 @@ class StringLPad(Expression):
         value = self.column.cast(StringType()).eval(row, schema)
         delta = self.length - len(value)
         padding = (self.pad * delta)[:delta]  # Handle pad with multiple characters
-        return "{0}{1}".format(padding, value)
+        return '{0}{1}'.format(padding, value)
 
     def __str__(self):
-        return "lpad({0}, {1}, {2})".format(
-            self.column,
-            self.length,
-            self.pad
-        )
+        return 'lpad({0}, {1}, {2})'.format(self.column, self.length, self.pad)
 
 
 class StringRPad(Expression):
@@ -99,14 +92,10 @@ class StringRPad(Expression):
         value = self.column.cast(StringType()).eval(row, schema)
         delta = self.length - len(value)
         padding = (self.pad * delta)[:delta]  # Handle pad with multiple characters
-        return "{0}{1}".format(value, padding)
+        return '{0}{1}'.format(value, padding)
 
     def __str__(self):
-        return "rpad({0}, {1}, {2})".format(
-            self.column,
-            self.length,
-            self.pad
-        )
+        return 'rpad({0}, {1}, {2})'.format(self.column, self.length, self.pad)
 
 
 class StringRepeat(Expression):
@@ -120,10 +109,7 @@ class StringRepeat(Expression):
         return value * self.n
 
     def __str__(self):
-        return "repeat({0}, {1})".format(
-            self.column,
-            self.n
-        )
+        return 'repeat({0}, {1})'.format(self.column, self.n)
 
 
 class StringTranslate(Expression):
@@ -136,17 +122,19 @@ class StringTranslate(Expression):
             # Python's translate use an opposite importance order as Spark
             # when there are duplicates in matching_string mapped to different chars
             matching_string[::-1],
-            replace_string[::-1]
+            replace_string[::-1],
         )
 
     def eval(self, row, schema):
-        return self.column.cast(StringType()).eval(row, schema).translate(self.translation_table)
+        return (
+            self.column.cast(StringType())
+            .eval(row, schema)
+            .translate(self.translation_table)
+        )
 
     def __str__(self):
-        return "translate({0}, {1}, {2})".format(
-            self.column,
-            self.matching_string,
-            self.replace_string
+        return 'translate({0}, {1}, {2})'.format(
+            self.column, self.matching_string, self.replace_string
         )
 
 
@@ -157,10 +145,10 @@ class InitCap(Expression):
 
     def eval(self, row, schema):
         value = self.column.cast(StringType()).eval(row, schema)
-        return " ".join(word.capitalize() for word in value.split())
+        return ' '.join(word.capitalize() for word in value.split())
 
     def __str__(self):
-        return "initcap({0})".format(self.column)
+        return 'initcap({0})'.format(self.column)
 
 
 class Levenshtein(Expression):
@@ -177,15 +165,14 @@ class Levenshtein(Expression):
         return levenshtein_distance(value_1, value_2)
 
     def __str__(self):
-        return "levenshtein({0}, {1})".format(self.column1, self.column2)
+        return 'levenshtein({0}, {1})'.format(self.column1, self.column2)
 
 
 class SoundEx(UnaryExpression):
     _soundex_mapping = {
         letter: int(soundex_code)
         for letter, soundex_code in zip(
-            string.ascii_uppercase,
-            "01230127022455012623017202"
+            string.ascii_uppercase, '01230127022455012623017202'
         )
     }
 
@@ -195,8 +182,8 @@ class SoundEx(UnaryExpression):
         if raw_value is None:
             return None
 
-        if raw_value == "":
-            return ""
+        if raw_value == '':
+            return ''
 
         value = raw_value.upper()
         initial = value[0]
@@ -218,7 +205,7 @@ class SoundEx(UnaryExpression):
                     break
             last_code = code
 
-        return ("".join(res) + "000")[:4]
+        return (''.join(res) + '000')[:4]
 
     def _encode(self, letter):
         """
@@ -228,11 +215,20 @@ class SoundEx(UnaryExpression):
         return self._soundex_mapping.get(letter)
 
     def __str__(self):
-        return "soundex({0})".format(self.column)
+        return 'soundex({0})'.format(self.column)
 
 
 __all__ = [
-    "StringTrim", "StringTranslate", "StringRTrim", "StringRepeat", "StringRPad",
-    "StringLTrim", "StringLPad", "StringLocate", "Levenshtein", "StringInStr", "InitCap",
-    "SoundEx"
+    'StringTrim',
+    'StringTranslate',
+    'StringRTrim',
+    'StringRepeat',
+    'StringRPad',
+    'StringLTrim',
+    'StringLPad',
+    'StringLocate',
+    'Levenshtein',
+    'StringInStr',
+    'InitCap',
+    'SoundEx',
 ]
