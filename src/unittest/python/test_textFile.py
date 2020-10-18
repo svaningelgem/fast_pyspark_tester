@@ -233,8 +233,16 @@ def test_read_7z():
 
 def test_read_tar_gz():
     # file was created with:
-    # tar -cvzf data.tar.gz hello.txt
+    # tar -cvzf data.tar.gz hello.txt test/hello.txt
     rdd = Context().textFile('{}/data.tar.gz'.format(LOCAL_TEST_PATH))
+    print(rdd.collect())
+    assert 'Hello fast_pyspark_tester!' in rdd.collect()
+
+
+def test_read_tar_bz2():
+    # file was created with:
+    # tar -cvjf data.tar.bz2 hello.txt test/hello.txt
+    rdd = Context().textFile('{}/data.tar.bz2'.format(LOCAL_TEST_PATH))
     print(rdd.collect())
     assert 'Hello fast_pyspark_tester!' in rdd.collect()
 
@@ -284,4 +292,4 @@ def test_local_regex_read():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    test_wholeTextFiles()
+    test_read_tar_bz2()

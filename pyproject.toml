@@ -5,9 +5,11 @@ build-backend = "pybuilder.pep517"
 [tool.pytest.ini_options]
 minversion = "6.0"
 #addopts = "--exitfirst"
+addopts = '--cov=fast_pyspark_tester --cov-branch --cov-report=term-missing --cov-report=xml:target/reports/pytest_coverage.xml --cov-report=html:target/reports/pytest_coverage_html'
 testpaths = [
     'src/unittest/python'
 ]
+
 
 [tool.pylint.'BASIC']
 variable-rgx = '[a-z0-9_]{1,30}$'
