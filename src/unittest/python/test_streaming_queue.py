@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import platform
+
 import tornado.testing
 
 import fast_pyspark_tester
@@ -18,7 +20,11 @@ class TestCount(tornado.testing.AsyncTestCase):
         )
 
         ssc.start()
-        ssc.awaitTermination(timeout=0.3)
+        if platform.system() == 'Windows':
+            # Windows is freakingly slow! So we need a higher timeout there...
+            ssc.awaitTermination(timeout=1.0)
+        else:
+            ssc.awaitTermination(timeout=0.3)
         self.assertEqual(sum(result), 23)
 
     def test_groupByKey(self):
