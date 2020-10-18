@@ -10,8 +10,6 @@ use_plugin('python.core')
 use_plugin('python.flake8')
 use_plugin('python.distutils')
 use_plugin('python.pylint')
-# use_plugin("python.unittest")
-# use_plugin("python.coverage")
 # https://github.com/AlexeySanko/pybuilder_pytest
 use_plugin('pypi:pybuilder_pytest')
 # https://github.com/AlexeySanko/pybuilder_pytest_coverage
@@ -117,6 +115,7 @@ def set_properties(project):
     project.set_property('distutils_readme_file', 'README.rst')
 
     project.set_property('pytest_coverage_xml', True)
+    project.set_property('pytest_coverage_html', True)
     project.set_property('pytest_coverage_break_build_threshold', 0)  # Don't let coverage break the build (for now)
 
     project.set_property('distutils_console_scripts', [])
