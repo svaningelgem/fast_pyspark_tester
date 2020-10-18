@@ -301,7 +301,7 @@ def cast_to_float(value, from_type, options):
     except ValueError:
         if isinstance(from_type, (DateType, TimestampType, NumericType, StringType)):
             return None
-        raise AnalysisException('Cannot cast type {0} to float'.format(from_type))
+        raise AnalysisException(f'Cannot cast type {from_type} to float') from None
 
 
 def cast_value(value, options):

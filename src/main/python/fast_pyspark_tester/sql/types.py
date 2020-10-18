@@ -555,7 +555,7 @@ class StructType(DataType):
             try:
                 return self.fields[key]
             except IndexError:
-                raise IndexError('StructType index out of range')
+                raise IndexError('StructType index out of range') from None
         if isinstance(key, slice):
             return StructType(self.fields[key])
         raise TypeError('StructType keys should be strings, integers or slices')
@@ -971,7 +971,7 @@ def _infer_type(obj):
     try:
         return _infer_schema(obj)
     except TypeError:
-        raise TypeError('not supported type: %s' % type(obj))
+        raise TypeError(f'not supported type: {obj}') from None
 
 
 def _infer_struct_type(obj):
@@ -1545,9 +1545,9 @@ class Row(tuple):
             idx = self.__fields__.index(item)
             return super().__getitem__(idx)
         except IndexError:
-            raise KeyError(item)
+            raise KeyError(item) from None
         except ValueError:
-            raise ValueError(item)
+            raise ValueError(item) from None
 
     def __getattr__(self, item):
         if item.startswith('__'):
@@ -1558,9 +1558,9 @@ class Row(tuple):
             idx = self.__fields__.index(item)
             return self[idx]
         except IndexError:
-            raise AttributeError(item)
+            raise AttributeError(item) from None
         except ValueError:
-            raise AttributeError(item)
+            raise AttributeError(item) from None
 
     def __setattr__(self, key, value):
         if key not in ('__fields__', '__from_dict__', '_metadata'):
@@ -1639,7 +1639,7 @@ def _check_series_localize_timestamps(s, timezone):
         # pylint: disable=import-outside-toplevel
         from pandas.api.types import is_datetime64tz_dtype
     except ImportError:
-        raise Exception('require_minimum_pandas_version() was not called')
+        raise Exception('require_minimum_pandas_version() was not called') from None
     tz = timezone or _get_local_timezone()
     # pylint: disable=W0511
     # TODO: handle nested timestamps, such as ArrayType(TimestampType())?
@@ -1679,7 +1679,7 @@ def _check_series_convert_timestamps_internal(s, timezone):
         # pylint: disable=import-outside-toplevel
         from pandas.api.types import is_datetime64_dtype, is_datetime64tz_dtype
     except ImportError:
-        raise Exception('require_minimum_pandas_version() was not called')
+        raise Exception('require_minimum_pandas_version() was not called') from None
 
     # pylint: disable=W0511
     # TODO: handle nested timestamps, such as ArrayType(TimestampType())?
@@ -1738,7 +1738,7 @@ def _check_series_convert_timestamps_localize(s, from_timezone, to_timezone):
         import pandas as pd
         from pandas.api.types import is_datetime64tz_dtype, is_datetime64_dtype
     except ImportError:
-        raise Exception('require_minimum_pandas_version() was not called')
+        raise Exception('require_minimum_pandas_version() was not called') from None
 
     from_tz = from_timezone or _get_local_timezone()
     to_tz = to_timezone or _get_local_timezone()
