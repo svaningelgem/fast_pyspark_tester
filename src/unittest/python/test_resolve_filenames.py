@@ -55,14 +55,10 @@ def test_local_2():
 @pytest.mark.skipif(not os.getenv('AWS_ACCESS_KEY_ID'), reason='no AWS env')
 def test_s3_1():
     filenames = File.resolve_filenames(
-        's3n://aws-publicdatasets/common-crawl/'
-        'crawl-data/CC-MAIN-2015-11/warc.paths.*'
+        's3n://aws-publicdatasets/common-crawl/' 'crawl-data/CC-MAIN-2015-11/warc.paths.*'
     )
     print(filenames)
-    assert (
-        's3n://aws-publicdatasets/common-crawl/'
-        'crawl-data/CC-MAIN-2015-11/warc.paths.gz' in filenames
-    )
+    assert 's3n://aws-publicdatasets/common-crawl/' 'crawl-data/CC-MAIN-2015-11/warc.paths.gz' in filenames
 
 
 def test_hdfs_resolve_filenames_with_wildcard():
@@ -70,13 +66,9 @@ def test_hdfs_resolve_filenames_with_wildcard():
     # pylint: disable=import-outside-toplevel
     from fast_pyspark_tester.fileio.fs import Hdfs
 
-    Hdfs.client_and_path = staticmethod(
-        lambda *args, **kwargs: (MockedHdfsClient(), 'unused_path')
-    )
+    Hdfs.client_and_path = staticmethod(lambda *args, **kwargs: (MockedHdfsClient(), 'unused_path'))
 
-    filenames = Hdfs.resolve_filenames(
-        'hdfs://hdfs-cluster.com/user/username/input/part-*.gz'
-    )
+    filenames = Hdfs.resolve_filenames('hdfs://hdfs-cluster.com/user/username/input/part-*.gz')
     print(filenames)
     assert filenames == [
         'hdfs://hdfs-cluster.com/user/username/input/part-00001.gz',
@@ -89,9 +81,7 @@ def test_hdfs_resolve_filenames_with_folder_path():
     # pylint: disable=import-outside-toplevel
     from fast_pyspark_tester.fileio.fs import Hdfs
 
-    Hdfs.client_and_path = staticmethod(
-        lambda *args, **kwargs: (MockedHdfsClient(), 'unused_path')
-    )
+    Hdfs.client_and_path = staticmethod(lambda *args, **kwargs: (MockedHdfsClient(), 'unused_path'))
 
     filenames = Hdfs.resolve_filenames('hdfs://hdfs-cluster.com/user/username/input')
     print(filenames)
@@ -106,9 +96,7 @@ def test_hdfs_resolve_filenames_with_folder_path_and_trailing_slash():
     # pylint: disable=import-outside-toplevel
     from fast_pyspark_tester.fileio.fs import Hdfs
 
-    Hdfs.client_and_path = staticmethod(
-        lambda *args, **kwargs: (MockedHdfsClient(), 'unused_path')
-    )
+    Hdfs.client_and_path = staticmethod(lambda *args, **kwargs: (MockedHdfsClient(), 'unused_path'))
 
     filenames = Hdfs.resolve_filenames('hdfs://hdfs-cluster.com/user/username/input/')
     print(filenames)
@@ -123,13 +111,9 @@ def test_hdfs_resolve_filenames_with_file_path():
     # pylint: disable=import-outside-toplevel
     from fast_pyspark_tester.fileio.fs import Hdfs
 
-    Hdfs.client_and_path = staticmethod(
-        lambda *args, **kwargs: (MockedHdfsClient(), 'unused_path')
-    )
+    Hdfs.client_and_path = staticmethod(lambda *args, **kwargs: (MockedHdfsClient(), 'unused_path'))
 
-    filenames = Hdfs.resolve_filenames(
-        'hdfs://hdfs-cluster.com/user/username/input/part-00001.gz'
-    )
+    filenames = Hdfs.resolve_filenames('hdfs://hdfs-cluster.com/user/username/input/part-00001.gz')
     print(filenames)
     assert filenames == ['hdfs://hdfs-cluster.com/user/username/input/part-00001.gz']
 

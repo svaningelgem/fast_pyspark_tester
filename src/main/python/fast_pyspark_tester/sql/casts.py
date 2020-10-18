@@ -33,9 +33,7 @@ NO_TIMESTAMP_CONVERSION = object()
 
 JAVA_TIME_FORMAT_TOKENS = re.compile('(([a-zA-Z])\\2*|[^a-zA-Z]+)')
 
-TIME_REGEX = re.compile(
-    '^([0-9]+):([0-9]+)?(?::([0-9]+))?(?:\\.([0-9]+))?(Z|[+-][0-9]+(?::(?:[0-9]+)?)?)?$'
-)
+TIME_REGEX = re.compile('^([0-9]+):([0-9]+)?(?::([0-9]+))?(?:\\.([0-9]+))?(Z|[+-][0-9]+(?::(?:[0-9]+)?)?)?$')
 
 GMT = pytz.timezone('GMT')
 
@@ -47,11 +45,7 @@ def identity(value, options):
 def cast_from_none(value, from_type, options):
     if value is None:
         return None
-    raise AnalysisException(
-        'Expected a null value from a field with type {0}, got {1}'.format(
-            from_type, value
-        )
-    )
+    raise AnalysisException('Expected a null value from a field with type {0}, got {1}'.format(from_type, value))
 
 
 def default_timestamp_formatter(timestamp):
@@ -61,9 +55,7 @@ def default_timestamp_formatter(timestamp):
 def cast_to_string(value, from_type, options):
     date_format = get_time_formatter(options.get('dateformat', 'yyyy-MM-dd'))
     timestamp_format = (
-        get_time_formatter(options['timestampformat'])
-        if 'timestampformat' in options
-        else default_timestamp_formatter
+        get_time_formatter(options['timestampformat']) if 'timestampformat' in options else default_timestamp_formatter
     )
     if value is None:
         return 'null'
@@ -90,20 +82,13 @@ def cast_map(value, from_type, options):
     casted_values = [
         (
             cast_to_string(key, from_type.keyType, options),
-            (
-                cast_to_string(sub_value, from_type.valueType, options)
-                if sub_value is not None
-                else None
-            ),
+            (cast_to_string(sub_value, from_type.valueType, options) if sub_value is not None else None),
         )
         for key, sub_value in value.items()
     ]
     return '[{0}]'.format(
         ', '.join(
-            '{0} ->{1}'.format(
-                casted_key,
-                ' {0}'.format(casted_value) if casted_value is not None else '',
-            )
+            '{0} ->{1}'.format(casted_key, ' {0}'.format(casted_value) if casted_value is not None else '',)
             for casted_key, casted_value in casted_values
         )
     )
@@ -115,16 +100,12 @@ def cast_sequence(value, from_type, options):
     else:
         types = [from_type.elementType] * len(value)
     casted_values = [
-        cast_to_string(sub_value, sub_value_type, options)
-        if sub_value is not None
-        else None
+        cast_to_string(sub_value, sub_value_type, options) if sub_value is not None else None
         for sub_value, sub_value_type in zip(value, types)
     ]
     casted_value = '[{0}]'.format(
         ','.join(
-            ('' if casted_value is None else '{0}' if i == 0 else ' {0}').format(
-                casted_value
-            )
+            ('' if casted_value is None else '{0}' if i == 0 else ' {0}').format(casted_value)
             for i, casted_value in enumerate(casted_values)
         )
     )
@@ -221,9 +202,7 @@ def cast_to_timestamp(value, from_type, options):
         return (
             None
             if date is None or time_of_day is None
-            else datetime.datetime(
-                year=date.year, month=date.month, day=date.day, **time_of_day
-            )
+            else datetime.datetime(year=date.year, month=date.month, day=date.day, **time_of_day)
             .astimezone(tzlocal())
             .replace(tzinfo=None)
         )
@@ -258,13 +237,7 @@ def cast_to_boolean(value, from_type, options):
     if value == '' or value is None:
         return None
     if isinstance(from_type, StringType):
-        return (
-            True
-            if value.lower() == 'true'
-            else False
-            if value.lower() == 'false'
-            else None
-        )
+        return True if value.lower() == 'true' else False if value.lower() == 'false' else None
     if isinstance(from_type, (NumericType, BooleanType)):
         return bool(value)
     raise AnalysisException('Cannot cast type {0} to boolean'.format(from_type))
@@ -278,12 +251,7 @@ def _cast_to_bounded_type(name, min_value, max_value, value, from_type, options)
         return None
     if isinstance(from_type, TimestampType):
         return _cast_to_bounded_type(
-            name,
-            min_value,
-            max_value,
-            cast_to_float(value, from_type, options=options),
-            FloatType(),
-            options=options,
+            name, min_value, max_value, cast_to_float(value, from_type, options=options), FloatType(), options=options,
         )
     if isinstance(from_type, StringType):
         casted_value = int(value)
@@ -296,30 +264,22 @@ def _cast_to_bounded_type(name, min_value, max_value, value, from_type, options)
 
 def cast_to_byte(value, from_type, options):
     min_value, max_value = -128, 127
-    return _cast_to_bounded_type(
-        'byte', min_value, max_value, value, from_type, options=options
-    )
+    return _cast_to_bounded_type('byte', min_value, max_value, value, from_type, options=options)
 
 
 def cast_to_short(value, from_type, options):
     min_value, max_value = -32768, 32767
-    return _cast_to_bounded_type(
-        'short', min_value, max_value, value, from_type, options=options
-    )
+    return _cast_to_bounded_type('short', min_value, max_value, value, from_type, options=options)
 
 
 def cast_to_int(value, from_type, options):
     min_value, max_value = -2147483648, 2147483647
-    return _cast_to_bounded_type(
-        'int', min_value, max_value, value, from_type, options=options
-    )
+    return _cast_to_bounded_type('int', min_value, max_value, value, from_type, options=options)
 
 
 def cast_to_long(value, from_type, options):
     min_value, max_value = -9223372036854775808, 9223372036854775807
-    return _cast_to_bounded_type(
-        'long', min_value, max_value, value, from_type, options=options
-    )
+    return _cast_to_bounded_type('long', min_value, max_value, value, from_type, options=options)
 
 
 def cast_to_decimal(value, from_type, to_type, options):
@@ -341,7 +301,7 @@ def cast_to_float(value, from_type, options):
     except ValueError:
         if isinstance(from_type, (DateType, TimestampType, NumericType, StringType)):
             return None
-        raise AnalysisException('Cannot cast type {0} to float'.format(from_type))
+        raise AnalysisException(f'Cannot cast type {from_type} to float') from None
 
 
 def cast_value(value, options):
@@ -367,29 +327,17 @@ def cast_to_double(value, from_type, options):
 
 def cast_to_array(value, from_type, to_type, options):
     if isinstance(from_type, ArrayType):
-        caster = get_caster(
-            from_type=from_type.elementType,
-            to_type=to_type.elementType,
-            options=options,
-        )
-        return [
-            caster(sub_value) if sub_value is not None else None for sub_value in value
-        ]
+        caster = get_caster(from_type=from_type.elementType, to_type=to_type.elementType, options=options,)
+        return [caster(sub_value) if sub_value is not None else None for sub_value in value]
     raise AnalysisException('Cannot cast type {0} to array'.format(from_type))
 
 
 def cast_to_map(value, from_type, to_type, options):
     if isinstance(from_type, MapType):
-        key_caster = get_caster(
-            from_type=from_type.keyType, to_type=to_type.keyType, options=options
-        )
-        value_caster = get_caster(
-            from_type=from_type.valueType, to_type=to_type.valueType, options=options
-        )
+        key_caster = get_caster(from_type=from_type.keyType, to_type=to_type.keyType, options=options)
+        value_caster = get_caster(from_type=from_type.valueType, to_type=to_type.valueType, options=options)
         return {
-            key_caster(key): (
-                value_caster(sub_value) if sub_value is not None else None
-            )
+            key_caster(key): (value_caster(sub_value) if sub_value is not None else None)
             for key, sub_value in value.items()
         }
     raise AnalysisException('Cannot cast type {0} to map'.format(from_type))
@@ -410,9 +358,7 @@ def get_struct_caster(from_type, to_type, options):
 
     def do_cast_to_struct(value):
         return create_row(
-            names,
-            (caster(sub_value) for caster, sub_value in zip(casters, value)),
-            metadata=value.get_metadata(),
+            names, (caster(sub_value) for caster, sub_value in zip(casters, value)), metadata=value.get_metadata(),
         )
 
     return do_cast_to_struct
@@ -531,10 +477,7 @@ def get_time_formatter(java_time_format):
 
     This function currently only support a small subset of Java time formats.
     """
-    sub_formatters = [
-        get_sub_formatter(token)
-        for token in JAVA_TIME_FORMAT_TOKENS.findall(java_time_format)
-    ]
+    sub_formatters = [get_sub_formatter(token) for token in JAVA_TIME_FORMAT_TOKENS.findall(java_time_format)]
 
     def time_formatter(value):
         return ''.join(sub_formatter(value) for sub_formatter in sub_formatters)

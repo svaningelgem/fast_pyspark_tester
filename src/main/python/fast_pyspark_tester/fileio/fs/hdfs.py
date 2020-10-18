@@ -1,12 +1,12 @@
 from __future__ import absolute_import, unicode_literals
 
-from fnmatch import fnmatch
 import logging
+from fnmatch import fnmatch
 from io import BytesIO, StringIO
 
+from .file_system import FileSystem
 from ...exceptions import FileSystemNotSupported
 from ...utils import parse_file_uri, format_file_uri
-from .file_system import FileSystem
 
 log = logging.getLogger(__name__)
 
@@ -23,11 +23,9 @@ class Hdfs(FileSystem):
 
     def __init__(self, file_name):
         if hdfs is None:
-            raise FileSystemNotSupported(
-                'hdfs not supported. Install the python package "hdfs".'
-            )
+            raise FileSystemNotSupported('hdfs not supported. Install the python package "hdfs".')
 
-        super(Hdfs, self).__init__(file_name)
+        super().__init__(file_name)
 
     @staticmethod
     def client_and_path(path):
@@ -42,9 +40,7 @@ class Hdfs(FileSystem):
 
         if cache_id not in Hdfs._conn:
             if hdfs is None:
-                raise FileSystemNotSupported(
-                    'hdfs not supported. Install the python package "hdfs".'
-                )
+                raise FileSystemNotSupported('hdfs not supported. Install the python package "hdfs".')
             Hdfs._conn[cache_id] = hdfs.InsecureClient(  # pylint: disable=no-member
                 'http://{0}:{1}'.format(domain, port)
             )
@@ -74,9 +70,7 @@ class Hdfs(FileSystem):
                 if file_status['type'] != 'DIRECTORY':
                     files.append(file_path)
                 else:
-                    files += Hdfs._get_folder_part_files(
-                        c, scheme, domain, file_local_path, part_file_expr
-                    )
+                    files += Hdfs._get_folder_part_files(c, scheme, domain, file_local_path, part_file_expr)
             elif fnmatch(file_path, part_file_expr):
                 files.append(file_path)
         return files
@@ -86,10 +80,7 @@ class Hdfs(FileSystem):
         files = []
         for fn, file_status in c.list(folder_local_path, status=True):
             sub_file_path = format_file_uri(scheme, domain, folder_local_path, fn)
-            if (
-                fnmatch(sub_file_path, expr_with_part)
-                and file_status['type'] != 'DIRECTORY'
-            ):
+            if fnmatch(sub_file_path, expr_with_part) and file_status['type'] != 'DIRECTORY':
                 files.append(sub_file_path)
         return files
 
@@ -111,16 +102,12 @@ class Hdfs(FileSystem):
             file_local_path = '{0}{1}'.format(folder_path, fn)
             if expr is None or fnmatch(file_local_path, expr):
                 if file_status['type'] == 'DIRECTORY':
-                    file_paths += cls._get_folder_files_by_expr(
-                        c, scheme, domain, file_local_path + '/', expr=None
-                    )
+                    file_paths += cls._get_folder_files_by_expr(c, scheme, domain, file_local_path + '/', expr=None)
                 else:
                     file_path = format_file_uri(scheme, domain, file_local_path)
                     file_paths.append(file_path)
             elif file_status['type'] == 'DIRECTORY':
-                file_paths += cls._get_folder_files_by_expr(
-                    c, scheme, domain, file_local_path + '/', expr
-                )
+                file_paths += cls._get_folder_files_by_expr(c, scheme, domain, file_local_path + '/', expr)
         return file_paths
 
     @classmethod

@@ -21,12 +21,7 @@ class RuntimeConfig(object):
 
     def _checkType(self, obj, identifier):
         if not isinstance(obj, str):
-            raise TypeError(
-                "expected %s '%s' to be a string (was '%s')"
-                % (identifier, obj, type(obj).__name__)
-            )
+            raise TypeError("expected %s '%s' to be a string (was '%s')" % (identifier, obj, type(obj).__name__))
 
     def isModifiable(self, key):
-        raise NotImplementedError(
-            'fast_pyspark_tester does not support yet this feature'
-        )
+        raise NotImplementedError('fast_pyspark_tester does not support yet this feature')

@@ -1,12 +1,12 @@
 from __future__ import absolute_import
 
+import logging
 from fnmatch import fnmatch
 from io import BytesIO, StringIO
-import logging
 
+from .file_system import FileSystem
 from ...exceptions import FileSystemNotSupported
 from ...utils import Tokenizer, parse_file_uri
-from .file_system import FileSystem
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class S3(FileSystem):
         if boto is None:
             raise FileSystemNotSupported('S3 not supported. Install "boto".')
 
-        super(S3, self).__init__(file_name)
+        super().__init__(file_name)
 
         # obtain key
         t = Tokenizer(self.file_name)
@@ -103,9 +103,7 @@ class S3(FileSystem):
 
     def load_text(self, encoding='utf8', encoding_errors='ignore'):
         log.debug('Loading {0} with size {1}.' ''.format(self.key.name, self.key.size))
-        return StringIO(
-            self.key.get_contents_as_string().decode(encoding, encoding_errors)
-        )
+        return StringIO(self.key.get_contents_as_string().decode(encoding, encoding_errors))
 
     def dump(self, stream):
         log.debug('Dumping to {0}.'.format(self.key.name))

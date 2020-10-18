@@ -22,10 +22,9 @@ class SevenZ(Codec):
     def __init__(self):
         if py7zlib is None:
             log.warning(
-                'py7zlib could not be imported. To read 7z files, '
-                'install the library with "pip install pylzma".'
+                'py7zlib could not be imported. To read 7z files, install the library with "pip install pylzma".'
             )
-        super(SevenZ, self).__init__()
+        super().__init__()
 
     def compress(self, stream):
         log.warning('Writing of 7z compressed archives is not supported.')

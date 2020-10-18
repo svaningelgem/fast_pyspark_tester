@@ -20,10 +20,7 @@ class DataFrameReaderTests(TestCase):
     maxDiff = None
 
     def test_csv_read_without_schema(self):
-        df = spark.read.csv(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data/fundings/'),
-            header=True,
-        )
+        df = spark.read.csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data/fundings/'), header=True,)
         self.assertEqual(df.count(), 4)
         self.assertEqual(
             df.schema,
@@ -98,8 +95,7 @@ class DataFrameReaderTests(TestCase):
 
     def test_csv_read_with_inferred_schema(self):
         df = spark.read.option('inferSchema', True).csv(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data/fundings/'),
-            header=True,
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data/fundings/'), header=True,
         )
         self.assertEqual(df.count(), 4)
         self.assertEqual(
@@ -189,8 +185,7 @@ class DataFrameReaderTests(TestCase):
             ]
         )
         df = spark.read.schema(schema).csv(
-            os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data/fundings/'),
-            header=True,
+            os.path.join(os.path.dirname(os.path.realpath(__file__)), 'data/fundings/'), header=True,
         )
         self.assertEqual(
             [Row(**r.asDict()) for r in df.collect()],

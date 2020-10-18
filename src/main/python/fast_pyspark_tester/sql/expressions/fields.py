@@ -1,12 +1,11 @@
-from fast_pyspark_tester.sql.types import StructField
-
 from fast_pyspark_tester.sql.expressions.expressions import Expression
+from fast_pyspark_tester.sql.types import StructField
 from fast_pyspark_tester.sql.utils import AnalysisException
 
 
 class FieldAsExpression(Expression):
     def __init__(self, field):
-        super(FieldAsExpression, self).__init__()
+        super().__init__()
         self.field = field
 
     def eval(self, row, schema):
@@ -23,9 +22,7 @@ def find_position_in_schema(schema, expr):
     if isinstance(expr, str):
         show_id = False
         field_name = expr
-        matches = set(
-            i for i, field in enumerate(schema.fields) if field_name == field.name
-        )
+        matches = set(i for i, field in enumerate(schema.fields) if field_name == field.name)
     elif isinstance(expr, FieldAsExpression):
         return find_position_in_schema(schema, expr.field)
     elif isinstance(expr, StructField) and hasattr(expr, 'id'):
@@ -50,16 +47,12 @@ def find_position_in_schema(schema, expr):
 def get_checked_matches(matches, field_name, schema, show_id):
     if not matches:
         raise AnalysisException(
-            "Unable to find the column '{0}' among {1}".format(
-                field_name, format_schema(schema, show_id)
-            )
+            "Unable to find the column '{0}' among {1}".format(field_name, format_schema(schema, show_id))
         )
 
     if len(matches) > 1:
         raise AnalysisException(
-            "Reference '{0}' is ambiguous, found {1} columns matching it.".format(
-                field_name, len(matches)
-            )
+            "Reference '{0}' is ambiguous, found {1} columns matching it.".format(field_name, len(matches))
         )
 
     return matches.pop()

@@ -3,16 +3,17 @@
 from __future__ import absolute_import, division
 
 import argparse
-from contextlib import closing
 import json
 import random
 import struct
 import sys
 import time
+from contextlib import closing
+
 from tornado import gen
-from tornado.tcpclient import TCPClient
 from tornado.ioloop import IOLoop, PeriodicCallback
 from tornado.iostream import StreamClosedError
+from tornado.tcpclient import TCPClient
 
 
 class Emitter(object):
@@ -86,20 +87,14 @@ class Emitter(object):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-n', type=int, default=1000, help='number of connections')
-    parser.add_argument(
-        '--values', type=int, default=1, help='number of values per connection'
-    )
+    parser.add_argument('--values', type=int, default=1, help='number of values per connection')
     parser.add_argument('--port', type=int, default=8123, help='target port number')
     parser.add_argument(
         '--format',
         default='hello',
-        help='format of the messages: hello (default), '
-        'text, json, bello (binary hello), '
-        'struct (binary)',
+        help='format of the messages: hello (default), ' 'text, json, bello (binary hello), ' 'struct (binary)',
     )
-    parser.add_argument(
-        '--delay', type=float, default=0.5, help='wait before start sending messages'
-    )
+    parser.add_argument('--delay', type=float, default=0.5, help='wait before start sending messages')
     args = parser.parse_args()
 
     time.sleep(args.delay)

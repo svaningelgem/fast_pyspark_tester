@@ -12,7 +12,6 @@ import pytz
 from pytz import UnknownTimeZoneError
 
 from fast_pyspark_tester.sql.casts import get_time_formatter
-from fast_pyspark_tester.sql.schema_utils import get_on_fields
 from fast_pyspark_tester.sql.internal_utils.joins import (
     FULL_JOIN,
     RIGHT_JOIN,
@@ -22,6 +21,7 @@ from fast_pyspark_tester.sql.internal_utils.joins import (
     LEFT_SEMI_JOIN,
     LEFT_ANTI_JOIN,
 )
+from fast_pyspark_tester.sql.schema_utils import get_on_fields
 from fast_pyspark_tester.sql.types import Row, create_row, row_from_keyed_values
 from fast_pyspark_tester.sql.utils import IllegalArgumentException
 
@@ -32,13 +32,9 @@ class Tokenizer(object):
 
     def next(self, separator=None):
         if isinstance(separator, list):
-            separator_positions_and_lengths = [
-                (self.expression.find(s), s) for s in separator if s in self.expression
-            ]
+            separator_positions_and_lengths = [(self.expression.find(s), s) for s in separator if s in self.expression]
             if separator_positions_and_lengths:
-                sep_pos, separator = min(
-                    separator_positions_and_lengths, key=itemgetter(0)
-                )
+                sep_pos, separator = min(separator_positions_and_lengths, key=itemgetter(0))
             else:
                 sep_pos = -1
         elif separator:
@@ -101,9 +97,7 @@ def reservoir_sample_and_size(iterable, k, seed):
     return reservoir, reservoir_size
 
 
-def compute_weighted_percentiles(
-    weighted_values, number_of_percentiles, key=lambda x: x
-):
+def compute_weighted_percentiles(weighted_values, number_of_percentiles, key=lambda x: x):
     """
     Compute weighted percentiles from a list of values and weights.
 
@@ -143,19 +137,14 @@ def compute_weighted_percentiles(
     if number_of_percentiles == 1:
         raise ValueError('number_of_percentiles must be at least 2')
 
-    ordered_values = sorted(
-        weighted_values, key=lambda weighted_value: key(weighted_value[0])
-    )
+    ordered_values = sorted(weighted_values, key=lambda weighted_value: key(weighted_value[0]))
     total_weight = sum(weight for value, weight in ordered_values)
 
     bounds = []
     cumulative_weight = 0
     for value, weight in ordered_values:
         cumulative_weight += weight
-        while (
-            len(bounds) / (number_of_percentiles - 1)
-            <= cumulative_weight / total_weight
-        ):
+        while len(bounds) / (number_of_percentiles - 1) <= cumulative_weight / total_weight:
             bounds.append(value)
 
     return bounds
@@ -239,10 +228,7 @@ def format_cell(value):
         return '[{0}]'.format(', '.join(format_cell(sub_value) for sub_value in value))
     if isinstance(value, dict):
         return '[{0}]'.format(
-            ', '.join(
-                '{0} -> {1}'.format(format_cell(key), format_cell(sub_value))
-                for key, sub_value in value.items()
-            )
+            ', '.join('{0} -> {1}'.format(format_cell(key), format_cell(sub_value)) for key, sub_value in value.items())
         )
     return str(value)
 
@@ -379,27 +365,18 @@ def merge_rows_joined_on_values(left, right, left_schema, right_schema, how, on)
 
     left_on_fields, right_on_fields = get_on_fields(left_schema, right_schema, on)
 
-    on_parts = [
-        (on_field, left[on_field] if left is not None else right[on_field])
-        for on_field in on
-    ]
+    on_parts = [(on_field, left[on_field] if left is not None else right[on_field]) for on_field in on]
 
     if left is None and how in (FULL_JOIN, RIGHT_JOIN):
         left = create_row(left_names, [None for _ in left_names])
     if right is None and how in (LEFT_JOIN, FULL_JOIN):
         right = create_row(right_names, [None for _ in right_names])
 
-    left_parts = (
-        (field.name, value)
-        for field, value in zip(left_schema.fields, left)
-        if field not in left_on_fields
-    )
+    left_parts = ((field.name, value) for field, value in zip(left_schema.fields, left) if field not in left_on_fields)
 
     if how in (INNER_JOIN, CROSS_JOIN, LEFT_JOIN, FULL_JOIN, RIGHT_JOIN):
         right_parts = (
-            (field.name, value)
-            for field, value in zip(right_schema.fields, right)
-            if field not in right_on_fields
+            (field.name, value) for field, value in zip(right_schema.fields, right) if field not in right_on_fields
         )
     elif how in (LEFT_SEMI_JOIN, LEFT_ANTI_JOIN):
         right_parts = ()
@@ -478,9 +455,7 @@ def parse_tz(tz):
     try:
         return pytz.timezone(tz)
     except UnknownTimeZoneError:
-        GMT_PATTERN = (
-            r'GMT(?P<sign>[+-])(?P<hours>[0-9]{1,2})(?::(?P<minutes>[0-9]{2}))?'
-        )
+        GMT_PATTERN = r'GMT(?P<sign>[+-])(?P<hours>[0-9]{1,2})(?::(?P<minutes>[0-9]{2}))?'
         match = re.match(GMT_PATTERN, tz)
         if match:
             return parse_gmt_based_offset(match)
@@ -591,18 +566,15 @@ def get_json_encoder(options):
             def encode_rows(item):
                 if isinstance(item, Row):
                     return collections.OrderedDict(
-                        (key, encode_rows(value))
-                        for key, value in zip(item.__fields__, item)
+                        (key, encode_rows(value)) for key, value in zip(item.__fields__, item)
                     )
                 if isinstance(item, (list, tuple)):
                     return [encode_rows(e) for e in item]
                 if isinstance(item, dict):
-                    return collections.OrderedDict(
-                        (key, encode_rows(value)) for key, value in item.items()
-                    )
+                    return collections.OrderedDict((key, encode_rows(value)) for key, value in item.items())
                 return item
 
-            return super(CustomJSONEncoder, self).encode(encode_rows(o))
+            return super().encode(encode_rows(o))
 
         # default can be overridden if passed a parameter during init
         # pylint doesn't like the behavior but it is the expected one
@@ -612,6 +584,6 @@ def get_json_encoder(options):
                 return timestamp_formatter(o)
             if isinstance(o, datetime.date):
                 return date_formatter(o)
-            return super(CustomJSONEncoder, self).default(o)
+            return super().default(o)
 
     return CustomJSONEncoder

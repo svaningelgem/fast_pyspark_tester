@@ -14,19 +14,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import itertools
-import os
-import sys
-import decimal
-import datetime
-import json as _json
-import re
-from array import array
 import ctypes
+import datetime
+import decimal
+import itertools
+import json as _json
+import os
 import platform
+import re
+import sys
+from array import array
 
 from fast_pyspark_tester.sql.utils import ParseException, require_minimum_pandas_version
-
 
 if sys.version >= '3':
     long = int
@@ -117,7 +116,7 @@ class DataTypeSingleton(type):
 
     def __call__(cls):
         if cls not in cls._instances:
-            cls._instances[cls] = super(DataTypeSingleton, cls).__call__()
+            cls._instances[cls] = super().__call__()
         return cls._instances[cls]
 
 
@@ -294,9 +293,7 @@ class ArrayType(DataType):
         >>> ArrayType(StringType(), False) == ArrayType(StringType())
         False
         """
-        assert isinstance(
-            elementType, DataType
-        ), 'elementType %s should be an instance of %s' % (elementType, DataType)
+        assert isinstance(elementType, DataType), 'elementType %s should be an instance of %s' % (elementType, DataType)
         self.elementType = elementType
         self.containsNull = containsNull
 
@@ -316,9 +313,7 @@ class ArrayType(DataType):
     # noinspection PyShadowingNames
     @classmethod
     def fromJson(cls, json):
-        return ArrayType(
-            _parse_datatype_json_value(json['elementType']), json['containsNull']
-        )
+        return ArrayType(_parse_datatype_json_value(json['elementType']), json['containsNull'])
 
     def needConversion(self):
         return self.elementType.needConversion()
@@ -353,28 +348,17 @@ class MapType(DataType):
         ...        == MapType(StringType(), FloatType()))
         False
         """
-        assert isinstance(
-            keyType, DataType
-        ), 'keyType %s should be an instance of %s' % (keyType, DataType)
-        assert isinstance(
-            valueType, DataType
-        ), 'valueType %s should be an instance of %s' % (valueType, DataType)
+        assert isinstance(keyType, DataType), 'keyType %s should be an instance of %s' % (keyType, DataType)
+        assert isinstance(valueType, DataType), 'valueType %s should be an instance of %s' % (valueType, DataType)
         self.keyType = keyType
         self.valueType = valueType
         self.valueContainsNull = valueContainsNull
 
     def simpleString(self):
-        return 'map<%s,%s>' % (
-            self.keyType.simpleString(),
-            self.valueType.simpleString(),
-        )
+        return 'map<%s,%s>' % (self.keyType.simpleString(), self.valueType.simpleString(),)
 
     def __repr__(self):
-        return 'MapType(%s,%s,%s)' % (
-            self.keyType,
-            self.valueType,
-            str(self.valueContainsNull).lower(),
-        )
+        return 'MapType(%s,%s,%s)' % (self.keyType, self.valueType, str(self.valueContainsNull).lower(),)
 
     def jsonValue(self):
         return {
@@ -399,18 +383,12 @@ class MapType(DataType):
     def toInternal(self, obj):
         if not self.needConversion():
             return obj
-        return obj and dict(
-            (self.keyType.toInternal(k), self.valueType.toInternal(v))
-            for k, v in obj.items()
-        )
+        return obj and dict((self.keyType.toInternal(k), self.valueType.toInternal(v)) for k, v in obj.items())
 
     def fromInternal(self, obj):
         if not self.needConversion():
             return obj
-        return obj and dict(
-            (self.keyType.fromInternal(k), self.valueType.fromInternal(v))
-            for k, v in obj.items()
-        )
+        return obj and dict((self.keyType.fromInternal(k), self.valueType.fromInternal(v)) for k, v in obj.items())
 
 
 class StructField(DataType):
@@ -431,9 +409,7 @@ class StructField(DataType):
         ...      == StructField("f2", StringType(), True))
         False
         """
-        assert isinstance(
-            dataType, DataType
-        ), 'dataType %s should be an instance of %s' % (dataType, DataType)
+        assert isinstance(dataType, DataType), 'dataType %s should be an instance of %s' % (dataType, DataType)
         assert isinstance(name, basestring), 'field name %s should be string' % name
         if not isinstance(name, str):
             name = name.encode('utf-8')
@@ -446,11 +422,7 @@ class StructField(DataType):
         return '%s:%s' % (self.name, self.dataType.simpleString())
 
     def __repr__(self):
-        return 'StructField(%s,%s,%s)' % (
-            self.name,
-            self.dataType,
-            str(self.nullable).lower(),
-        )
+        return 'StructField(%s,%s,%s)' % (self.name, self.dataType, str(self.nullable).lower(),)
 
     def jsonValue(self):
         return {
@@ -463,12 +435,7 @@ class StructField(DataType):
     # noinspection PyShadowingNames
     @classmethod
     def fromJson(cls, json):
-        return StructField(
-            json['name'],
-            _parse_datatype_json_value(json['type']),
-            json['nullable'],
-            json['metadata'],
-        )
+        return StructField(json['name'], _parse_datatype_json_value(json['type']), json['nullable'], json['metadata'],)
 
     def needConversion(self):
         return self.dataType.needConversion()
@@ -480,10 +447,7 @@ class StructField(DataType):
         return self.dataType.fromInternal(obj)
 
     def typeName(self):
-        raise TypeError(
-            'StructField does not have typeName. '
-            'Use typeName on its type explicitly instead.'
-        )
+        raise TypeError('StructField does not have typeName. ' 'Use typeName on its type explicitly instead.')
 
 
 class StructType(DataType):
@@ -519,9 +483,7 @@ class StructType(DataType):
         else:
             self.fields = fields
             self.names = [f.name for f in fields]
-            assert all(
-                isinstance(f, StructField) for f in fields
-            ), 'fields should be a list of StructField'
+            assert all(isinstance(f, StructField) for f in fields), 'fields should be a list of StructField'
         # Precalculated list of fields that need conversion with fromInternal/toInternal functions
         self._needConversion = [f.needConversion() for f in self]
         self._needSerializeAnyField = any(self._needConversion)
@@ -561,9 +523,7 @@ class StructType(DataType):
             self.names.append(field.name)
         else:
             if isinstance(field, str) and data_type is None:
-                raise ValueError(
-                    'Must specify DataType if passing name of struct_field to create.'
-                )
+                raise ValueError('Must specify DataType if passing name of struct_field to create.')
 
             if isinstance(data_type, str):
                 data_type_f = _parse_datatype_json_value(data_type)
@@ -595,7 +555,7 @@ class StructType(DataType):
             try:
                 return self.fields[key]
             except IndexError:
-                raise IndexError('StructType index out of range')
+                raise IndexError('StructType index out of range') from None
         if isinstance(key, slice):
             return StructType(self.fields[key])
         raise TypeError('StructType keys should be strings, integers or slices')
@@ -655,17 +615,10 @@ class StructType(DataType):
             )
         if isinstance(obj, Row):
             return create_row(
-                obj.__fields__,
-                (
-                    f.toInternal(val)
-                    for f, val, c in zip(self.fields, obj, self._needConversion)
-                ),
+                obj.__fields__, (f.toInternal(val) for f, val, c in zip(self.fields, obj, self._needConversion)),
             )
         if isinstance(obj, (tuple, list)):
-            return tuple(
-                f.toInternal(v) if c else v
-                for f, v, c in zip(self.fields, obj, self._needConversion)
-            )
+            return tuple(f.toInternal(v) if c else v for f, v, c in zip(self.fields, obj, self._needConversion))
         if hasattr(obj, '__dict__'):
             d = obj.__dict__
             return tuple(
@@ -682,19 +635,14 @@ class StructType(DataType):
             return obj
         if self._needSerializeAnyField:
             # Only calling fromInternal function for fields that need conversion
-            values = [
-                f.fromInternal(v) if c else v
-                for f, v, c in zip(self.fields, obj, self._needConversion)
-            ]
+            values = [f.fromInternal(v) if c else v for f, v, c in zip(self.fields, obj, self._needConversion)]
         else:
             values = obj
         return create_row(self.names, values)
 
     @classmethod
     def fromDDL(cls, string):
-        raise NotImplementedError(
-            'fast_pyspark_tester does not support yet StructType.fromDDL'
-        )
+        raise NotImplementedError('fast_pyspark_tester does not support yet StructType.fromDDL')
 
 
 class UserDefinedType(DataType):
@@ -772,9 +720,7 @@ class UserDefinedType(DataType):
 
     def jsonValue(self):
         if self.scalaUDT():
-            assert (
-                self.module() != '__main__'
-            ), 'UDT in __main__ cannot work with ScalaUDT'
+            assert self.module() != '__main__', 'UDT in __main__ cannot work with ScalaUDT'
             schema = {
                 'type': 'udt',
                 'class': self.scalaUDT(),
@@ -782,9 +728,7 @@ class UserDefinedType(DataType):
                 'sqlType': self.sqlType().jsonValue(),
             }
         else:
-            raise NotImplementedError(
-                'fast_pyspark_tester does not implement jsonValue() for UDT'
-            )
+            raise NotImplementedError('fast_pyspark_tester does not implement jsonValue() for UDT')
             # ser = CloudPickleSerializer()
             # b = ser.dumps(type(self))
             # schema = {
@@ -804,9 +748,7 @@ class UserDefinedType(DataType):
         pyClass = pyUDT[split + 1:]
         m = __import__(pyModule, globals(), locals(), [pyClass])
         if not hasattr(m, pyClass):
-            raise NotImplementedError(
-                'fast_pyspark_tester does not implement fromJson() for UDT'
-            )
+            raise NotImplementedError('fast_pyspark_tester does not implement fromJson() for UDT')
             # s = base64.b64decode(json['serializedClass'].encode('utf-8'))
             # UDT = CloudPickleSerializer().loads(s)
         UDT = getattr(m, pyClass)
@@ -846,9 +788,7 @@ def _parse_datatype_string(s):
     for :class:`IntegerType`. Since Spark 2.3, this also supports a schema in a DDL-formatted
     string and case-insensitive strings.
     """
-    raise NotImplementedError(
-        '_parse_datatype_string is not yet supported by fast_pyspark_tester'
-    )
+    raise NotImplementedError('_parse_datatype_string is not yet supported by fast_pyspark_tester')
     # pylint: disable=W0511
     # todo: implement in pure Python the code below
     # NB: it probably requires to use antl4r
@@ -916,9 +856,7 @@ _type_mappings = {
 }
 
 if sys.version < '3':
-    _type_mappings.update(
-        {unicode: StringType, long: LongType}
-    )
+    _type_mappings.update({unicode: StringType, long: LongType})
 
 # Mapping Python array types to Spark SQL DataType
 # We should be careful here. The size of these types in python depends on C
@@ -986,9 +924,7 @@ for _typecode in _array_signed_int_typecode_ctype_mappings:
 for _typecode in _array_unsigned_int_typecode_ctype_mappings:
     # JVM does not have unsigned types, so use signed types that is at least 1
     # bit larger to store
-    _size = (
-        ctypes.sizeof(_array_unsigned_int_typecode_ctype_mappings[_typecode]) * 8 + 1
-    )
+    _size = ctypes.sizeof(_array_unsigned_int_typecode_ctype_mappings[_typecode]) * 8 + 1
     _dt = _int_size_to_type(_size)
     if _dt is not None:
         _array_type_mappings[_typecode] = _dt
@@ -1035,7 +971,7 @@ def _infer_type(obj):
     try:
         return _infer_schema(obj)
     except TypeError:
-        raise TypeError('not supported type: %s' % type(obj))
+        raise TypeError(f'not supported type: {obj}') from None
 
 
 def _infer_struct_type(obj):
@@ -1107,9 +1043,7 @@ def _get_null_fields(field, prefix=''):
         prefixed_field_name = field.name
 
     if isinstance(field, ArrayType):
-        return _get_null_fields(
-            field.elementType, prefix=prefixed_field_name + '.elements'
-        )
+        return _get_null_fields(field.elementType, prefix=prefixed_field_name + '.elements')
 
     if isinstance(field, MapType):
         return [
@@ -1146,12 +1080,7 @@ def _merge_type(a, b, name=None):
     if isinstance(a, StructType):
         nfs = dict((f.name, f.dataType) for f in b.fields)
         fields = [
-            StructField(
-                f.name,
-                _merge_type(
-                    f.dataType, nfs.get(f.name, NullType()), name=new_name(f.name)
-                ),
-            )
+            StructField(f.name, _merge_type(f.dataType, nfs.get(f.name, NullType()), name=new_name(f.name)),)
             for f in a.fields
         ]
         names = {f.name for f in fields}
@@ -1161,12 +1090,7 @@ def _merge_type(a, b, name=None):
         return StructType(fields)
 
     if isinstance(a, ArrayType):
-        return ArrayType(
-            _merge_type(
-                a.elementType, b.elementType, name='element in array %s' % name
-            ),
-            True,
-        )
+        return ArrayType(_merge_type(a.elementType, b.elementType, name='element in array %s' % name), True,)
 
     if isinstance(a, MapType):
         return MapType(
@@ -1222,10 +1146,7 @@ def _create_converter(dataType):
 
         if isinstance(obj, Row):
             if convert_fields:
-                return create_row(
-                    obj.__fields__,
-                    [converter(value) for converter, value in zip(converters, obj)],
-                )
+                return create_row(obj.__fields__, [converter(value) for converter, value in zip(converters, obj)],)
             return obj
 
         if isinstance(obj, (tuple, list)):
@@ -1244,9 +1165,7 @@ def _create_converter(dataType):
             raise TypeError('Unexpected obj type: %s' % type(obj))
 
         if convert_fields:
-            return tuple(
-                [convert(d.get(name)) for name, convert in zip(names, converters)]
-            )
+            return tuple([convert(d.get(name)) for name, convert in zip(names, converters)])
         return tuple([d.get(name) for name in names])
 
     return convert_struct
@@ -1336,29 +1255,15 @@ def _make_type_verifier(dataType, nullable=True, name=None):
     _type = type(dataType)
 
     def assert_acceptable_types(obj):
-        assert _type in _acceptable_types, new_msg(
-            'unknown datatype: %s for object %r' % (dataType, obj)
-        )
+        assert _type in _acceptable_types, new_msg('unknown datatype: %s for object %r' % (dataType, obj))
 
     def verify_acceptable_types(obj):
         # subclass of them can not be fromInternal in JVM
         convertible_types = tuple(_acceptable_types[_type])
         if not isinstance(obj, convertible_types):
-            raise TypeError(
-                new_msg(
-                    '%s can not accept object %r in type %s'
-                    % (dataType, obj, type(obj))
-                )
-            )
+            raise TypeError(new_msg('%s can not accept object %r in type %s' % (dataType, obj, type(obj))))
 
-    verify_value = get_verifier(
-        dataType,
-        name,
-        new_name,
-        assert_acceptable_types,
-        verify_acceptable_types,
-        new_msg,
-    )
+    verify_value = get_verifier(dataType, name, new_name, assert_acceptable_types, verify_acceptable_types, new_msg,)
 
     def verify(obj):
         if not verify_nullability(obj):
@@ -1367,9 +1272,7 @@ def _make_type_verifier(dataType, nullable=True, name=None):
     return verify
 
 
-def get_verifier(
-    dataType, name, new_name, assert_acceptable_types, verify_acceptable_types, new_msg
-):
+def get_verifier(dataType, name, new_name, assert_acceptable_types, verify_acceptable_types, new_msg):
     if isinstance(dataType, StringType):
         # StringType can work with any types
         def no_check(value):
@@ -1381,9 +1284,7 @@ def get_verifier(
 
         def verify_udf(obj):
             if not (hasattr(obj, '__UDT__') and obj.__UDT__ == dataType):
-                raise ValueError(
-                    new_msg('%r is not an instance of type %r' % (obj, dataType))
-                )
+                raise ValueError(new_msg('%r is not an instance of type %r' % (obj, dataType)))
             field_verifier(dataType.toInternal(obj))
 
         verifier = verify_udf
@@ -1393,9 +1294,7 @@ def get_verifier(
             assert_acceptable_types(obj)
             verify_acceptable_types(obj)
             if obj < -128 or obj > 127:
-                raise ValueError(
-                    new_msg('object of ByteType out of range, got: %s' % obj)
-                )
+                raise ValueError(new_msg('object of ByteType out of range, got: %s' % obj))
 
         verifier = verify_byte
     elif isinstance(dataType, ShortType):
@@ -1404,9 +1303,7 @@ def get_verifier(
             assert_acceptable_types(obj)
             verify_acceptable_types(obj)
             if obj < -32768 or obj > 32767:
-                raise ValueError(
-                    new_msg('object of ShortType out of range, got: %s' % obj)
-                )
+                raise ValueError(new_msg('object of ShortType out of range, got: %s' % obj))
 
         verifier = verify_short
     elif isinstance(dataType, IntegerType):
@@ -1415,23 +1312,15 @@ def get_verifier(
             assert_acceptable_types(obj)
             verify_acceptable_types(obj)
             if obj < -2147483648 or obj > 2147483647:
-                raise ValueError(
-                    new_msg('object of IntegerType out of range, got: %s' % obj)
-                )
+                raise ValueError(new_msg('object of IntegerType out of range, got: %s' % obj))
 
         verifier = verify_integer
     elif isinstance(dataType, ArrayType):
-        verifier = get_array_verifier(
-            dataType, name, assert_acceptable_types, verify_acceptable_types
-        )
+        verifier = get_array_verifier(dataType, name, assert_acceptable_types, verify_acceptable_types)
     elif isinstance(dataType, MapType):
-        verifier = get_map_verifier(
-            dataType, name, assert_acceptable_types, verify_acceptable_types
-        )
+        verifier = get_map_verifier(dataType, name, assert_acceptable_types, verify_acceptable_types)
     elif isinstance(dataType, StructType):
-        verifier = get_struct_verifier(
-            dataType, new_name, assert_acceptable_types, new_msg
-        )
+        verifier = get_struct_verifier(dataType, new_name, assert_acceptable_types, new_msg)
     else:
 
         def verify_default(obj):
@@ -1443,9 +1332,7 @@ def get_verifier(
     return verifier
 
 
-def get_array_verifier(
-    dataType, name, assert_acceptable_types, verify_acceptable_types
-):
+def get_array_verifier(dataType, name, assert_acceptable_types, verify_acceptable_types):
     element_verifier = _make_type_verifier(
         dataType.elementType, dataType.containsNull, name='element in array %s' % name
     )
@@ -1462,9 +1349,7 @@ def get_array_verifier(
 def get_struct_verifier(dataType, new_name, assert_acceptable_types, new_msg):
     verifiers = []
     for field in dataType.fields:
-        field_verifier = _make_type_verifier(
-            field.dataType, field.nullable, name=new_name(field.name)
-        )
+        field_verifier = _make_type_verifier(field.dataType, field.nullable, name=new_name(field.name))
         verifiers.append((field.name, field_verifier))
 
     def verify_struct(obj):
@@ -1492,22 +1377,14 @@ def get_struct_verifier(dataType, new_name, assert_acceptable_types, new_msg):
             for f, verifier in verifiers:
                 verifier(d.get(f))
         else:
-            raise TypeError(
-                new_msg(
-                    'StructType can not accept object %r in type %s' % (obj, type(obj))
-                )
-            )
+            raise TypeError(new_msg('StructType can not accept object %r in type %s' % (obj, type(obj))))
 
     return verify_struct
 
 
 def get_map_verifier(dataType, name, assert_acceptable_types, verify_acceptable_types):
-    key_verifier = _make_type_verifier(
-        dataType.keyType, False, name='key of map %s' % name
-    )
-    value_verifier = _make_type_verifier(
-        dataType.valueType, dataType.valueContainsNull, name='value of map %s' % name
-    )
+    key_verifier = _make_type_verifier(dataType.keyType, False, name='key of map %s' % name)
+    value_verifier = _make_type_verifier(dataType.valueType, dataType.valueContainsNull, name='value of map %s' % name)
 
     def verify_map(obj):
         assert_acceptable_types(obj)
@@ -1648,30 +1525,29 @@ class Row(tuple):
     def __contains__(self, item):
         if hasattr(self, '__fields__'):
             return item in self.__fields__
-        return super(Row, self).__contains__(item)
+        return super().__contains__(item)
 
     # let object acts like class
     def __call__(self, *args):
         """create new Row object"""
         if len(args) > len(self):
             raise ValueError(
-                'Can not create Row with fields %s, expected %d values '
-                'but got %s' % (self, len(self), args)
+                'Can not create Row with fields %s, expected %d values ' 'but got %s' % (self, len(self), args)
             )
         return create_row(self, args)
 
     def __getitem__(self, item):
         if isinstance(item, (int, slice)):
-            return super(Row, self).__getitem__(item)
+            return super().__getitem__(item)
         try:
             # it will be slow when it has many fields,
             # but this will not be used in normal cases
             idx = self.__fields__.index(item)
-            return super(Row, self).__getitem__(idx)
+            return super().__getitem__(idx)
         except IndexError:
-            raise KeyError(item)
+            raise KeyError(item) from None
         except ValueError:
-            raise ValueError(item)
+            raise ValueError(item) from None
 
     def __getattr__(self, item):
         if item.startswith('__'):
@@ -1682,9 +1558,9 @@ class Row(tuple):
             idx = self.__fields__.index(item)
             return self[idx]
         except IndexError:
-            raise AttributeError(item)
+            raise AttributeError(item) from None
         except ValueError:
-            raise AttributeError(item)
+            raise AttributeError(item) from None
 
     def __setattr__(self, key, value):
         if key not in ('__fields__', '__from_dict__', '_metadata'):
@@ -1700,9 +1576,7 @@ class Row(tuple):
     def __repr__(self):
         """Printable representation of Row used in Python REPL."""
         if hasattr(self, '__fields__'):
-            return 'Row(%s)' % ', '.join(
-                '%s=%r' % (k, v) for k, v in zip(self.__fields__, tuple(self))
-            )
+            return 'Row(%s)' % ', '.join('%s=%r' % (k, v) for k, v in zip(self.__fields__, tuple(self)))
         return '<Row(%s)>' % ', '.join(self)
 
     def set_grouping(self, grouping):
@@ -1765,7 +1639,7 @@ def _check_series_localize_timestamps(s, timezone):
         # pylint: disable=import-outside-toplevel
         from pandas.api.types import is_datetime64tz_dtype
     except ImportError:
-        raise Exception('require_minimum_pandas_version() was not called')
+        raise Exception('require_minimum_pandas_version() was not called') from None
     tz = timezone or _get_local_timezone()
     # pylint: disable=W0511
     # TODO: handle nested timestamps, such as ArrayType(TimestampType())?
@@ -1805,7 +1679,7 @@ def _check_series_convert_timestamps_internal(s, timezone):
         # pylint: disable=import-outside-toplevel
         from pandas.api.types import is_datetime64_dtype, is_datetime64tz_dtype
     except ImportError:
-        raise Exception('require_minimum_pandas_version() was not called')
+        raise Exception('require_minimum_pandas_version() was not called') from None
 
     # pylint: disable=W0511
     # TODO: handle nested timestamps, such as ArrayType(TimestampType())?
@@ -1864,7 +1738,7 @@ def _check_series_convert_timestamps_localize(s, from_timezone, to_timezone):
         import pandas as pd
         from pandas.api.types import is_datetime64tz_dtype, is_datetime64_dtype
     except ImportError:
-        raise Exception('require_minimum_pandas_version() was not called')
+        raise Exception('require_minimum_pandas_version() was not called') from None
 
     from_tz = from_timezone or _get_local_timezone()
     to_tz = to_timezone or _get_local_timezone()
@@ -1875,9 +1749,7 @@ def _check_series_convert_timestamps_localize(s, from_timezone, to_timezone):
     if is_datetime64_dtype(s.dtype) and from_tz != to_tz:
         # `s.dt.tz_localize('tzlocal()')` doesn't work properly when including NaT.
         return s.apply(
-            lambda ts: ts.tz_localize(from_tz, ambiguous=False)
-            .tz_convert(to_tz)
-            .tz_localize(None)
+            lambda ts: ts.tz_localize(from_tz, ambiguous=False).tz_convert(to_tz).tz_localize(None)
             if ts is not pd.NaT
             else pd.NaT
         )
@@ -1973,6 +1845,5 @@ def python_to_spark_type(python_type):
     if python_type in PYTHON_TO_SPARK_TYPE:
         return PYTHON_TO_SPARK_TYPE[python_type]
     raise NotImplementedError(
-        'Pysparkling does not currently support '
-        'type {0} for the requested operation'.format(python_type)
+        'Pysparkling does not currently support ' 'type {0} for the requested operation'.format(python_type)
     )

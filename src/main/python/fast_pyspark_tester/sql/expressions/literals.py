@@ -3,7 +3,7 @@ from fast_pyspark_tester.sql.expressions.expressions import Expression
 
 class Literal(Expression):
     def __init__(self, value):
-        super(Literal, self).__init__()
+        super().__init__()
         self.value = value
 
     def eval(self, row, schema):

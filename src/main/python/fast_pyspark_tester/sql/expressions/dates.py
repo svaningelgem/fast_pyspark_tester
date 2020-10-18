@@ -15,14 +15,12 @@ DAYS_OF_WEEK = ('MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN')
 
 class AddMonths(Expression):
     def __init__(self, start_date, num_months):
-        super(AddMonths, self).__init__(start_date)
+        super().__init__(start_date)
         self.start_date = start_date
         self.num_months = num_months
 
     def eval(self, row, schema):
-        return self.start_date.cast(DateType()).eval(row, schema) + relativedelta(
-            months=self.num_months
-        )
+        return self.start_date.cast(DateType()).eval(row, schema) + relativedelta(months=self.num_months)
 
     def __str__(self):
         return 'add_months({0}, {1})'.format(self.start_date, self.num_months)
@@ -30,7 +28,7 @@ class AddMonths(Expression):
 
 class DateAdd(Expression):
     def __init__(self, start_date, num_days):
-        super(DateAdd, self).__init__(start_date)
+        super().__init__(start_date)
         self.start_date = start_date
         self.num_days = num_days
         self.timedelta = datetime.timedelta(days=num_days)
@@ -44,7 +42,7 @@ class DateAdd(Expression):
 
 class DateSub(Expression):
     def __init__(self, start_date, num_days):
-        super(DateSub, self).__init__(start_date)
+        super().__init__(start_date)
         self.start_date = start_date
         self.num_days = num_days
         self.timedelta = datetime.timedelta(days=num_days)
@@ -152,7 +150,7 @@ class DayOfWeek(UnaryExpression):
 
 class NextDay(Expression):
     def __init__(self, column, day_of_week):
-        super(NextDay, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.day_of_week = day_of_week
 
@@ -175,7 +173,7 @@ class NextDay(Expression):
 
 class MonthsBetween(Expression):
     def __init__(self, column1, column2, round_off):
-        super(MonthsBetween, self).__init__(column1, column2)
+        super().__init__(column1, column2)
         self.column1 = column1
         self.column2 = column2
         self.round_off = round_off
@@ -184,17 +182,13 @@ class MonthsBetween(Expression):
         value_1 = self.column1.cast(TimestampType()).eval(row, schema)
         value_2 = self.column2.cast(TimestampType()).eval(row, schema)
 
-        if not isinstance(value_1, datetime.datetime) or not isinstance(
-            value_2, datetime.datetime
-        ):
+        if not isinstance(value_1, datetime.datetime) or not isinstance(value_2, datetime.datetime):
             return None
 
         one_day = datetime.timedelta(days=1)
         value_1_is_the_last_of_its_month = value_1.month != (value_1 + one_day).month
         value_2_is_the_last_of_its_month = value_2.month != (value_2 + one_day).month
-        if value_1.day == value_2.day or (
-            value_1_is_the_last_of_its_month and value_2_is_the_last_of_its_month
-        ):
+        if value_1.day == value_2.day or (value_1_is_the_last_of_its_month and value_2_is_the_last_of_its_month):
             # Special cases where time of day is not consider
             diff = (value_1.year - value_2.year) * 12 + (value_1.month - value_2.month)
         else:
@@ -205,24 +199,18 @@ class MonthsBetween(Expression):
                 + (value_1.minute - value_2.minute) / 1440
                 + (value_1.second - value_2.second) / 86400
             )
-            diff = (
-                (value_1.year - value_2.year) * 12
-                + (value_1.month - value_2.month) * 1
-                + day_offset / 31
-            )
+            diff = (value_1.year - value_2.year) * 12 + (value_1.month - value_2.month) * 1 + day_offset / 31
         if self.round_off:
             return float(round(diff, 8))
         return float(diff)
 
     def __str__(self):
-        return 'months_between({0}, {1}, {2})'.format(
-            self.column1, self.column2, str(self.round_off).lower()
-        )
+        return 'months_between({0}, {1}, {2})'.format(self.column1, self.column2, str(self.round_off).lower())
 
 
 class DateDiff(Expression):
     def __init__(self, column1, column2):
-        super(DateDiff, self).__init__(column1, column2)
+        super().__init__(column1, column2)
         self.column1 = column1
         self.column2 = column2
 
@@ -230,9 +218,7 @@ class DateDiff(Expression):
         value_1 = self.column1.cast(DateType()).eval(row, schema)
         value_2 = self.column2.cast(DateType()).eval(row, schema)
 
-        if not isinstance(value_1, datetime.date) or not isinstance(
-            value_2, datetime.date
-        ):
+        if not isinstance(value_1, datetime.date) or not isinstance(value_2, datetime.date):
             return None
 
         return (value_1 - value_2).days
@@ -243,7 +229,7 @@ class DateDiff(Expression):
 
 class FromUnixTime(Expression):
     def __init__(self, column, f):
-        super(FromUnixTime, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.format = f
         self.formatter = get_time_formatter(self.format)
@@ -258,7 +244,7 @@ class FromUnixTime(Expression):
 
 class DateFormat(Expression):
     def __init__(self, column, f):
-        super(DateFormat, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.format = f
         self.formatter = get_time_formatter(self.format)
@@ -273,14 +259,14 @@ class DateFormat(Expression):
 
 class CurrentTimestamp(Expression):
     def __init__(self):
-        super(CurrentTimestamp, self).__init__()
+        super().__init__()
         self.current_timestamp = None
 
     def eval(self, row, schema):
         return self.current_timestamp
 
     def initialize(self, partition_index):
-        super(CurrentTimestamp, self).initialize(partition_index)
+        super().initialize(partition_index)
         self.current_timestamp = datetime.datetime.now()
 
     def __str__(self):
@@ -289,14 +275,14 @@ class CurrentTimestamp(Expression):
 
 class CurrentDate(Expression):
     def __init__(self):
-        super(CurrentDate, self).__init__()
+        super().__init__()
         self.current_timestamp = None
 
     def eval(self, row, schema):
         return self.current_timestamp.date()
 
     def initialize(self, partition_index):
-        super(CurrentDate, self).initialize(partition_index)
+        super().initialize(partition_index)
         self.current_timestamp = datetime.datetime.now()
 
     def __str__(self):
@@ -305,7 +291,7 @@ class CurrentDate(Expression):
 
 class UnixTimestamp(Expression):
     def __init__(self, column, f):
-        super(UnixTimestamp, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.format = f
         self.parser = get_unix_timestamp_parser(self.format)
@@ -320,7 +306,7 @@ class UnixTimestamp(Expression):
 
 class ParseToTimestamp(Expression):
     def __init__(self, column, f):
-        super(ParseToTimestamp, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.format = f
         self.parser = get_unix_timestamp_parser(self.format)
@@ -331,14 +317,13 @@ class ParseToTimestamp(Expression):
 
     def __str__(self):
         return "to_timestamp('{0}'{1})".format(
-            self.column,
-            ", '{0}'".format(self.format) if self.format is not None else '',
+            self.column, ", '{0}'".format(self.format) if self.format is not None else '',
         )
 
 
 class ParseToDate(Expression):
     def __init__(self, column, f):
-        super(ParseToDate, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.format = f
         self.parser = get_unix_timestamp_parser(self.format)
@@ -349,14 +334,13 @@ class ParseToDate(Expression):
 
     def __str__(self):
         return "to_date('{0}'{1})".format(
-            self.column,
-            ", '{0}'".format(self.format) if self.format is not None else '',
+            self.column, ", '{0}'".format(self.format) if self.format is not None else '',
         )
 
 
 class TruncDate(Expression):
     def __init__(self, column, level):
-        super(TruncDate, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.level = level
 
@@ -374,7 +358,7 @@ class TruncDate(Expression):
 
 class TruncTimestamp(Expression):
     def __init__(self, level, column):
-        super(TruncTimestamp, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.level = level
 
@@ -402,27 +386,18 @@ class TruncTimestamp(Expression):
             quarter_start_month = int((value.month - 1) / 3) * 3 + 1
             return datetime.datetime(value.year, quarter_start_month, 1)
         if self.level in ('week',):
-            return datetime.datetime(
-                value.year, value.month, value.day
-            ) - datetime.timedelta(days=value.isoweekday() - 1)
+            return datetime.datetime(value.year, value.month, value.day) - datetime.timedelta(
+                days=value.isoweekday() - 1
+            )
         return None
 
     def truncate_to_time(self, value):
         if self.level in ('hour',):
             return datetime.datetime(value.year, value.month, value.day, value.hour)
         if self.level in ('minute',):
-            return datetime.datetime(
-                value.year, value.month, value.day, value.hour, value.minute
-            )
+            return datetime.datetime(value.year, value.month, value.day, value.hour, value.minute)
         if self.level in ('second',):
-            return datetime.datetime(
-                value.year,
-                value.month,
-                value.day,
-                value.hour,
-                value.minute,
-                value.second,
-            )
+            return datetime.datetime(value.year, value.month, value.day, value.hour, value.minute, value.second,)
         return None
 
     def __str__(self):
@@ -431,7 +406,7 @@ class TruncTimestamp(Expression):
 
 class FromUTCTimestamp(Expression):
     def __init__(self, column, tz):
-        super(FromUTCTimestamp, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.tz = tz
         self.pytz = parse_tz(tz)
@@ -450,7 +425,7 @@ class FromUTCTimestamp(Expression):
 
 class ToUTCTimestamp(Expression):
     def __init__(self, column, tz):
-        super(ToUTCTimestamp, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.tz = tz
         self.pytz = parse_tz(tz)

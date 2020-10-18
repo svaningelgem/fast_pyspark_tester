@@ -23,11 +23,7 @@ class Expression(object):
         return self.__class__.__name__
 
     def output_fields(self, schema):
-        return [
-            StructField(
-                name=str(self), dataType=self.data_type, nullable=self.is_nullable
-            )
-        ]
+        return [StructField(name=str(self), dataType=self.data_type, nullable=self.is_nullable)]
 
     @property
     def data_type(self):
@@ -147,7 +143,7 @@ class Expression(object):
 
 class UnaryExpression(Expression):
     def __init__(self, column):
-        super(UnaryExpression, self).__init__(column)
+        super().__init__(column)
         self.column = column
 
     def eval(self, row, schema):
@@ -163,7 +159,7 @@ class BinaryOperation(Expression):
     """
 
     def __init__(self, arg1, arg2):
-        super(BinaryOperation, self).__init__(arg1, arg2)
+        super().__init__(arg1, arg2)
         self.arg1 = arg1
         self.arg2 = arg2
 
@@ -198,20 +194,16 @@ class TypeSafeBinaryOperation(BinaryOperation):
             order_1 = INTERNAL_TYPE_ORDER.index(type_1)
             order_2 = INTERNAL_TYPE_ORDER.index(type_2)
         except ValueError as e:
-            raise AnalysisException('Unable to process type: {0}'.format(e))
+            raise AnalysisException(f'Unable to process type: {e}') from None
 
         spark_type_1 = python_to_spark_type(type_1)
         spark_type_2 = python_to_spark_type(type_2)
 
         if order_1 > order_2:
-            caster = get_caster(
-                from_type=spark_type_2, to_type=spark_type_1, options={}
-            )
+            caster = get_caster(from_type=spark_type_2, to_type=spark_type_1, options={})
             value_2 = caster(value_2)
         elif order_1 < order_2:
-            caster = get_caster(
-                from_type=spark_type_1, to_type=spark_type_2, options={}
-            )
+            caster = get_caster(from_type=spark_type_1, to_type=spark_type_2, options={})
             value_1 = caster(value_1)
 
         return self.unsafe_operation(value_1, value_2)
@@ -239,9 +231,7 @@ class NullSafeBinaryOperation(BinaryOperation):
 
         type_1 = value_1.__class__
         type_2 = value_2.__class__
-        if type_1 == type_2 or (
-            isinstance(value_1, (int, float)) and isinstance(value_2, (int, float))
-        ):
+        if type_1 == type_2 or (isinstance(value_1, (int, float)) and isinstance(value_2, (int, float))):
             return self.unsafe_operation(value_1, value_2)
 
         raise AnalysisException(
@@ -258,7 +248,7 @@ class NullSafeBinaryOperation(BinaryOperation):
 
 class NullSafeColumnOperation(Expression):
     def __init__(self, column, *args):
-        super(NullSafeColumnOperation, self).__init__(column, *args)
+        super().__init__(column, *args)
         self.column = column
 
     def eval(self, row, schema):

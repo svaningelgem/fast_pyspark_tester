@@ -158,12 +158,7 @@ class DataFrameReader(OptionUtils):
         raise TypeError('path can be only string, list or RDD')
 
     def text(
-        self,
-        paths,
-        wholetext=False,
-        lineSep=None,
-        pathGlobFilter=None,
-        recursiveFileLookup=None,
+        self, paths, wholetext=False, lineSep=None, pathGlobFilter=None, recursiveFileLookup=None,
     ):
         self._set_opts(
             wholetext=wholetext,
@@ -191,9 +186,7 @@ class DataFrameWriter(OptionUtils):
             return self
         if saveMode not in WRITE_MODES:
             raise IllegalArgumentException(
-                'Unknown save mode: {0}. Accepted save modes are {1}.'.format(
-                    saveMode, "', '".join(WRITE_MODES)
-                )
+                'Unknown save mode: {0}. Accepted save modes are {1}.'.format(saveMode, "', '".join(WRITE_MODES))
             )
         self._jwrite = self._jwrite.mode(saveMode)
         return self
@@ -219,15 +212,11 @@ class DataFrameWriter(OptionUtils):
 
     def bucketBy(self, numBuckets, col, *cols):
         if not isinstance(numBuckets, int):
-            raise TypeError(
-                'numBuckets should be an int, got {0}.'.format(type(numBuckets))
-            )
+            raise TypeError('numBuckets should be an int, got {0}.'.format(type(numBuckets)))
 
         if isinstance(col, (list, tuple)):
             if cols:
-                raise ValueError(
-                    'col is a {0} but cols are not empty'.format(type(col))
-                )
+                raise ValueError('col is a {0} but cols are not empty'.format(type(col)))
 
             cols = col
         else:
@@ -242,9 +231,7 @@ class DataFrameWriter(OptionUtils):
     def sortBy(self, col, *cols):
         if isinstance(col, (list, tuple)):
             if cols:
-                raise ValueError(
-                    'col is a {0} but cols are not empty'.format(type(col))
-                )
+                raise ValueError('col is a {0} but cols are not empty'.format(type(col)))
 
             col, cols = col[0], col[1:]
 
@@ -269,14 +256,7 @@ class DataFrameWriter(OptionUtils):
             self._jwrite.save(writer_class, path)
 
     def json(
-        self,
-        path,
-        mode=None,
-        compression=None,
-        dateFormat=None,
-        timestampFormat=None,
-        lineSep=None,
-        encoding=None,
+        self, path, mode=None, compression=None, dateFormat=None, timestampFormat=None, lineSep=None, encoding=None,
     ):
         self.mode(mode)
         self._set_opts(

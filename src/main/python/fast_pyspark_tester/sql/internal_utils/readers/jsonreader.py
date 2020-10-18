@@ -48,11 +48,7 @@ class JSONReader(object):
         partitions, partition_schema = resolve_partitions(paths)
 
         rdd_filenames = sc.parallelize(sorted(partitions.keys()), len(partitions))
-        rdd = rdd_filenames.flatMap(
-            partial(
-                parse_json_file, partitions, partition_schema, self.schema, self.options
-            )
-        )
+        rdd = rdd_filenames.flatMap(partial(parse_json_file, partitions, partition_schema, self.schema, self.options))
 
         inferred_schema = infer_schema_from_rdd(rdd)
 
@@ -61,11 +57,7 @@ class JSONReader(object):
 
         # Field order is defined by fields in the record, not by the given schema
         # Field type is defined by the given schema or inferred
-        full_schema = StructType(
-            fields=[
-                schema_fields.get(field.name, field) for field in inferred_schema.fields
-            ]
-        )
+        full_schema = StructType(fields=[schema_fields.get(field.name, field) for field in inferred_schema.fields])
 
         cast_row = get_struct_caster(inferred_schema, full_schema, options=self.options)
         casted_rdd = rdd.map(cast_row)
@@ -103,18 +95,12 @@ def parse_record(record, schema, partition, partition_schema, options):
     else:
         field_names = list(record_value.__fields__)
     record_values = [
-        record_value[field_name] if field_name in record_value.__fields__ else None
-        for field_name in field_names
+        record_value[field_name] if field_name in record_value.__fields__ else None for field_name in field_names
     ]
-    partition_field_names = (
-        [f.name for f in partition_schema.fields] if partition_schema else []
-    )
+    partition_field_names = [f.name for f in partition_schema.fields] if partition_schema else []
     # pylint: disable=W0511
     # todo: handle nested rows
-    row = create_row(
-        itertools.chain(field_names, partition_field_names),
-        itertools.chain(record_values, partition),
-    )
+    row = create_row(itertools.chain(field_names, partition_field_names), itertools.chain(record_values, partition),)
     return row
 
 
@@ -122,7 +108,5 @@ def decode_record(item):
     if isinstance(item, list):
         return [decode_record(e) for e in item]
     if isinstance(item, dict):
-        return row_from_keyed_values(
-            (key, decode_record(value)) for key, value in item.items()
-        )
+        return row_from_keyed_values((key, decode_record(value)) for key, value in item.items())
     return item

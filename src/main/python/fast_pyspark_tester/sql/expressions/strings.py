@@ -31,7 +31,7 @@ class StringRTrim(UnaryExpression):
 
 class StringInStr(Expression):
     def __init__(self, substr, column):
-        super(StringInStr, self).__init__(column)
+        super().__init__(column)
         self.substr = substr
         self.column = column
 
@@ -45,7 +45,7 @@ class StringInStr(Expression):
 
 class StringLocate(Expression):
     def __init__(self, substr, column, pos):
-        super(StringLocate, self).__init__(column)
+        super().__init__(column)
         self.substr = substr
         self.column = column
         self.start = pos - 1
@@ -58,15 +58,13 @@ class StringLocate(Expression):
 
     def __str__(self):
         return 'locate({0}, {1}{2})'.format(
-            self.substr,
-            self.column,
-            ', {0}'.format(self.start) if self.start is not None else '',
+            self.substr, self.column, ', {0}'.format(self.start) if self.start is not None else '',
         )
 
 
 class StringLPad(Expression):
     def __init__(self, column, length, pad):
-        super(StringLPad, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.length = length
         self.pad = pad
@@ -83,7 +81,7 @@ class StringLPad(Expression):
 
 class StringRPad(Expression):
     def __init__(self, column, length, pad):
-        super(StringRPad, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.length = length
         self.pad = pad
@@ -100,7 +98,7 @@ class StringRPad(Expression):
 
 class StringRepeat(Expression):
     def __init__(self, column, n):
-        super(StringRepeat, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.n = n
 
@@ -114,7 +112,7 @@ class StringRepeat(Expression):
 
 class StringTranslate(Expression):
     def __init__(self, column, matching_string, replace_string):
-        super(StringTranslate, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.matching_string = matching_string
         self.replace_string = replace_string
@@ -126,21 +124,15 @@ class StringTranslate(Expression):
         )
 
     def eval(self, row, schema):
-        return (
-            self.column.cast(StringType())
-            .eval(row, schema)
-            .translate(self.translation_table)
-        )
+        return self.column.cast(StringType()).eval(row, schema).translate(self.translation_table)
 
     def __str__(self):
-        return 'translate({0}, {1}, {2})'.format(
-            self.column, self.matching_string, self.replace_string
-        )
+        return 'translate({0}, {1}, {2})'.format(self.column, self.matching_string, self.replace_string)
 
 
 class InitCap(Expression):
     def __init__(self, column):
-        super(InitCap, self).__init__(column)
+        super().__init__(column)
         self.column = column
 
     def eval(self, row, schema):
@@ -153,7 +145,7 @@ class InitCap(Expression):
 
 class Levenshtein(Expression):
     def __init__(self, column1, column2):
-        super(Levenshtein, self).__init__(column1, column2)
+        super().__init__(column1, column2)
         self.column1 = column1
         self.column2 = column2
 
@@ -170,10 +162,7 @@ class Levenshtein(Expression):
 
 class SoundEx(UnaryExpression):
     _soundex_mapping = {
-        letter: int(soundex_code)
-        for letter, soundex_code in zip(
-            string.ascii_uppercase, '01230127022455012623017202'
-        )
+        letter: int(soundex_code) for letter, soundex_code in zip(string.ascii_uppercase, '01230127022455012623017202')
     }
 
     def eval(self, row, schema):

@@ -1,11 +1,10 @@
-from fast_pyspark_tester.sql.types import StructField, IntegerType, DataType
-
 from fast_pyspark_tester.sql.expressions.expressions import UnaryExpression
+from fast_pyspark_tester.sql.types import StructField, IntegerType, DataType
 
 
 class Explode(UnaryExpression):
     def __init__(self, column):
-        super(Explode, self).__init__(column)
+        super().__init__(column)
         self.column = column
 
     @property

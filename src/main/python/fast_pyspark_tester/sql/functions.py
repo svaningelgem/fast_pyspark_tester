@@ -91,6 +91,7 @@ from fast_pyspark_tester.sql.expressions.explodes import (
     PosExplodeOuter,
 )
 from fast_pyspark_tester.sql.expressions.jsons import StructsToJson
+from fast_pyspark_tester.sql.expressions.literals import Literal
 from fast_pyspark_tester.sql.expressions.mappers import (
     CaseWhen,
     Rand,
@@ -159,7 +160,6 @@ from fast_pyspark_tester.sql.expressions.mappers import (
     MapFromEntries,
     MapConcat,
 )
-from fast_pyspark_tester.sql.expressions.literals import Literal
 from fast_pyspark_tester.sql.expressions.operators import (
     IsNull,
     BitwiseNot,
@@ -787,72 +787,56 @@ def cume_dist():
     """
     :rtype: Column
     """
-    raise NotImplementedError(
-        'window functions are not yet supported by fast_pyspark_tester'
-    )
+    raise NotImplementedError('window functions are not yet supported by fast_pyspark_tester')
 
 
 def dense_rank():
     """
     :rtype: Column
     """
-    raise NotImplementedError(
-        'window functions are not yet supported by fast_pyspark_tester'
-    )
+    raise NotImplementedError('window functions are not yet supported by fast_pyspark_tester')
 
 
 def lag(e, offset, defaultValue=None):
     """
     :rtype: Column
     """
-    raise NotImplementedError(
-        'window functions are not yet supported by fast_pyspark_tester'
-    )
+    raise NotImplementedError('window functions are not yet supported by fast_pyspark_tester')
 
 
 def lead(e, offset, defaultValue=None):
     """
     :rtype: Column
     """
-    raise NotImplementedError(
-        'window functions are not yet supported by fast_pyspark_tester'
-    )
+    raise NotImplementedError('window functions are not yet supported by fast_pyspark_tester')
 
 
 def ntile(n):
     """
     :rtype: Column
     """
-    raise NotImplementedError(
-        'window functions are not yet supported by fast_pyspark_tester'
-    )
+    raise NotImplementedError('window functions are not yet supported by fast_pyspark_tester')
 
 
 def percent_rank():
     """
     :rtype: Column
     """
-    raise NotImplementedError(
-        'window functions are not yet supported by fast_pyspark_tester'
-    )
+    raise NotImplementedError('window functions are not yet supported by fast_pyspark_tester')
 
 
 def rank():
     """
     :rtype: Column
     """
-    raise NotImplementedError(
-        'window functions are not yet supported by fast_pyspark_tester'
-    )
+    raise NotImplementedError('window functions are not yet supported by fast_pyspark_tester')
 
 
 def row_number():
     """
     :rtype: Column
     """
-    raise NotImplementedError(
-        'window functions are not yet supported by fast_pyspark_tester'
-    )
+    raise NotImplementedError('window functions are not yet supported by fast_pyspark_tester')
 
 
 def create_map(*exprs):
@@ -2485,9 +2469,7 @@ def sequence(start, stop, step=None):
     """
     :rtype: Column
     """
-    return col(
-        Sequence(parse(start), parse(stop), parse(step) if step is not None else None)
-    )
+    return col(Sequence(parse(start), parse(stop), parse(step) if step is not None else None))
 
 
 def array_repeat(e, count):
@@ -2579,8 +2561,7 @@ def schema_of_csv(csv, options=None):
         csv = lit(csv)
     elif not isinstance(csv, Column) or not isinstance(csv.expr, Literal):
         raise AnalysisException(
-            'type mismatch: The input csv should be a string literal and not null; '
-            'however, got {0}.'.format(csv)
+            'type mismatch: The input csv should be a string literal and not null; ' 'however, got {0}.'.format(csv)
         )
     return col(SchemaOfCsv(parse(csv), options))
 
@@ -2624,11 +2605,7 @@ def udf(f, returnType=DataType()):
 
     def wrapper(*args, **kwargs):
         if kwargs:
-            raise TypeError(
-                "wrapper() got an unexpected keyword argument '{0}'".format(
-                    list(kwargs.keys())
-                )
-            )
+            raise TypeError("wrapper() got an unexpected keyword argument '{0}'".format(list(kwargs.keys())))
         exprs = [parse(arg) for arg in args]
         return col(UserDefinedFunction(f, returnType, *exprs))
 

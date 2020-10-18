@@ -21,7 +21,7 @@ class Http(FileSystem):
         if requests is None:
             raise FileSystemNotSupported('http not supported. Install "requests".')
 
-        super(Http, self).__init__(file_name)
+        super().__init__(file_name)
         self.headers = None
 
     @staticmethod

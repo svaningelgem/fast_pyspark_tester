@@ -39,9 +39,7 @@ class FileStream(object):
             self.files_done = set(File.resolve_filenames(self.path))
 
     def get(self):
-        files = [
-            fn for fn in File.resolve_filenames(self.path) if fn not in self.files_done
-        ]
+        files = [fn for fn in File.resolve_filenames(self.path) if fn not in self.files_done]
         if not files:
             return None
 

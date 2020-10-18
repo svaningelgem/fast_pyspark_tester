@@ -19,3 +19,8 @@ disable = 'bad-continuation,invalid-name,unused-argument,too-few-public-methods,
 
 [tool.pylint.'SIMILARITIES']
 ignore-imports = 'yes'
+
+[tool.black]
+line-length = 120
+target-version = ['py36']
+include = '\.pyi?$'

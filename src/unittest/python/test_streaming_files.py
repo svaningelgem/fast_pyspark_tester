@@ -4,7 +4,6 @@ import tornado.testing
 
 import fast_pyspark_tester
 
-
 LICENSE_FILE = os.path.join(os.path.dirname(__file__), '../../../LICENS*')
 
 
@@ -34,11 +33,7 @@ class TextFile(tornado.testing.AsyncTestCase):
         sc = fast_pyspark_tester.Context()
         ssc = fast_pyspark_tester.streaming.StreamingContext(sc, 0.1)
 
-        (
-            ssc.textFileStream(LICENSE_FILE)
-            .count()
-            .saveAsTextFiles('tests/textout/', suffix='.gz')
-        )
+        (ssc.textFileStream(LICENSE_FILE).count().saveAsTextFiles('tests/textout/', suffix='.gz'))
 
 
 class BinaryFile(tornado.testing.AsyncTestCase):
