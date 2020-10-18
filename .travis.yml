@@ -12,4 +12,4 @@ install:
 script:
  - pyb -X
 after_success:
- - bash <(curl -s https://gist.githubusercontent.com/svaningelgem/b748f492a3bee734e511b0de685ea399/raw/0ace01326f92347003adb940fb9d1d4f89ef2899/codecov_bash) -v
+ - bash <(curl -s https://codecov.io/bash)
