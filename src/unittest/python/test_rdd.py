@@ -101,11 +101,11 @@ class RDDTest(unittest.TestCase):
         self.assertEqual(xy, [('a', ('xa', None)), ('b', ('xb', 'yb')), ('c', ('xc', 'yc'))])
 
         self.assertEqual(
-            xz, [('a', ('xa', None)), ('b', ('xb', None)), ('c', ('xc', 'zc')), ('d', (None, 'zd')),],
+            xz, [('a', ('xa', None)), ('b', ('xb', None)), ('c', ('xc', 'zc')), ('d', (None, 'zd'))],
         )
 
         self.assertEqual(
-            zx, [('a', (None, 'xa')), ('b', (None, 'xb')), ('c', ('zc', 'xc')), ('d', ('zd', None)),],
+            zx, [('a', (None, 'xa')), ('b', (None, 'xb')), ('c', ('zc', 'xc')), ('d', ('zd', None))],
         )
 
     def testFullOuterJoinDuplicate(self):
@@ -118,7 +118,7 @@ class RDDTest(unittest.TestCase):
         xz = sorted(x.fullOuterJoin(z).collect())
 
         self.assertEqual(
-            xy, [('a', ('xa', None)), ('b', (None, 'yb')), ('c', ('xc1', 'yc')), ('c', ('xc2', 'yc')),],
+            xy, [('a', ('xa', None)), ('b', (None, 'yb')), ('c', ('xc1', 'yc')), ('c', ('xc2', 'yc'))],
         )
 
         # Two sets of duplicate keys gives cartesian product

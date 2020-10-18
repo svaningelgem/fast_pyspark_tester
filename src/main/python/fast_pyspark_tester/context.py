@@ -595,7 +595,7 @@ class FixedLengthChunker(object):
 
     def __call__(self, data):
         for i in range(0, len(data), self.record_length):
-            yield data[i : i + self.record_length]
+            yield data[i:i + self.record_length]
 
 
 class VariableLengthChunker(object):
@@ -605,7 +605,7 @@ class VariableLengthChunker(object):
 
     def __call__(self, data):
         while data:
-            prefix, data = data[: self.prefix_length], data[self.prefix_length :]
+            prefix, data = data[:self.prefix_length], data[self.prefix_length:]
             length = struct.unpack(self.length_fmt, prefix)[0]
             package, data = data[:length], data[length:]
             yield package

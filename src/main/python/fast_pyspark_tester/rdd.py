@@ -1461,7 +1461,7 @@ class RDD(object):
 
         codec_suffix = ''
         if path.endswith(tuple('.' + ending for endings, _ in fileio.codec.FILE_ENDINGS for ending in endings)):
-            codec_suffix = path[path.rfind('.') :]
+            codec_suffix = path[path.rfind('.'):]
 
         def _map(path, obj):
             stream = io.BytesIO()
@@ -1512,7 +1512,7 @@ class RDD(object):
 
         codec_suffix = ''
         if path.endswith(tuple('.' + ending for endings, _ in fileio.codec.FILE_ENDINGS for ending in endings)):
-            codec_suffix = path[path.rfind('.') :]
+            codec_suffix = path[path.rfind('.'):]
 
         self.context.runJob(
             self.mapPartitions(to_stringio),

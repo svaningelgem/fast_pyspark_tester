@@ -745,7 +745,7 @@ class UserDefinedType(DataType):
         pyUDT = str(json['pyClass'])  # convert unicode to str
         split = pyUDT.rfind('.')
         pyModule = pyUDT[:split]
-        pyClass = pyUDT[split + 1 :]
+        pyClass = pyUDT[split + 1:]
         m = __import__(pyModule, globals(), locals(), [pyClass])
         if not hasattr(m, pyClass):
             raise NotImplementedError('fast_pyspark_tester does not implement fromJson() for UDT')

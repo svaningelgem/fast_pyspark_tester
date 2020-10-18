@@ -42,7 +42,7 @@ class SessionTests(TestCase):
             df.collect(), [Row(_1=1, _2='one'), Row(_1=2, _2='two'), Row(_1=3, _2='three')],
         )
         self.assertEqual(
-            df.schema, StructType([StructField('_1', LongType(), True), StructField('_2', StringType(), True),]),
+            df.schema, StructType([StructField('_1', LongType(), True), StructField('_2', StringType(), True)]),
         )
 
     def test_session_create_data_frame_from_list(self):
@@ -52,7 +52,7 @@ class SessionTests(TestCase):
             df.collect(), [Row(_1=1, _2='one'), Row(_1=2, _2='two'), Row(_1=3, _2='three')],
         )
         self.assertEqual(
-            df.schema, StructType([StructField('_1', LongType(), True), StructField('_2', StringType(), True),]),
+            df.schema, StructType([StructField('_1', LongType(), True), StructField('_2', StringType(), True)]),
         )
 
     @pytest.mark.skipif(not has_pandas, reason='pandas is not installed')
@@ -70,10 +70,10 @@ class SessionTests(TestCase):
 
         self.assertEqual(df.count(), 3)
         self.assertListEqual(
-            df.collect(), [Row(**{'0': 1, '1': 'one'}), Row(**{'0': 2, '1': 'two'}), Row(**{'0': 3, '2': 'three'}),],
+            df.collect(), [Row(**{'0': 1, '1': 'one'}), Row(**{'0': 2, '1': 'two'}), Row(**{'0': 3, '2': 'three'})],
         )
         self.assertEqual(
-            df.schema, StructType([StructField('0', LongType(), True), StructField('1', StringType(), True),]),
+            df.schema, StructType([StructField('0', LongType(), True), StructField('1', StringType(), True)]),
         )
 
     def test_session_create_data_frame_from_list_with_col_names(self):

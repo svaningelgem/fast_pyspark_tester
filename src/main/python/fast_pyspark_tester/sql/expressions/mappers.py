@@ -187,7 +187,7 @@ class SubstringIndex(Expression):
 
     def eval(self, row, schema):
         parts = str(self.column.eval(row, schema)).split(self.delim)
-        return self.delim.join(parts[: self.count] if self.count > 0 else parts[self.count :])
+        return self.delim.join(parts[:self.count] if self.count > 0 else parts[self.count:])
 
     def __str__(self):
         return 'substring_index({0}, {1}, {2})'.format(self.column, self.delim, self.count)

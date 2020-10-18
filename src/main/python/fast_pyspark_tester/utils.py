@@ -48,7 +48,7 @@ class Tokenizer(object):
             return value
 
         value = self.expression[:sep_pos]
-        self.expression = self.expression[sep_pos + len(separator) :]
+        self.expression = self.expression[sep_pos + len(separator):]
         return value
 
 
@@ -58,7 +58,7 @@ def parse_file_uri(expr):
     domain = t.next('/')
     last_slash_position = t.expression.rfind('/')
     folder_path = '/' + t.expression[: last_slash_position + 1]
-    file_pattern = t.expression[last_slash_position + 1 :]
+    file_pattern = t.expression[last_slash_position + 1:]
 
     return scheme, domain, folder_path, file_pattern
 

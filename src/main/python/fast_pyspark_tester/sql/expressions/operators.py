@@ -317,7 +317,7 @@ class Substring(Expression):
         self.length = length
 
     def eval(self, row, schema):
-        return str(self.expr.eval(row, schema))[self.start - 1 : self.start - 1 + self.length]
+        return str(self.expr.eval(row, schema))[self.start - 1:self.start - 1 + self.length]
 
     def __str__(self):
         return 'substring({0}, {1}, {2})'.format(self.expr, self.start, self.length)
