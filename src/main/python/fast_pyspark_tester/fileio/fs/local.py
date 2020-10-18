@@ -33,6 +33,8 @@ class Local(FileSystem):
             for filename in filenames:
                 path = os.path.join(root, filename)
                 if fnmatch(path, expr) or fnmatch(path, expr + '/part*'):
+                    if os.path.altsep:
+                        path = path.replace(os.path.altsep, os.path.sep)
                     files.append(path)
         return files
 

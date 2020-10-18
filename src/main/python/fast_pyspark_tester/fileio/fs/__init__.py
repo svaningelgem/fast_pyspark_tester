@@ -1,5 +1,7 @@
 from __future__ import absolute_import
 
+from pathlib import Path
+
 from .file_system import FileSystem
 from .gs import GS
 from .hdfs import Hdfs

@@ -4,7 +4,7 @@ build-backend = "pybuilder.pep517"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--exit-first"
+#addopts = "--exitfirst"
 testpaths = [
     'src/unittest/python'
 ]

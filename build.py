@@ -13,9 +13,9 @@ use_plugin("python.pylint")
 # use_plugin("python.unittest")
 # use_plugin("python.coverage")
 # https://github.com/AlexeySanko/pybuilder_pytest
-# use_plugin('pypi:pybuilder_pytest')
+use_plugin('pypi:pybuilder_pytest')
 # https://github.com/AlexeySanko/pybuilder_pytest_coverage
-# use_plugin('pypi:pybuilder_pytest_coverage')
+use_plugin('pypi:pybuilder_pytest_coverage')
 
 
 name = "fast_pyspark_tester"

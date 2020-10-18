@@ -83,3 +83,5 @@ target/
 
 .idea/
 _SUCCESS
+
+src/unittest/python/20news-19997.tar.gz
