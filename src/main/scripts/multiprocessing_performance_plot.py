@@ -23,11 +23,7 @@ def plot(has_hyperthreading=True):
     #         linewidth=2, linestyle='dashed', color='grey')
     n_threads = n_cpu * 2 if has_hyperthreading else n_cpu
     bars_ideal = ax.bar(
-        x_left,
-        range(n_threads) + [n_threads for _ in range(len(x) - n_threads)],
-        1.0,
-        color='lightgrey',
-        linewidth=0,
+        x_left, range(n_threads) + [n_threads for _ in range(len(x) - n_threads)], 1.0, color='lightgrey', linewidth=0,
     )
 
     # measured
@@ -35,40 +31,24 @@ def plot(has_hyperthreading=True):
 
     # divide with cpu cores
     ax.plot(
-        (n_cpu + 0.5, n_cpu + 0.5),
-        (0, n_threads + 1),
-        linewidth=2,
-        linestyle='solid',
-        color='black',
+        (n_cpu + 0.5, n_cpu + 0.5), (0, n_threads + 1), linewidth=2, linestyle='solid', color='black',
     )
-    ax.text(
-        n_cpu + 0.4, n_threads + 1, '{} CPU cores'.format(n_cpu), ha='right', va='top'
-    )
+    ax.text(n_cpu + 0.4, n_threads + 1, '{} CPU cores'.format(n_cpu), ha='right', va='top')
 
     # divide with cpu threads
     if has_hyperthreading:
         ax.plot(
-            (n_cpu * 2 + 0.5, n_cpu * 2 + 0.5),
-            (0, n_threads + 1),
-            linewidth=2,
-            linestyle='solid',
-            color='black',
+            (n_cpu * 2 + 0.5, n_cpu * 2 + 0.5), (0, n_threads + 1), linewidth=2, linestyle='solid', color='black',
         )
         ax.text(
-            n_cpu * 2 + 0.4,
-            n_threads + 1,
-            '{} CPU threads'.format(n_cpu * 2),
-            ha='right',
-            va='top',
+            n_cpu * 2 + 0.4, n_threads + 1, '{} CPU threads'.format(n_cpu * 2), ha='right', va='top',
         )
 
     # add some text for labels, title and axes ticks
     ax.set_xlabel('n processes')
     ax.set_ylabel('speedup')
     ax.set_xticks(x)
-    ax.set_xticklabels(
-        ['no\nserialization\n(single process)'] + [str(s) for s in x[1:]]
-    )
+    ax.set_xticklabels(['no\nserialization\n(single process)'] + [str(s) for s in x[1:]])
     ax.set_xlim(-0.5, max(x) + 0.5)
     ax.set_ylim(0, max(x))
     ax.legend((bars[0], bars_ideal[0]), ('measured', 'ideal'), loc='upper left')
@@ -76,11 +56,7 @@ def plot(has_hyperthreading=True):
     for rect in bars:
         height = rect.get_height()
         ax.text(
-            rect.get_x() + rect.get_width() / 2.0,
-            height - 0.05,
-            '{:.2f}'.format(height),
-            ha='center',
-            va='top',
+            rect.get_x() + rect.get_width() / 2.0, height - 0.05, '{:.2f}'.format(height), ha='center', va='top',
         )
 
     fig.tight_layout()

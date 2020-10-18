@@ -71,10 +71,7 @@ def test_wholeTextFiles():
 
 @pytest.mark.skipif(not AWS_ACCESS_KEY_ID, reason='no AWS env')
 def test_s3_textFile():
-    myrdd = Context().textFile(
-        's3n://aws-publicdatasets/common-crawl/crawl-data/'
-        'CC-MAIN-2015-11/warc.paths.*'
-    )
+    myrdd = Context().textFile('s3n://aws-publicdatasets/common-crawl/crawl-data/' 'CC-MAIN-2015-11/warc.paths.*')
     assert (
         'common-crawl/crawl-data/CC-MAIN-2015-11/segments/1424937481488.49/'
         'warc/CC-MAIN-20150226075801-00329-ip-10-28-5-156.ec2.'
@@ -92,18 +89,14 @@ def test_s3_textFile_loop():
     rdd.saveAsTextFile(fn)
     rdd_check = Context().textFile(fn)
 
-    assert rdd.count() == rdd_check.count() and all(
-        e1 == e2 for e1, e2 in zip(rdd.collect(), rdd_check.collect())
-    )
+    assert rdd.count() == rdd_check.count() and all(e1 == e2 for e1, e2 in zip(rdd.collect(), rdd_check.collect()))
 
 
 @pytest.mark.skipif(not HDFS_TEST_PATH, reason='no HDFS env')
 def test_hdfs_textFile_loop():
     random.seed()
 
-    fn = '{}/pysparkling_test_{:d}.txt'.format(
-        HDFS_TEST_PATH, random.random() * 999999.0
-    )
+    fn = '{}/pysparkling_test_{:d}.txt'.format(HDFS_TEST_PATH, random.random() * 999999.0)
     print('HDFS test file: {0}'.format(fn))
 
     rdd = Context().parallelize('Hello World {0}'.format(x) for x in range(10))
@@ -111,21 +104,15 @@ def test_hdfs_textFile_loop():
     read_rdd = Context().textFile(fn)
     print(rdd.collect())
     print(read_rdd.collect())
-    assert rdd.count() == read_rdd.count() and all(
-        r1 == r2 for r1, r2 in zip(rdd.collect(), read_rdd.collect())
-    )
+    assert rdd.count() == read_rdd.count() and all(r1 == r2 for r1, r2 in zip(rdd.collect(), read_rdd.collect()))
 
 
 @pytest.mark.skipif(not HDFS_TEST_PATH, reason='no HDFS env')
 def test_hdfs_file_exists():
     random.seed()
 
-    fn1 = '{}/pysparkling_test_{:d}.txt'.format(
-        HDFS_TEST_PATH, random.random() * 999999.0
-    )
-    fn2 = '{}/pysparkling_test_{:d}.txt'.format(
-        HDFS_TEST_PATH, random.random() * 999999.0
-    )
+    fn1 = '{}/pysparkling_test_{:d}.txt'.format(HDFS_TEST_PATH, random.random() * 999999.0)
+    fn2 = '{}/pysparkling_test_{:d}.txt'.format(HDFS_TEST_PATH, random.random() * 999999.0)
 
     rdd = Context().parallelize('Hello World {0}'.format(x) for x in range(10))
     rdd.saveAsTextFile(fn1)
@@ -144,9 +131,7 @@ def test_gs_textFile_loop():
     rdd.saveAsTextFile(fn)
     rdd_check = Context().textFile(fn)
 
-    assert rdd.count() == rdd_check.count() and all(
-        e1 == e2 for e1, e2 in zip(rdd.collect(), rdd_check.collect())
-    )
+    assert rdd.count() == rdd_check.count() and all(e1 == e2 for e1, e2 in zip(rdd.collect(), rdd_check.collect()))
 
 
 @pytest.mark.skipif(not AWS_ACCESS_KEY_ID, reason='no AWS env')
@@ -154,18 +139,15 @@ def test_gs_textFile_loop():
 def test_dumpToFile():
     random.seed()
 
-    fn = '{}/pysparkling_test_{:d}.pickle'.format(
-        S3_TEST_PATH, random.random() * 999999.0
-    )
+    fn = '{}/pysparkling_test_{:d}.pickle'.format(S3_TEST_PATH, random.random() * 999999.0)
     File(fn).dump(pickle.dumps({'hello': 'world'}))
 
 
 def test_http_textFile():
     myrdd = Context().textFile(
-        'https://s3-us-west-2.amazonaws.com/human-microbiome-project/DEMO/'
-        'HM16STR/46333/by_subject/1139.fsa'
+        'https://s3-us-west-2.amazonaws.com/human-microbiome-project/DEMO/' 'HM16STR/46333/by_subject/1139.fsa'
     )
-    assert u'TGCTGCGGTGAATGCGTTCCCGGGTCT' in myrdd.collect()
+    assert 'TGCTGCGGTGAATGCGTTCCCGGGTCT' in myrdd.collect()
 
 
 def test_saveAsTextFile():
@@ -273,31 +255,21 @@ def test_read_tar_gz_20news():
 
 
 def test_pyspark_compatibility_txt():
-    kv = (
-        Context().textFile('{}/pyspark/key_value.txt'.format(LOCAL_TEST_PATH)).collect()
-    )
+    kv = Context().textFile('{}/pyspark/key_value.txt'.format(LOCAL_TEST_PATH)).collect()
     print(kv)
-    assert u"('a', 1)" in kv and u"('b', 2)" in kv and len(kv) == 2
+    assert "('a', 1)" in kv and "('b', 2)" in kv and len(kv) == 2
 
 
 def test_pyspark_compatibility_bz2():
-    kv = (
-        Context()
-        .textFile('{}/pyspark/key_value.txt.bz2'.format(LOCAL_TEST_PATH))
-        .collect()
-    )
+    kv = Context().textFile('{}/pyspark/key_value.txt.bz2'.format(LOCAL_TEST_PATH)).collect()
     print(kv)
-    assert u'a\t1' in kv and u'b\t2' in kv and len(kv) == 2
+    assert 'a\t1' in kv and 'b\t2' in kv and len(kv) == 2
 
 
 def test_pyspark_compatibility_gz():
-    kv = (
-        Context()
-        .textFile('{}/pyspark/key_value.txt.gz'.format(LOCAL_TEST_PATH))
-        .collect()
-    )
+    kv = Context().textFile('{}/pyspark/key_value.txt.gz'.format(LOCAL_TEST_PATH)).collect()
     print(kv)
-    assert u'a\t1' in kv and u'b\t2' in kv and len(kv) == 2
+    assert 'a\t1' in kv and 'b\t2' in kv and len(kv) == 2
 
 
 def test_local_regex_read():

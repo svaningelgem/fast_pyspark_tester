@@ -106,19 +106,10 @@ class WriteInFolder(Aggregation):
 
 
 class DataWriter(object):
-    default_options = dict(
-        dateFormat='yyyy-MM-dd', timestampFormat="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
-    )
+    default_options = dict(dateFormat='yyyy-MM-dd', timestampFormat="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",)
 
     def __init__(
-        self,
-        df,
-        mode,
-        options,
-        partitioning_col_names,
-        num_buckets,
-        bucket_col_names,
-        sort_col_names,
+        self, df, mode, options, partitioning_col_names, num_buckets, bucket_col_names, sort_col_names,
     ):
         """
 
@@ -132,9 +123,7 @@ class DataWriter(object):
         """
         self.mode = mode
         self.options = Options(self.default_options, options)
-        self.partitioning_col_names = (
-            partitioning_col_names if partitioning_col_names else []
-        )
+        self.partitioning_col_names = partitioning_col_names if partitioning_col_names else []
         self.num_buckets = num_buckets
         self.bucket_col_names = bucket_col_names if partitioning_col_names else []
         self.sort_col_names = sort_col_names if partitioning_col_names else []
@@ -209,9 +198,7 @@ class CSVWriter(DataWriter):
         if value is None:
             value = self.nullValue
         else:
-            value = cast_to_string(
-                value, from_type=field.dataType, options=self.options
-            )
+            value = cast_to_string(value, from_type=field.dataType, options=self.options)
         if self.ignoreLeadingWhiteSpace:
             value = value.rstrip()
         if self.ignoreTrailingWhiteSpace:
@@ -221,10 +208,7 @@ class CSVWriter(DataWriter):
         return value
 
     def preformat(self, row, schema):
-        return tuple(
-            self.preformat_cell(value, field)
-            for value, field in zip(row, schema.fields)
-        )
+        return tuple(self.preformat_cell(value, field) for value, field in zip(row, schema.fields))
 
     @property
     def sep(self):
@@ -282,15 +266,8 @@ class CSVWriter(DataWriter):
         if not items:
             return 0
 
-        partition_parts = [
-            '{0}={1}'.format(col_name, ref_value[col_name])
-            for col_name in self.partitioning_col_names
-        ]
-        file_path = '/'.join(
-            [output_path]
-            + partition_parts
-            + ['part-00000-{0}.csv'.format(portable_hash(ref_value))]
-        )
+        partition_parts = ['{0}={1}'.format(col_name, ref_value[col_name]) for col_name in self.partitioning_col_names]
+        file_path = '/'.join([output_path] + partition_parts + ['part-00000-{0}.csv'.format(portable_hash(ref_value))])
 
         # pylint: disable=W0511
         # todo: Add support of:
@@ -317,23 +294,10 @@ class CSVWriter(DataWriter):
 
 class JSONWriter(DataWriter):
     def __init__(
-        self,
-        df,
-        mode,
-        options,
-        partitioning_col_names,
-        num_buckets,
-        bucket_col_names,
-        sort_col_names,
+        self, df, mode, options, partitioning_col_names, num_buckets, bucket_col_names, sort_col_names,
     ):
         super(JSONWriter, self).__init__(
-            df,
-            mode,
-            options,
-            partitioning_col_names,
-            num_buckets,
-            bucket_col_names,
-            sort_col_names,
+            df, mode, options, partitioning_col_names, num_buckets, bucket_col_names, sort_col_names,
         )
 
         self.encoder = get_json_encoder(self.options)
@@ -360,11 +324,7 @@ class JSONWriter(DataWriter):
 
     def preformat(self, row, schema):
         return (
-            json.dumps(
-                collections.OrderedDict(zip(schema.names, row)),
-                cls=self.encoder,
-                separators=(',', ':'),
-            )
+            json.dumps(collections.OrderedDict(zip(schema.names, row)), cls=self.encoder, separators=(',', ':'),)
             + self.lineSep
         )
 
@@ -375,14 +335,9 @@ class JSONWriter(DataWriter):
         if not items:
             return 0
 
-        partition_parts = [
-            '{0}={1}'.format(col_name, ref_value[col_name])
-            for col_name in self.partitioning_col_names
-        ]
+        partition_parts = ['{0}={1}'.format(col_name, ref_value[col_name]) for col_name in self.partitioning_col_names]
         partition_folder = '/'.join([output_path] + partition_parts)
-        file_path = '{0}/part-00000-{1}.json'.format(
-            partition_folder, portable_hash(ref_value)
-        )
+        file_path = '{0}/part-00000-{1}.json'.format(partition_folder, portable_hash(ref_value))
 
         if not os.path.exists(partition_folder):
             os.makedirs(partition_folder)

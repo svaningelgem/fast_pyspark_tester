@@ -36,9 +36,7 @@ class TestCount(tornado.testing.AsyncTestCase):
 
         ssc.start()
         ssc.awaitTermination(timeout=0.25)
-        self.assertEqual(
-            result, [[('a', [2, 5]), ('b', [8])], [('a', [2]), ('b', [3])]]
-        )
+        self.assertEqual(result, [[('a', [2, 5]), ('b', [8])], [('a', [2]), ('b', [3])]])
 
     def test_mapValues(self):
         sc = fast_pyspark_tester.Context()

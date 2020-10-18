@@ -85,9 +85,7 @@ class StatCounter(object):
             self.maxValue = maximum(self.maxValue, other.maxValue)
             self.minValue = minimum(self.minValue, other.minValue)
 
-            self.m2 += other.m2 + (
-                (delta * delta * self.n * other.n) / (self.n + other.n)
-            )
+            self.m2 += other.m2 + ((delta * delta * self.n * other.n) / (self.n + other.n))
             self.n += other.n
 
         return self
@@ -232,12 +230,7 @@ class ColumnStatHelper(object):
         delta2 = delta * delta
         deltaN2 = deltaN * deltaN
         self.m3 = self.m3 - 3 * deltaN * self.m2 + delta * (delta2 - deltaN2)
-        self.m4 = (
-            self.m4
-            - 4 * deltaN * self.m3
-            - 6 * deltaN2 * self.m2
-            + delta * (delta * delta2 - deltaN * deltaN2)
-        )
+        self.m4 = self.m4 - 4 * deltaN * self.m3 - 6 * deltaN2 * self.m2 + delta * (delta * delta2 - deltaN * deltaN2)
 
     def update_sample(self, value):
         self.head_sampled.append(value)
@@ -265,14 +258,10 @@ class ColumnStatHelper(object):
                     break
 
             count_without_head += 1
-            if not new_samples or (
-                sample_idx == len(self.sampled) and ops_idx == len(sorted_head) - 1
-            ):
+            if not new_samples or (sample_idx == len(self.sampled) and ops_idx == len(sorted_head) - 1):
                 delta = 0
             else:
-                delta = math.floor(
-                    2 * self.percentiles_relative_error * count_without_head
-                )
+                delta = math.floor(2 * self.percentiles_relative_error * count_without_head)
 
             new_samples.append(PercentileStats(value=current_sample, g=1, delta=delta))
 
@@ -288,9 +277,7 @@ class ColumnStatHelper(object):
         head = self.sampled[-1]
         for sample1 in self.sampled[-2:0:-1]:
             if sample1.g + head.g + head.delta < merge_threshold:
-                head = PercentileStats(
-                    value=head.value, g=head.g + sample1.g, delta=head.delta
-                )
+                head = PercentileStats(value=head.value, g=head.g + sample1.g, delta=head.delta)
             else:
                 reverse_compressed_sample.append(head)
                 head = sample1
@@ -499,9 +486,7 @@ class RowStatHelper(object):
         for col_name in other.col_names:
             counter = other.column_stat_helpers[col_name]
             if col_name in self.column_stat_helpers:
-                self.column_stat_helpers[col_name] = self.column_stat_helpers[
-                    col_name
-                ].mergeStats(counter)
+                self.column_stat_helpers[col_name] = self.column_stat_helpers[col_name].mergeStats(counter)
             else:
                 self.column_stat_helpers[col_name] = counter
                 self.col_names.append(col_name)
@@ -516,10 +501,7 @@ class RowStatHelper(object):
         return [
             row_from_keyed_values(
                 [('summary', stat)]
-                + [
-                    (col_name, self.get_stat(self.column_stat_helpers[col_name], stat))
-                    for col_name in self.col_names
-                ]
+                + [(col_name, self.get_stat(self.column_stat_helpers[col_name], stat)) for col_name in self.col_names]
             )
             for stat in stats
         ]
@@ -552,10 +534,7 @@ class RowStatHelper(object):
 class CovarianceCounter(object):
     def __init__(self, method):
         if method != 'pearson':
-            raise ValueError(
-                'Currently only the calculation of the Pearson Correlation '
-                'coefficient is supported.'
-            )
+            raise ValueError('Currently only the calculation of the Pearson Correlation ' 'coefficient is supported.')
         self.xAvg = 0.0  # the mean of all examples seen so far in col1
         self.yAvg = 0.0  # the mean of all examples seen so far in col2
         self.Ck = 0.0  # the co-moment after k examples
@@ -583,17 +562,11 @@ class CovarianceCounter(object):
             totalCount = self.count + other.count
             deltaX = self.xAvg - other.xAvg
             deltaY = self.yAvg - other.yAvg
-            self.Ck += (
-                other.Ck + deltaX * deltaY * self.count / totalCount * other.count
-            )
+            self.Ck += other.Ck + deltaX * deltaY * self.count / totalCount * other.count
             self.xAvg = (self.xAvg * self.count + other.xAvg * other.count) / totalCount
             self.yAvg = (self.yAvg * self.count + other.yAvg * other.count) / totalCount
-            self.MkX += (
-                other.MkX + deltaX * deltaX * self.count / totalCount * other.count
-            )
-            self.MkY += (
-                other.MkY + deltaY * deltaY * self.count / totalCount * other.count
-            )
+            self.MkX += other.MkX + deltaX * deltaX * self.count / totalCount * other.count
+            self.MkY += other.MkY + deltaY * deltaY * self.count / totalCount * other.count
             self.count = totalCount
         return self
 

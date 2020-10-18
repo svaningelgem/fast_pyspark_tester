@@ -20,9 +20,7 @@ class AddMonths(Expression):
         self.num_months = num_months
 
     def eval(self, row, schema):
-        return self.start_date.cast(DateType()).eval(row, schema) + relativedelta(
-            months=self.num_months
-        )
+        return self.start_date.cast(DateType()).eval(row, schema) + relativedelta(months=self.num_months)
 
     def __str__(self):
         return 'add_months({0}, {1})'.format(self.start_date, self.num_months)
@@ -184,17 +182,13 @@ class MonthsBetween(Expression):
         value_1 = self.column1.cast(TimestampType()).eval(row, schema)
         value_2 = self.column2.cast(TimestampType()).eval(row, schema)
 
-        if not isinstance(value_1, datetime.datetime) or not isinstance(
-            value_2, datetime.datetime
-        ):
+        if not isinstance(value_1, datetime.datetime) or not isinstance(value_2, datetime.datetime):
             return None
 
         one_day = datetime.timedelta(days=1)
         value_1_is_the_last_of_its_month = value_1.month != (value_1 + one_day).month
         value_2_is_the_last_of_its_month = value_2.month != (value_2 + one_day).month
-        if value_1.day == value_2.day or (
-            value_1_is_the_last_of_its_month and value_2_is_the_last_of_its_month
-        ):
+        if value_1.day == value_2.day or (value_1_is_the_last_of_its_month and value_2_is_the_last_of_its_month):
             # Special cases where time of day is not consider
             diff = (value_1.year - value_2.year) * 12 + (value_1.month - value_2.month)
         else:
@@ -205,19 +199,13 @@ class MonthsBetween(Expression):
                 + (value_1.minute - value_2.minute) / 1440
                 + (value_1.second - value_2.second) / 86400
             )
-            diff = (
-                (value_1.year - value_2.year) * 12
-                + (value_1.month - value_2.month) * 1
-                + day_offset / 31
-            )
+            diff = (value_1.year - value_2.year) * 12 + (value_1.month - value_2.month) * 1 + day_offset / 31
         if self.round_off:
             return float(round(diff, 8))
         return float(diff)
 
     def __str__(self):
-        return 'months_between({0}, {1}, {2})'.format(
-            self.column1, self.column2, str(self.round_off).lower()
-        )
+        return 'months_between({0}, {1}, {2})'.format(self.column1, self.column2, str(self.round_off).lower())
 
 
 class DateDiff(Expression):
@@ -230,9 +218,7 @@ class DateDiff(Expression):
         value_1 = self.column1.cast(DateType()).eval(row, schema)
         value_2 = self.column2.cast(DateType()).eval(row, schema)
 
-        if not isinstance(value_1, datetime.date) or not isinstance(
-            value_2, datetime.date
-        ):
+        if not isinstance(value_1, datetime.date) or not isinstance(value_2, datetime.date):
             return None
 
         return (value_1 - value_2).days
@@ -331,8 +317,7 @@ class ParseToTimestamp(Expression):
 
     def __str__(self):
         return "to_timestamp('{0}'{1})".format(
-            self.column,
-            ", '{0}'".format(self.format) if self.format is not None else '',
+            self.column, ", '{0}'".format(self.format) if self.format is not None else '',
         )
 
 
@@ -349,8 +334,7 @@ class ParseToDate(Expression):
 
     def __str__(self):
         return "to_date('{0}'{1})".format(
-            self.column,
-            ", '{0}'".format(self.format) if self.format is not None else '',
+            self.column, ", '{0}'".format(self.format) if self.format is not None else '',
         )
 
 
@@ -402,27 +386,18 @@ class TruncTimestamp(Expression):
             quarter_start_month = int((value.month - 1) / 3) * 3 + 1
             return datetime.datetime(value.year, quarter_start_month, 1)
         if self.level in ('week',):
-            return datetime.datetime(
-                value.year, value.month, value.day
-            ) - datetime.timedelta(days=value.isoweekday() - 1)
+            return datetime.datetime(value.year, value.month, value.day) - datetime.timedelta(
+                days=value.isoweekday() - 1
+            )
         return None
 
     def truncate_to_time(self, value):
         if self.level in ('hour',):
             return datetime.datetime(value.year, value.month, value.day, value.hour)
         if self.level in ('minute',):
-            return datetime.datetime(
-                value.year, value.month, value.day, value.hour, value.minute
-            )
+            return datetime.datetime(value.year, value.month, value.day, value.hour, value.minute)
         if self.level in ('second',):
-            return datetime.datetime(
-                value.year,
-                value.month,
-                value.day,
-                value.hour,
-                value.minute,
-                value.second,
-            )
+            return datetime.datetime(value.year, value.month, value.day, value.hour, value.minute, value.second,)
         return None
 
     def __str__(self):

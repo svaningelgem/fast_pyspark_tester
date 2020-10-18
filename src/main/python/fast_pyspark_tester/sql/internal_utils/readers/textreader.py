@@ -14,9 +14,7 @@ from fast_pyspark_tester.sql.types import (
 
 
 class TextReader(object):
-    default_options = dict(
-        lineSep=None, encoding='utf-8', sep=',', inferSchema=False, header=False
-    )
+    default_options = dict(lineSep=None, encoding='utf-8', sep=',', inferSchema=False, header=False)
 
     def __init__(self, spark, paths, schema, options):
         self.spark = spark
@@ -31,11 +29,7 @@ class TextReader(object):
         partitions, partition_schema = resolve_partitions(paths)
 
         rdd_filenames = sc.parallelize(sorted(partitions.keys()), len(partitions))
-        rdd = rdd_filenames.flatMap(
-            partial(
-                parse_text_file, partitions, partition_schema, self.schema, self.options
-            )
-        )
+        rdd = rdd_filenames.flatMap(partial(parse_text_file, partitions, partition_schema, self.schema, self.options))
 
         if partition_schema:
             partitions_fields = partition_schema.fields
@@ -50,17 +44,11 @@ class TextReader(object):
 
 def parse_text_file(partitions, partition_schema, schema, options, file_name):
     f_content = TextFile(file_name).load(encoding=options.encoding).read()
-    records = (
-        f_content.split(options.lineSep)
-        if options.lineSep is not None
-        else f_content.splitlines()
-    )
+    records = f_content.split(options.lineSep) if options.lineSep is not None else f_content.splitlines()
 
     rows = []
     for record in records:
-        row = text_record_to_row(
-            record, options, schema, partition_schema, partitions[file_name]
-        )
+        row = text_record_to_row(record, options, schema, partition_schema, partitions[file_name])
         row.set_input_file_name(file_name)
         rows.append(row)
 
@@ -68,11 +56,8 @@ def parse_text_file(partitions, partition_schema, schema, options, file_name):
 
 
 def text_record_to_row(record, options, schema, partition_schema, partition):
-    partition_field_names = (
-        [f.name for f in partition_schema.fields] if partition_schema else []
-    )
+    partition_field_names = [f.name for f in partition_schema.fields] if partition_schema else []
     row = create_row(
-        itertools.chain([schema.fields[0].name], partition_field_names),
-        itertools.chain([record], partition or []),
+        itertools.chain([schema.fields[0].name], partition_field_names), itertools.chain([record], partition or []),
     )
     return row

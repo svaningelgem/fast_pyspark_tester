@@ -64,10 +64,7 @@ class Server(object):
             k: (sensor_sums[k] / v, sensor_squares[k] / v)
             for k, v in sensor_counts.items()
         }
-        sensors = {
-            k: (ex_ex2[0], math.sqrt(ex_ex2[1] - ex_ex2[0] ** 2))
-            for k, ex_ex2 in sensor_expections.items()
-        }
+        sensors = {k: (ex_ex2[0], math.sqrt(ex_ex2[1] - ex_ex2[0] ** 2)) for k, ex_ex2 in sensor_expections.items()}
         print('run: n = {}, counts = {}, result = {}' ''.format(n, counts, result))
         print('sensors = {}'.format(sensors))
         time.sleep(self.pause)

@@ -1,8 +1,7 @@
 from IPython.parallel import Client
 
 rc = Client(
-    '/Users/sven/.starcluster/ipcluster/'
-    'SecurityGroup:@sc-smallcluster-us-east-1.json',
+    '/Users/sven/.starcluster/ipcluster/' 'SecurityGroup:@sc-smallcluster-us-east-1.json',
     sshkey='/Users/sven/.ssh/starclusterkey.rsa',
     packer='pickle',
 )

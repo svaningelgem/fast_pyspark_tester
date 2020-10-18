@@ -52,8 +52,7 @@ class CaseWhen(Expression):
     def __str__(self):
         return 'CASE {0} END'.format(
             ' '.join(
-                'WHEN {0} THEN {1}'.format(condition, value)
-                for condition, value in zip(self.conditions, self.values)
+                'WHEN {0} THEN {1}'.format(condition, value) for condition, value in zip(self.conditions, self.values)
             )
         )
 
@@ -84,8 +83,7 @@ class Otherwise(Expression):
     def __str__(self):
         return 'CASE {0} ELSE {1} END'.format(
             ' '.join(
-                'WHEN {0} THEN {1}'.format(condition, value)
-                for condition, value in zip(self.conditions, self.values)
+                'WHEN {0} THEN {1}'.format(condition, value) for condition, value in zip(self.conditions, self.values)
             ),
             self.default,
         )
@@ -134,9 +132,7 @@ class RegExpReplace(Expression):
         return self.fn(self.e.eval(row, schema))
 
     def __str__(self):
-        return 'regexp_replace({0}, {1}, {2})'.format(
-            self.e, self.exp, self.replacement
-        )
+        return 'regexp_replace({0}, {1}, {2})'.format(self.e, self.exp, self.replacement)
 
 
 class Round(NullSafeColumnOperation):
@@ -191,14 +187,10 @@ class SubstringIndex(Expression):
 
     def eval(self, row, schema):
         parts = str(self.column.eval(row, schema)).split(self.delim)
-        return self.delim.join(
-            parts[: self.count] if self.count > 0 else parts[self.count:]
-        )
+        return self.delim.join(parts[: self.count] if self.count > 0 else parts[self.count :])
 
     def __str__(self):
-        return 'substring_index({0}, {1}, {2})'.format(
-            self.column, self.delim, self.count
-        )
+        return 'substring_index({0}, {1}, {2})'.format(self.column, self.delim, self.count)
 
 
 class Coalesce(Expression):
@@ -417,9 +409,7 @@ class Log(Expression):
         return math.log(value_eval, self.base)
 
     def __str__(self):
-        return 'LOG({0}{1})'.format(
-            '{}, '.format(self.base) if self.base != math.e else '', self.value
-        )
+        return 'LOG({0}{1})'.format('{}, '.format(self.base) if self.base != math.e else '', self.value)
 
 
 class Log10(UnaryExpression):
@@ -538,17 +528,13 @@ class CreateStruct(Expression):
     def eval(self, row, schema):
         struct_cols, struct_values = [], []
         for col in self.columns:
-            output_cols, output_values = resolve_column(
-                col, row, schema, allow_generator=False
-            )
+            output_cols, output_values = resolve_column(col, row, schema, allow_generator=False)
             struct_cols += output_cols
             struct_values += output_values[0]
         return create_row(struct_cols, struct_values)
 
     def __str__(self):
-        return 'named_struct({0})'.format(
-            ', '.join('{0}, {0}'.format(col) for col in self.columns)
-        )
+        return 'named_struct({0})'.format(', '.join('{0}, {0}'.format(col) for col in self.columns))
 
 
 class Bin(UnaryExpression):
@@ -632,10 +618,7 @@ class ConcatWs(Expression):
 
     def __str__(self):
         return 'concat_ws({0}{1})'.format(
-            self.sep,
-            ', {0}'.format(', '.join(str(col) for col in self.columns))
-            if self.columns
-            else '',
+            self.sep, ', {0}'.format(', '.join(str(col) for col in self.columns)) if self.columns else '',
         )
 
 
@@ -706,15 +689,11 @@ class StringSplit(Expression):
 
     def eval(self, row, schema):
         limit = self.limit if self.limit is not None else 0
-        return list(
-            self.compiled_regex.split(str(self.column.eval(row, schema)), limit)
-        )
+        return list(self.compiled_regex.split(str(self.column.eval(row, schema)), limit))
 
     def __str__(self):
         return 'split({0}, {1}{2})'.format(
-            self.column,
-            self.regex,
-            ', {0}'.format(self.limit) if self.limit is not None else '',
+            self.column, self.regex, ', {0}'.format(self.limit) if self.limit is not None else '',
         )
 
 
@@ -727,9 +706,7 @@ class Conv(Expression):
 
     def eval(self, row, schema):
         value = self.column.cast(StringType()).eval(row, schema)
-        return self.convert(
-            value, self.from_base, abs(self.to_base), positive_only=self.to_base > 0
-        )
+        return self.convert(value, self.from_base, abs(self.to_base), positive_only=self.to_base > 0)
 
     def __str__(self):
         return 'conv({0}, {1}, {2})'.format(self.column, self.from_base, self.to_base)
@@ -769,11 +746,7 @@ class Conv(Expression):
         >>> Conv.convert("YOP", 36, 0)  # returns None if to_base < 2
         >>> Conv.convert("YOP", 10, 2)  # returns None if value is not in the from_base
         """
-        if (
-            not (2 <= from_base <= 36 and 2 <= to_base <= 36)
-            or from_string is None
-            or not from_string
-        ):
+        if not (2 <= from_base <= 36 and 2 <= to_base <= 36) or from_string is None or not from_string:
             return None
 
         if from_string.startswith('-'):
@@ -787,10 +760,7 @@ class Conv(Expression):
         if not set(digits[:from_base]).issuperset(set(from_numbers)):
             return None
 
-        value = sum(
-            digits.index(digit) * (from_base ** i)
-            for i, digit in enumerate(from_numbers[::-1])
-        )
+        value = sum(digits.index(digit) * (from_base ** i) for i, digit in enumerate(from_numbers[::-1]))
 
         if value_is_negative and positive_only:
             value = 2 ** 64 - value
@@ -813,9 +783,7 @@ class Conv(Expression):
 
 class Hex(UnaryExpression):
     def eval(self, row, schema):
-        return Conv.convert(
-            self.column.eval(row, schema), from_base=10, to_base=16, positive_only=True
-        )
+        return Conv.convert(self.column.eval(row, schema), from_base=10, to_base=16, positive_only=True)
 
     def __str__(self):
         return 'hex({0})'.format(self.column)
@@ -823,9 +791,7 @@ class Hex(UnaryExpression):
 
 class Unhex(UnaryExpression):
     def eval(self, row, schema):
-        return Conv.convert(
-            self.column.eval(row, schema), from_base=16, to_base=10, positive_only=True
-        )
+        return Conv.convert(self.column.eval(row, schema), from_base=16, to_base=10, positive_only=True)
 
     def __str__(self):
         return 'unhex({0})'.format(self.column)
@@ -887,12 +853,8 @@ class GroupingID(Expression):
     def eval(self, row, schema):
         metadata = row.get_metadata()
         if metadata is None or 'grouping' not in metadata:
-            raise AnalysisException(
-                'grouping_id() can only be used with GroupingSets/Cube/Rollup'
-            )
-        id_binary_string_value = ''.join(
-            '1' if grouping else '0' for grouping in metadata['grouping']
-        )
+            raise AnalysisException('grouping_id() can only be used with GroupingSets/Cube/Rollup')
+        id_binary_string_value = ''.join('1' if grouping else '0' for grouping in metadata['grouping'])
         return int(id_binary_string_value, 2)
 
     def __str__(self):
@@ -903,9 +865,7 @@ class Grouping(UnaryExpression):
     def eval(self, row, schema):
         metadata = row.get_metadata()
         if metadata is None or 'grouping' not in metadata:
-            raise AnalysisException(
-                'grouping_id() can only be used with GroupingSets/Cube/Rollup'
-            )
+            raise AnalysisException('grouping_id() can only be used with GroupingSets/Cube/Rollup')
         pos = self.column.find_position_in_schema(schema)
         return int(metadata['grouping'][pos])
 

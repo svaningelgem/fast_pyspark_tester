@@ -52,15 +52,13 @@ class StringLocate(Expression):
 
     def eval(self, row, schema):
         value = self.column.cast(StringType()).eval(row, schema)
-        if self.substr not in value[self.start:]:
+        if self.substr not in value[self.start :]:
             return 0
         return value.index(self.substr, self.start) + 1
 
     def __str__(self):
         return 'locate({0}, {1}{2})'.format(
-            self.substr,
-            self.column,
-            ', {0}'.format(self.start) if self.start is not None else '',
+            self.substr, self.column, ', {0}'.format(self.start) if self.start is not None else '',
         )
 
 
@@ -126,16 +124,10 @@ class StringTranslate(Expression):
         )
 
     def eval(self, row, schema):
-        return (
-            self.column.cast(StringType())
-            .eval(row, schema)
-            .translate(self.translation_table)
-        )
+        return self.column.cast(StringType()).eval(row, schema).translate(self.translation_table)
 
     def __str__(self):
-        return 'translate({0}, {1}, {2})'.format(
-            self.column, self.matching_string, self.replace_string
-        )
+        return 'translate({0}, {1}, {2})'.format(self.column, self.matching_string, self.replace_string)
 
 
 class InitCap(Expression):
@@ -170,10 +162,7 @@ class Levenshtein(Expression):
 
 class SoundEx(UnaryExpression):
     _soundex_mapping = {
-        letter: int(soundex_code)
-        for letter, soundex_code in zip(
-            string.ascii_uppercase, '01230127022455012623017202'
-        )
+        letter: int(soundex_code) for letter, soundex_code in zip(string.ascii_uppercase, '01230127022455012623017202')
     }
 
     def eval(self, row, schema):

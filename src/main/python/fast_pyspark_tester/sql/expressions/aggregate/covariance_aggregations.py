@@ -13,9 +13,7 @@ class CovarianceStatAggregation(Aggregation):
         self.stat_helper = CovarianceCounter(method='pearson')
 
     def merge(self, row, schema):
-        self.stat_helper.add(
-            row.eval(self.column1, schema), row.eval(self.column2, schema)
-        )
+        self.stat_helper.add(row.eval(self.column1, schema), row.eval(self.column2, schema))
 
     def mergeStats(self, other, schema):
         self.stat_helper.merge(other)

@@ -28,9 +28,7 @@ class TCPTextTest(tornado.testing.AsyncTestCase):
         counter = Counter()
         (
             ssc.socketTextStream('127.0.0.1', 8123).foreachRDD(
-                lambda rdd: counter.update(''.join(rdd.collect()))
-                if rdd.collect()
-                else None
+                lambda rdd: counter.update(''.join(rdd.collect())) if rdd.collect() else None
             )
         )
         self.client()
@@ -54,11 +52,7 @@ class TCPBinaryFixedLengthTest(tornado.testing.AsyncTestCase):
         ssc = fast_pyspark_tester.streaming.StreamingContext(sc, 0.1)
 
         counter = Counter()
-        (
-            ssc.socketBinaryStream('127.0.0.1', 8124, length=5).foreachRDD(
-                lambda rdd: counter.update(rdd.collect())
-            )
-        )
+        (ssc.socketBinaryStream('127.0.0.1', 8124, length=5).foreachRDD(lambda rdd: counter.update(rdd.collect())))
         self.client()
 
         ssc.start()
@@ -80,11 +74,7 @@ class TCPBinaryUIntLengthTest(tornado.testing.AsyncTestCase):
         ssc = fast_pyspark_tester.streaming.StreamingContext(sc, 0.1)
 
         counter = Counter()
-        (
-            ssc.socketBinaryStream('127.0.0.1', 8125, length='<I').foreachRDD(
-                lambda rdd: counter.update(rdd.collect())
-            )
-        )
+        (ssc.socketBinaryStream('127.0.0.1', 8125, length='<I').foreachRDD(lambda rdd: counter.update(rdd.collect())))
         self.client()
 
         ssc.start()

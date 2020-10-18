@@ -58,10 +58,7 @@ class MapColumn(Expression):
         self.values = columns[1::2]
 
     def eval(self, row, schema):
-        return dict(
-            (key.eval(row, schema), value.eval(row, schema))
-            for key, value in zip(self.keys, self.values)
-        )
+        return dict((key.eval(row, schema), value.eval(row, schema)) for key, value in zip(self.keys, self.values))
 
     def __str__(self):
         return 'map({0})'.format(', '.join(str(col) for col in self.columns))
@@ -86,9 +83,7 @@ class Size(UnaryExpression):
         if isinstance(column_value, (list, dict)):
             return len(column_value)
         raise AnalysisException(
-            '{0} value should be an array or a map, got {1}'.format(
-                self.column, type(column_value)
-            )
+            '{0} value should be an array or a map, got {1}'.format(self.column, type(column_value))
         )
 
     def __str__(self):
@@ -159,9 +154,7 @@ class Sequence(Expression):
         stop_value = self.stop.eval(row, schema)
         if self.step is not None:
             step_value = self.step.eval(row, schema)
-            if (step_value < stop_value and step_value <= 0) or (
-                step_value > stop_value and step_value >= 0
-            ):
+            if (step_value < stop_value and step_value <= 0) or (step_value > stop_value and step_value >= 0):
                 raise Exception(
                     'requirement failed: Illegal sequence boundaries: '
                     '{0} to {1} by {2}'.format(start_value, stop_value, step_value)
@@ -190,10 +183,7 @@ class ArrayJoin(Expression):
 
     def eval(self, row, schema):
         column_eval = self.column.eval(row, schema)
-        return self.delimiter.join(
-            value if value is not None else self.nullReplacement
-            for value in column_eval
-        )
+        return self.delimiter.join(value if value is not None else self.nullReplacement for value in column_eval)
 
     def __str__(self):
         return 'array_join({0}, {1}{2})'.format(
@@ -201,9 +191,7 @@ class ArrayJoin(Expression):
             self.delimiter,
             # Spark use the same logic of not displaying nullReplacement
             # if it is None, even if it was explicitly set
-            ', {0}'.format(self.nullReplacement)
-            if self.nullReplacement is not None
-            else '',
+            ', {0}'.format(self.nullReplacement) if self.nullReplacement is not None else '',
         )
 
 
@@ -226,10 +214,7 @@ class ArraysZip(Expression):
         self.cols = cols
 
     def eval(self, row, schema):
-        return [
-            list(combination)
-            for combination in zip(*(c.eval(row, schema) for c in self.cols))
-        ]
+        return [list(combination) for combination in zip(*(c.eval(row, schema) for c in self.cols))]
 
     def __str__(self):
         return 'arrays_zip({0})'.format(', '.join(self.cols))

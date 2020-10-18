@@ -19,12 +19,7 @@ class Options(dict):
     """
 
     def __init__(self, *args, **kwargs):
-        d = {
-            key.lower(): value
-            for arg in args
-            if arg is not None
-            for key, value in arg.items()
-        }
+        d = {key.lower(): value for arg in args if arg is not None for key, value in arg.items()}
         d.update({key.lower(): value for key, value in kwargs.items()})
         super(Options, self).__init__(d)
 

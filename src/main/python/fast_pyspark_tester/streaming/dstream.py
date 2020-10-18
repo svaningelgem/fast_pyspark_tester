@@ -111,9 +111,7 @@ class DStream(object):
         >>> ssc.awaitTermination(0.15)
         [(1, 2), (2, 1), (5, 3)]
         """
-        return self.transform(
-            lambda rdd: self._context._context.parallelize(rdd.countByValue().items())
-        )
+        return self.transform(lambda rdd: self._context._context.parallelize(rdd.countByValue().items()))
 
     def countByWindow(self, windowDuration, slideDuration=None):
         """Applies count() after window().
@@ -156,9 +154,7 @@ class DStream(object):
         :param f: mapping function
         :rtype: DStream
         """
-        return self.mapPartitions(
-            lambda p: (e for pp in p for e in f(pp)), preservesPartitioning,
-        )
+        return self.mapPartitions(lambda p: (e for pp in p for e in f(pp)), preservesPartitioning,)
 
     def flatMapValues(self, f):
         """Apply f to each value of a key-value pair.
@@ -295,9 +291,9 @@ class DStream(object):
         [3]
         [8]
         """
-        return self.mapPartitions(
-            lambda p: (f(e) for e in p), preservesPartitioning
-        ).transform(lambda rdd: rdd.setName('{}:{}'.format(rdd.prev.name(), f)))
+        return self.mapPartitions(lambda p: (f(e) for e in p), preservesPartitioning).transform(
+            lambda rdd: rdd.setName('{}:{}'.format(rdd.prev.name(), f))
+        )
 
     def mapPartitions(self, f, preservesPartitioning=False):
         """Map partitions.
@@ -305,9 +301,9 @@ class DStream(object):
         :param f: mapping function
         :rtype: DStream
         """
-        return self.mapPartitionsWithIndex(
-            lambda i, p: f(p), preservesPartitioning
-        ).transform(lambda rdd: rdd.setName('{}:{}'.format(rdd.prev.name(), f)))
+        return self.mapPartitionsWithIndex(lambda i, p: f(p), preservesPartitioning).transform(
+            lambda rdd: rdd.setName('{}:{}'.format(rdd.prev.name(), f))
+        )
 
     def mapPartitionsWithIndex(self, f, preservesPartitioning=False):
         """Apply a map function that takes an index and the data.
@@ -318,9 +314,7 @@ class DStream(object):
         :param f: mapping function
         :rtype: DStream
         """
-        return self.transform(
-            lambda rdd: rdd.mapPartitionsWithIndex(f, preservesPartitioning)
-        )
+        return self.transform(lambda rdd: rdd.mapPartitionsWithIndex(f, preservesPartitioning))
 
     def mapValues(self, f):
         """Apply ``f`` to every element.
@@ -372,11 +366,7 @@ class DStream(object):
 
         # avoid RDD.reduce() which does not return an RDD
         return self.transform(
-            lambda rdd: (
-                rdd.map(lambda i: (None, i))
-                .reduceByKey(func)
-                .map(lambda none_i: none_i[1])
-            )
+            lambda rdd: (rdd.map(lambda i: (None, i)).reduceByKey(func).map(lambda none_i: none_i[1]))
         )
 
     def reduceByKey(self, func, numPartitions=None):
@@ -411,11 +401,7 @@ class DStream(object):
         0
 
         """
-        return self.transform(
-            lambda rdd: (
-                rdd.repartition(numPartitions) if not isinstance(rdd, EmptyRDD) else rdd
-            )
-        )
+        return self.transform(lambda rdd: (rdd.repartition(numPartitions) if not isinstance(rdd, EmptyRDD) else rdd))
 
     def rightOuterJoin(self, other, numPartitions=None):
         """Apply rightOuterJoin to each pair of RDDs.
@@ -467,9 +453,7 @@ class DStream(object):
         """
         self.foreachRDD(
             lambda time_, rdd: rdd.saveAsTextFile(
-                '{}-{:.0f}{}'.format(
-                    prefix, time_ * 1000, suffix if suffix is not None else ''
-                )
+                '{}-{:.0f}{}'.format(prefix, time_ * 1000, suffix if suffix is not None else '')
             )
         )
 
@@ -480,11 +464,7 @@ class DStream(object):
         :param datetime.datetime|int end: datetiem or unix timestamp
         :rtype: DStream
         """
-        return self.transform(
-            lambda time_, rdd: rdd
-            if begin <= time_ <= end
-            else EmptyRDD(self._context._context)
-        )
+        return self.transform(lambda time_, rdd: rdd if begin <= time_ <= end else EmptyRDD(self._context._context))
 
     def transform(self, func):
         """Return a new DStream where each RDD is transformed by ``f``.
@@ -650,9 +630,7 @@ class TransformedWithDStream(DStream):
         self._prev._step(time_)
         self._other_prev._step(time_)
         self._current_time = time_
-        self._current_rdd = self._func(
-            time_, self._prev._current_rdd, self._other_prev._current_rdd
-        )
+        self._current_rdd = self._func(time_, self._prev._current_rdd, self._other_prev._current_rdd)
 
 
 class WindowedDStream(DStream):
@@ -663,9 +641,7 @@ class WindowedDStream(DStream):
             slideDuration = self._context.batch_duration
 
         self._prev = prev
-        self._window_duration = int(
-            round(windowDuration / self._context.batch_duration)
-        )
+        self._window_duration = int(round(windowDuration / self._context.batch_duration))
         self._slide_duration = int(round(slideDuration / self._context.batch_duration))
         self._slide_counter = 0
         self._window = []
@@ -705,9 +681,7 @@ class CogroupedDStream(DStream):
         self._prev1._step(time_)
         self._prev2._step(time_)
         self._current_time = time_
-        self._current_rdd = getattr(self._prev1._current_rdd, self._op)(
-            self._prev2._current_rdd, self._num_partitions
-        )
+        self._current_rdd = getattr(self._prev1._current_rdd, self._op)(self._prev2._current_rdd, self._num_partitions)
 
 
 class StatefulDStream(DStream):

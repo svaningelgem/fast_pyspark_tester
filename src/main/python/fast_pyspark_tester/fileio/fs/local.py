@@ -70,9 +70,7 @@ class Local(FileSystem):
             return io.BytesIO(f.read())
 
     def load_text(self, encoding='utf8', encoding_errors='ignore'):
-        with io.open(
-            self.file_path, 'r', encoding=encoding, errors=encoding_errors
-        ) as f:
+        with io.open(self.file_path, 'r', encoding=encoding, errors=encoding_errors) as f:
             return io.StringIO(f.read())
 
     def dump(self, stream):

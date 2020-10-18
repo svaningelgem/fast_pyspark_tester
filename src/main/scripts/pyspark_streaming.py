@@ -27,11 +27,7 @@ def simple_queue_one_at_a_time(ssc):
 
 
 def save_text(ssc):
-    (
-        ssc.queueStream([range(5), ['a', 'b'], ['c']], oneAtATime=True).saveAsTextFiles(
-            'scripts/textout/'
-        )
-    )
+    (ssc.queueStream([range(5), ['a', 'b'], ['c']], oneAtATime=True).saveAsTextFiles('scripts/textout/'))
 
 
 def window(ssc):
@@ -61,11 +57,7 @@ def stream_log(ssc):
 
 
 def stream_queue_default(ssc):
-    (
-        ssc.queueStream([[4], [2]], default=['placeholder']).foreachRDD(
-            lambda rdd: print(rdd.collect())
-        )
-    )
+    (ssc.queueStream([[4], [2]], default=['placeholder']).foreachRDD(lambda rdd: print(rdd.collect())))
 
 
 def join_with_repeated_keys(ssc):

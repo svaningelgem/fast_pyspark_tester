@@ -6,10 +6,10 @@ from pybuilder.core import use_plugin, init, before, after, Author, Project
 from pybuilder.errors import BuildFailedException
 from pybuilder.vcs import VCSRevision
 
-use_plugin("python.core")
-use_plugin("python.flake8")
-use_plugin("python.distutils")
-use_plugin("python.pylint")
+use_plugin('python.core')
+use_plugin('python.flake8')
+use_plugin('python.distutils')
+use_plugin('python.pylint')
 # use_plugin("python.unittest")
 # use_plugin("python.coverage")
 # https://github.com/AlexeySanko/pybuilder_pytest
@@ -18,8 +18,8 @@ use_plugin('pypi:pybuilder_pytest')
 use_plugin('pypi:pybuilder_pytest_coverage')
 
 
-name = "fast_pyspark_tester"
-default_task = "publish"
+name = 'fast_pyspark_tester'
+default_task = 'publish'
 version = '0.6.0'
 license = 'MIT'
 summary = 'Pure Python implementation of the pyspark interface.'
@@ -53,11 +53,11 @@ def _add_extras_require(project, logger):
     indent_size = 4
     encoding = 'utf-8'
 
-    setup_script = Path(project.expand_path("$dir_dist", "setup.py"))
+    setup_script = Path(project.expand_path('$dir_dist', 'setup.py'))
     logger.info("Adding 'extras_require' to setup.py")
     setup = setup_script.read_text(encoding=encoding).rstrip()
     if setup[-1] != ')':
-        raise BuildFailedException("This setup.py seems to be wrong?")
+        raise BuildFailedException('This setup.py seems to be wrong?')
 
     # Get the requirements-dev.txt file line by line, ready for insertion.
     requirements_dev = '\n'.join(
@@ -69,7 +69,7 @@ def _add_extras_require(project, logger):
     # TODO: find a nicer way to embed this!
     new_setup = (
         setup[:-1].rstrip()
-        + f"""
+        + f'''
         extras_require={{
             'hdfs': ['hdfs>=2.0.0'],
             'pandas': ['pandas>=0.23.2'],
@@ -80,7 +80,7 @@ def _add_extras_require(project, logger):
             ]
         }},
     )
-"""
+'''
     )
 
     setup_script.write_text(new_setup, encoding=encoding)
@@ -90,10 +90,7 @@ def _add_extras_require(project, logger):
 def write_version_into_library(project: Project):
     version_file = Path(project.expand_path('$dir_dist', f'{project.name}/__version__.py'))
     version_file.write_text(
-        version_file
-        .read_text()
-        .replace('%version%', project.version)
-        .replace('%hash%', VCSRevision().get_git_hash())
+        version_file.read_text().replace('%version%', project.version).replace('%hash%', VCSRevision().get_git_hash())
     )
 
 
@@ -104,11 +101,8 @@ def set_properties(project):
     old_project_list_scripts = project.list_scripts
 
     def _my_list_scripts():
-        return [
-            filename
-            for filename in old_project_list_scripts()
-            if filename.lower().endswith('.py')
-        ]
+        return [filename for filename in old_project_list_scripts() if filename.lower().endswith('.py')]
+
     setattr(project, 'list_scripts', _my_list_scripts)
 
     project.depends_on_requirements(file='requirements.txt')
@@ -132,10 +126,11 @@ def set_properties(project):
             'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: Implementation :: PyPy',
-        ]
+        ],
     )
 
 
 if __name__ == '__main__':
     from pybuilder.cli import main
+
     main('-CX', '--no-venvs')

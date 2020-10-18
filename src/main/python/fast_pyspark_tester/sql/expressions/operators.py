@@ -276,9 +276,7 @@ class IsIn(Expression):
         return self.arg1.eval(row, schema) in self.cols
 
     def __str__(self):
-        return '({0} IN ({1}))'.format(
-            self.arg1, ', '.join(str(col) for col in self.cols)
-        )
+        return '({0} IN ({1}))'.format(self.arg1, ', '.join(str(col) for col in self.cols))
 
 
 class IsNotNull(UnaryExpression):
@@ -302,9 +300,7 @@ class Cast(Expression):
         super(Cast, self).__init__(column)
         self.column = column
         self.destination_type = destination_type
-        self.caster = get_caster(
-            from_type=self.column.data_type, to_type=destination_type, options={}
-        )
+        self.caster = get_caster(from_type=self.column.data_type, to_type=destination_type, options={})
 
     def eval(self, row, schema):
         return self.caster(self.column.eval(row, schema))
@@ -321,9 +317,7 @@ class Substring(Expression):
         self.length = length
 
     def eval(self, row, schema):
-        return str(self.expr.eval(row, schema))[
-            self.start - 1:self.start - 1 + self.length
-        ]
+        return str(self.expr.eval(row, schema))[self.start - 1 : self.start - 1 + self.length]
 
     def __str__(self):
         return 'substring({0}, {1}, {2})'.format(self.expr, self.start, self.length)

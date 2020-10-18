@@ -56,22 +56,15 @@ def merge_schemas(left_schema, right_schema, how, on=None):
         on = []
 
     left_on_fields, right_on_fields = get_on_fields(left_schema, right_schema, on)
-    other_left_fields = [
-        field for field in left_schema.fields if field not in left_on_fields
-    ]
-    other_right_fields = [
-        field for field in right_schema.fields if field not in right_on_fields
-    ]
+    other_left_fields = [field for field in left_schema.fields if field not in left_on_fields]
+    other_right_fields = [field for field in right_schema.fields if field not in right_on_fields]
 
     if how in (INNER_JOIN, CROSS_JOIN, LEFT_JOIN, LEFT_ANTI_JOIN, LEFT_SEMI_JOIN):
         on_fields = left_on_fields
     elif how == RIGHT_JOIN:
         on_fields = right_on_fields
     elif how == FULL_JOIN:
-        on_fields = [
-            StructField(field.name, field.dataType, nullable=True)
-            for field in left_on_fields
-        ]
+        on_fields = [StructField(field.name, field.dataType, nullable=True) for field in left_on_fields]
     else:
         raise IllegalArgumentException('Invalid how argument in join: {0}'.format(how))
 
@@ -79,19 +72,11 @@ def merge_schemas(left_schema, right_schema, how, on=None):
 
 
 def get_on_fields(left_schema, right_schema, on):
-    left_on_fields = [
-        next(field for field in left_schema if field.name == c) for c in on
-    ]
-    right_on_fields = [
-        next(field for field in right_schema if field.name == c) for c in on
-    ]
+    left_on_fields = [next(field for field in left_schema if field.name == c) for c in on]
+    right_on_fields = [next(field for field in right_schema if field.name == c) for c in on]
     return left_on_fields, right_on_fields
 
 
 def get_schema_from_cols(cols, current_schema):
-    new_schema = StructType(
-        fields=[
-            field for col in cols for field in col.find_fields_in_schema(current_schema)
-        ]
-    )
+    new_schema = StructType(fields=[field for col in cols for field in col.find_fields_in_schema(current_schema)])
     return new_schema

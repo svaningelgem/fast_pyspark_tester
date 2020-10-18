@@ -61,8 +61,7 @@ class CacheManager(object):
 
     def has(self, ident):
         return ident in self.cache_obj and (
-            self.cache_obj[ident]['mem_obj'] is not None
-            or self.cache_obj[ident]['disk_location'] is not None
+            self.cache_obj[ident]['mem_obj'] is not None or self.cache_obj[ident]['disk_location'] is not None
         )
 
     def get_not_in(self, idents):
@@ -82,11 +81,7 @@ class CacheManager(object):
         self.cache_obj.update(cache_objects)
 
     def stored_idents(self):
-        return [
-            k
-            for k, v in self.cache_obj.items()
-            if (v['mem_obj'] is not None or v['disk_location'] is not None)
-        ]
+        return [k for k, v in self.cache_obj.items() if (v['mem_obj'] is not None or v['disk_location'] is not None)]
 
     def clone_contains(self, filter_id):
         """Clone the cache manager and add a subset of the cache to it.
@@ -96,9 +91,7 @@ class CacheManager(object):
 
         :rtype: CacheManager
         """
-        cm = CacheManager(
-            self.max_mem, self.serializer, self.deserializer, self.checksum
-        )
+        cm = CacheManager(self.max_mem, self.serializer, self.deserializer, self.checksum)
         cm.cache_obj = {i: c for i, c in self.cache_obj.items() if filter_id(i)}
         return cm
 
@@ -132,16 +125,9 @@ class TimedCacheManager(CacheManager):
     """
 
     def __init__(
-        self,
-        max_mem=1.0,
-        serializer=None,
-        deserializer=None,
-        checksum=None,
-        timeout=600.0,
+        self, max_mem=1.0, serializer=None, deserializer=None, checksum=None, timeout=600.0,
     ):
-        super(TimedCacheManager, self).__init__(
-            max_mem, serializer, deserializer, checksum
-        )
+        super(TimedCacheManager, self).__init__(max_mem, serializer, deserializer, checksum)
 
         self.timeout = timeout
         self._time_added = []  # pairs of (id, timestamp); oldest first
@@ -159,13 +145,7 @@ class TimedCacheManager(CacheManager):
 
         :rtype: TimedCacheManager
         """
-        cm = TimedCacheManager(
-            self.max_mem,
-            self.serializer,
-            self.deserializer,
-            self.checksum,
-            self.timeout,
-        )
+        cm = TimedCacheManager(self.max_mem, self.serializer, self.deserializer, self.checksum, self.timeout,)
         cm.cache_obj = {i: c for i, c in self.cache_obj.items() if filter_id(i)}
         return cm
 

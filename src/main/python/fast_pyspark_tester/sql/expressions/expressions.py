@@ -23,11 +23,7 @@ class Expression(object):
         return self.__class__.__name__
 
     def output_fields(self, schema):
-        return [
-            StructField(
-                name=str(self), dataType=self.data_type, nullable=self.is_nullable
-            )
-        ]
+        return [StructField(name=str(self), dataType=self.data_type, nullable=self.is_nullable)]
 
     @property
     def data_type(self):
@@ -204,14 +200,10 @@ class TypeSafeBinaryOperation(BinaryOperation):
         spark_type_2 = python_to_spark_type(type_2)
 
         if order_1 > order_2:
-            caster = get_caster(
-                from_type=spark_type_2, to_type=spark_type_1, options={}
-            )
+            caster = get_caster(from_type=spark_type_2, to_type=spark_type_1, options={})
             value_2 = caster(value_2)
         elif order_1 < order_2:
-            caster = get_caster(
-                from_type=spark_type_1, to_type=spark_type_2, options={}
-            )
+            caster = get_caster(from_type=spark_type_1, to_type=spark_type_2, options={})
             value_1 = caster(value_1)
 
         return self.unsafe_operation(value_1, value_2)
@@ -239,9 +231,7 @@ class NullSafeBinaryOperation(BinaryOperation):
 
         type_1 = value_1.__class__
         type_2 = value_2.__class__
-        if type_1 == type_2 or (
-            isinstance(value_1, (int, float)) and isinstance(value_2, (int, float))
-        ):
+        if type_1 == type_2 or (isinstance(value_1, (int, float)) and isinstance(value_2, (int, float))):
             return self.unsafe_operation(value_1, value_2)
 
         raise AnalysisException(

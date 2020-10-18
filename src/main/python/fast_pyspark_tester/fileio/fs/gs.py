@@ -33,9 +33,7 @@ class GS(FileSystem):
 
     def __init__(self, file_name):
         if storage is None:
-            raise FileSystemNotSupported(
-                'Google Storage is not supported. Install "gcloud".'
-            )
+            raise FileSystemNotSupported('Google Storage is not supported. Install "gcloud".')
 
         super(GS, self).__init__(file_name)
 
@@ -59,9 +57,7 @@ class GS(FileSystem):
     def _get_client(project_name):
         if project_name not in GS._clients:
             if storage is None:
-                raise FileSystemNotSupported(
-                    'Google Storage is not supported. Install "gcloud".'
-                )
+                raise FileSystemNotSupported('Google Storage is not supported. Install "gcloud".')
             GS._clients[project_name] = storage.Client(project_name)
         return GS._clients[project_name]
 
@@ -83,11 +79,7 @@ class GS(FileSystem):
         expr = expr[expr_s:]
         for k in bucket.list_blobs(prefix=prefix):
             if fnmatch(k.name, expr) or fnmatch(k.name, expr + '/part*'):
-                files.append(
-                    '{0}://{1}:{2}/{3}'.format(
-                        scheme, project_name, bucket_name, k.name
-                    )
-                )
+                files.append('{0}://{1}:{2}/{3}'.format(scheme, project_name, bucket_name, k.name))
         return files
 
     @staticmethod
@@ -110,9 +102,7 @@ class GS(FileSystem):
 
         files = []
         for k in bucket.list_blobs(prefix=folder_path):
-            if not k.name.endswith('/') and (
-                fnmatch(k.name, expr) or fnmatch(k.name, pattern_expr)
-            ):
+            if not k.name.endswith('/') and (fnmatch(k.name, expr) or fnmatch(k.name, pattern_expr)):
                 files.append('{0}://{1}/{2}'.format(scheme, raw_bucket_name, k.name))
         return files
 
@@ -126,23 +116,15 @@ class GS(FileSystem):
             project_name = GS.project_name
         blob_name = t.next()
         bucket = GS._get_client(project_name).get_bucket(bucket_name)
-        return bucket.get_blob(blob_name) or list(
-            bucket.list_blobs(prefix='{}/'.format(blob_name))
-        )
+        return bucket.get_blob(blob_name) or list(bucket.list_blobs(prefix='{}/'.format(blob_name)))
 
     def load(self):
-        log.debug(
-            'Loading {0} with size {1}.' ''.format(self.blob.name, self.blob.size)
-        )
+        log.debug('Loading {0} with size {1}.' ''.format(self.blob.name, self.blob.size))
         return BytesIO(self.blob.download_as_string())
 
     def load_text(self, encoding='utf8', encoding_errors='ignore'):
-        log.debug(
-            'Loading {0} with size {1}.' ''.format(self.blob.name, self.blob.size)
-        )
-        return StringIO(
-            self.blob.download_as_string().decode(encoding, encoding_errors)
-        )
+        log.debug('Loading {0} with size {1}.' ''.format(self.blob.name, self.blob.size))
+        return StringIO(self.blob.download_as_string().decode(encoding, encoding_errors))
 
     def dump(self, stream):
         log.debug('Dumping to {0}.'.format(self.blob.name))

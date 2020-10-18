@@ -16,9 +16,7 @@ class Context(unittest.TestCase):
         sc = fast_pyspark_tester.Context()
         self.assertRaises(
             fast_pyspark_tester.exceptions.ContextIsLockedException,
-            lambda: (
-                sc.parallelize(range(5)).map(lambda _: sc.parallelize([1])).collect()
-            ),
+            lambda: (sc.parallelize(range(5)).map(lambda _: sc.parallelize([1])).collect()),
         )
 
     def test_lock2(self):
@@ -30,8 +28,7 @@ class Context(unittest.TestCase):
             print(o.map(lambda x: x.collect()).collect())
 
         self.assertRaises(
-            fast_pyspark_tester.exceptions.ContextIsLockedException,
-            parallelize_in_parallelize,
+            fast_pyspark_tester.exceptions.ContextIsLockedException, parallelize_in_parallelize,
         )
 
     def test_parallelize_single_element(self):

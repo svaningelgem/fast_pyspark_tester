@@ -65,7 +65,7 @@ class S3(FileSystem):
         prefix = t.next(['*', '?'])
 
         bucket = cls._get_conn().get_bucket(bucket_name, validate=False)
-        expr = expr[len(scheme) + 3 + len(bucket_name) + 1:]
+        expr = expr[len(scheme) + 3 + len(bucket_name) + 1 :]
         for k in bucket.list(prefix=prefix):
             if fnmatch(k.name, expr) or fnmatch(k.name, expr + '/part*'):
                 files.append('{0}://{1}/{2}'.format(scheme, bucket_name, k.name,))
@@ -103,9 +103,7 @@ class S3(FileSystem):
 
     def load_text(self, encoding='utf8', encoding_errors='ignore'):
         log.debug('Loading {0} with size {1}.' ''.format(self.key.name, self.key.size))
-        return StringIO(
-            self.key.get_contents_as_string().decode(encoding, encoding_errors)
-        )
+        return StringIO(self.key.get_contents_as_string().decode(encoding, encoding_errors))
 
     def dump(self, stream):
         log.debug('Dumping to {0}.'.format(self.key.name))

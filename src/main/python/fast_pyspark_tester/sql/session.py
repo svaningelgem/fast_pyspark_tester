@@ -141,8 +141,7 @@ class SparkSession(object):
                         break
                 else:
                     raise ValueError(
-                        'Some of types cannot be determined by the '
-                        'first 100 rows, please try again with sampling'
+                        'Some of types cannot be determined by the ' 'first 100 rows, please try again with sampling'
                     )
         else:
             if samplingRatio < 0.99:
@@ -165,9 +164,7 @@ class SparkSession(object):
             schema = struct
 
         elif not isinstance(schema, StructType):
-            raise TypeError(
-                'schema should be StructType or list or None, but got: %s' % schema
-            )
+            raise TypeError('schema should be StructType or list or None, but got: %s' % schema)
 
         # convert python objects to sql data
         rdd = rdd.map(schema.toInternal)
@@ -193,9 +190,7 @@ class SparkSession(object):
             schema = struct
 
         elif not isinstance(schema, StructType):
-            raise TypeError(
-                'schema should be StructType or list or None, but got: %s' % schema
-            )
+            raise TypeError('schema should be StructType or list or None, but got: %s' % schema)
 
         # convert python objects to sql data
         data = [schema.toInternal(row) for row in data]
@@ -224,9 +219,7 @@ class SparkSession(object):
 
     def _convert_from_pandas(self, pdf, schema, timezone):
         if timezone is not None:
-            raise NotImplementedError(
-                'Pandas with session timezone respect is not supported'
-            )
+            raise NotImplementedError('Pandas with session timezone respect is not supported')
 
         # Convert pandas.DataFrame to list of numpy records
         np_records = pdf.to_records(index=False)
@@ -250,9 +243,7 @@ class SparkSession(object):
             schema = StructType.fromDDL(schema)
         elif isinstance(schema, (list, tuple)):
             # Must re-encode any unicode strings to be consistent with StructField names
-            schema = [
-                x.encode('utf-8') if not isinstance(x, str) else x for x in schema
-            ]
+            schema = [x.encode('utf-8') if not isinstance(x, str) else x for x in schema]
 
         try:
             # pandas is an optional dependency
@@ -279,11 +270,7 @@ class SparkSession(object):
             dataType = schema
             schema = StructType().add('value', schema)
 
-            verify_func = (
-                _make_type_verifier(dataType, name='field value')
-                if verifySchema
-                else no_check
-            )
+            verify_func = _make_type_verifier(dataType, name='field value') if verifySchema else no_check
 
             def prepare(obj):
                 verify_func(obj)
@@ -299,13 +286,8 @@ class SparkSession(object):
         else:
             rdd, schema = self._createFromLocal(map(prepare, data), schema)
 
-        cols = [
-            col_type.name if hasattr(col_type, 'name') else '_' + str(i)
-            for i, col_type in enumerate(schema)
-        ]
-        df = DataFrame(
-            DataFrameInternal(self._sc, rdd, cols, True, schema), self._wrapped
-        )
+        cols = [col_type.name if hasattr(col_type, 'name') else '_' + str(i) for i, col_type in enumerate(schema)]
+        df = DataFrame(DataFrameInternal(self._sc, rdd, cols, True, schema), self._wrapped)
         return df
 
     def parse_pandas_dataframe(self, data, schema):
@@ -319,9 +301,7 @@ class SparkSession(object):
         # If no schema supplied by user then get the names of columns only
         if schema is None:
             schema = [
-                str(x)
-                if not isinstance(x, basestring)
-                else (x.encode('utf-8') if not isinstance(x, str) else x)
+                str(x) if not isinstance(x, basestring) else (x.encode('utf-8') if not isinstance(x, str) else x)
                 for x in data.columns
             ]
         data = self._convert_from_pandas(data, schema, timezone)
@@ -331,9 +311,7 @@ class SparkSession(object):
         if numPartitions is None:
             numPartitions = self._sc.defaultParallelism
 
-        idf = DataFrameInternal.range(
-            self.sparkContext, start, end, step, numPartitions
-        )
+        idf = DataFrameInternal.range(self.sparkContext, start, end, step, numPartitions)
         return DataFrame(idf, self._wrapped)
 
     @property

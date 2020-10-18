@@ -33,10 +33,7 @@ class FileSystem(object):
 
         :rtype: bool
         """
-        log.warning(
-            'Could not determine whether {0} exists due to '
-            'unhandled scheme.'.format(self.file_name)
-        )
+        log.warning('Could not determine whether {0} exists due to ' 'unhandled scheme.'.format(self.file_name))
 
     def load(self):
         """Load a file to a stream.

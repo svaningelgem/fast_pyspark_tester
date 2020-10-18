@@ -40,9 +40,7 @@ def _run_task(task_context, rdd, func, partition):
 
     log.debug(
         'Running stage {} for partition {} of {} (id: {}).'
-        ''.format(
-            task_context.stage_id, task_context.partition_id, rdd.name(), rdd.id()
-        )
+        ''.format(task_context.stage_id, task_context.partition_id, rdd.name(), rdd.id())
     )
 
     try:
@@ -50,19 +48,11 @@ def _run_task(task_context, rdd, func, partition):
     except Exception as e:  # pylint: disable=broad-except
         log.warning(
             'Attempt {} failed for partition {} of {} (id: {}): {}'
-            ''.format(
-                task_context.attempt_number,
-                partition.index,
-                rdd.name(),
-                rdd.id(),
-                traceback.format_exc(),
-            )
+            ''.format(task_context.attempt_number, partition.index, rdd.name(), rdd.id(), traceback.format_exc(),)
         )
 
         if task_context.attempt_number == task_context.max_retries:
-            log.error(
-                'Partition {} of {} failed.' ''.format(partition.index, rdd.name())
-            )
+            log.error('Partition {} of {} failed.' ''.format(partition.index, rdd.name()))
             if not task_context.catch_exceptions:
                 raise e
 
@@ -188,9 +178,7 @@ class Context(object):
         a custom AccumulatorParam can be used.
         """
         if not isinstance(self._pool, DummyPool):
-            raise NotImplementedError(
-                'Accumulators are not yet compatible with multiprocessing'
-            )
+            raise NotImplementedError('Accumulators are not yet compatible with multiprocessing')
         if accum_param is None:
             if isinstance(value, int):
                 accum_param = accumulators.INT_ACCUMULATOR_PARAM
@@ -199,9 +187,7 @@ class Context(object):
             elif isinstance(value, complex):
                 accum_param = accumulators.COMPLEX_ACCUMULATOR_PARAM
             else:
-                raise TypeError(
-                    'No default accumulator param for type {0}'.format(type(value))
-                )
+                raise TypeError('No default accumulator param for type {0}'.format(type(value)))
         return accumulators.Accumulator(value, accum_param)
 
     def newRddId(self):
@@ -280,10 +266,7 @@ class Context(object):
 
         """
         resolved_names = File.resolve_filenames(name)
-        log.debug(
-            'pickleFile() resolved "{0}" to {1} files.'
-            ''.format(name, len(resolved_names))
-        )
+        log.debug('pickleFile() resolved "{0}" to {1} files.' ''.format(name, len(resolved_names)))
 
         n_partitions = len(resolved_names)
         if minPartitions and minPartitions > n_partitions:
@@ -325,9 +308,7 @@ class Context(object):
         else:
             map_result = self._runJob_distributed(rdd, func, partitions)
 
-        result = (
-            resultHandler(map_result) if resultHandler is not None else list(map_result)
-        )
+        result = resultHandler(map_result) if resultHandler is not None else list(map_result)
 
         # release lock
         self.locked = False
@@ -351,9 +332,7 @@ class Context(object):
 
         def prepare(partition):
             t_start = time.perf_counter()
-            cm_clone = self._cache_manager.clone_contains(
-                lambda i: i[1] == partition.index
-            )
+            cm_clone = self._cache_manager.clone_contains(lambda i: i[1] == partition.index)
             self._stats['driver_cache_clone'] += time.perf_counter() - t_start
 
             t_start = time.perf_counter()
@@ -366,9 +345,7 @@ class Context(object):
                 retry_wait=self.retry_wait,
             )
             serialized_task_context = self._serializer(task_context)
-            self._stats['driver_serialize_task_context'] += (
-                time.perf_counter() - t_start
-            )
+            self._stats['driver_serialize_task_context'] += time.perf_counter() - t_start
 
             t_start = time.perf_counter()
             serialized_partition = self._data_deserializer(partition)
@@ -435,10 +412,7 @@ class Context(object):
         ['bellobello']
         """
         resolved_names = File.resolve_filenames(path)
-        log.debug(
-            'binaryFile() resolved "{0}" to {1} files.'
-            ''.format(path, len(resolved_names))
-        )
+        log.debug('binaryFile() resolved "{0}" to {1} files.' ''.format(path, len(resolved_names)))
 
         n_partitions = len(resolved_names)
         if minPartitions and minPartitions > n_partitions:
@@ -535,10 +509,7 @@ class Context(object):
         :rtype: RDD
         """
         resolved_names = TextFile.resolve_filenames(filename)
-        log.debug(
-            'textFile() resolved "{0}" to {1} files.'
-            ''.format(filename, len(resolved_names))
-        )
+        log.debug('textFile() resolved "{0}" to {1} files.' ''.format(filename, len(resolved_names)))
 
         n_partitions = len(resolved_names)
         if minPartitions and minPartitions > n_partitions:
@@ -547,9 +518,7 @@ class Context(object):
         encoding = 'utf8' if use_unicode else 'ascii'
 
         rdd_filenames = self.parallelize(sorted(resolved_names), n_partitions)
-        rdd = rdd_filenames.flatMap(
-            lambda f_name: TextFile(f_name).load(encoding=encoding).read().splitlines()
-        )
+        rdd = rdd_filenames.flatMap(lambda f_name: TextFile(f_name).load(encoding=encoding).read().splitlines())
         rdd._name = filename
         return rdd
 
@@ -582,19 +551,14 @@ class Context(object):
         :rtype: RDD
         """
         resolved_names = TextFile.resolve_filenames(path)
-        log.debug(
-            'wholeTextFiles() resolved "{0}" to {1} files.'
-            ''.format(path, len(resolved_names))
-        )
+        log.debug('wholeTextFiles() resolved "{0}" to {1} files.' ''.format(path, len(resolved_names)))
 
         n_partitions = len(resolved_names)
         if minPartitions and minPartitions > n_partitions:
             n_partitions = minPartitions
 
         encoding = 'utf8' if use_unicode else 'ascii'
-        rdd_filenames = self.parallelize(
-            [(f_name, encoding) for f_name in sorted(resolved_names)], n_partitions,
-        )
+        rdd_filenames = self.parallelize([(f_name, encoding) for f_name in sorted(resolved_names)], n_partitions,)
         rdd = rdd_filenames.map(map_whole_text_file)
         rdd._name = path
         return rdd
@@ -631,7 +595,7 @@ class FixedLengthChunker(object):
 
     def __call__(self, data):
         for i in range(0, len(data), self.record_length):
-            yield data[i:i + self.record_length]
+            yield data[i : i + self.record_length]
 
 
 class VariableLengthChunker(object):
@@ -641,7 +605,7 @@ class VariableLengthChunker(object):
 
     def __call__(self, data):
         while data:
-            prefix, data = data[:self.prefix_length], data[self.prefix_length:]
+            prefix, data = data[: self.prefix_length], data[self.prefix_length :]
             length = struct.unpack(self.length_fmt, prefix)[0]
             package, data = data[:length], data[length:]
             yield package
