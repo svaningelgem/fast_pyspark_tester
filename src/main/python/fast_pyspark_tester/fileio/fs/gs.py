@@ -1,12 +1,12 @@
 from __future__ import absolute_import
 
-from fnmatch import fnmatch
 import logging
+from fnmatch import fnmatch
 from io import BytesIO, StringIO
 
+from .file_system import FileSystem
 from ...exceptions import FileSystemNotSupported
 from ...utils import Tokenizer, parse_file_uri
-from .file_system import FileSystem
 
 log = logging.getLogger(__name__)
 

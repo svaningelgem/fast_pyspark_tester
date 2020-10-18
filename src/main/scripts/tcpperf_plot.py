@@ -1,5 +1,6 @@
-from collections import namedtuple
 import csv
+from collections import namedtuple
+
 import matplotlib
 
 matplotlib.use('Agg')

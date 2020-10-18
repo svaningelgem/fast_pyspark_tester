@@ -1,8 +1,5 @@
 from __future__ import print_function
 
-import random
-from pathlib import Path
-
 import tornado.testing
 
 import fast_pyspark_tester

@@ -7,6 +7,7 @@ from copy import deepcopy
 from functools import partial
 
 from fast_pyspark_tester import StorageLevel
+from fast_pyspark_tester.sql.column import parse
 from fast_pyspark_tester.sql.functions import (
     array,
     map_from_arrays,
@@ -41,7 +42,6 @@ from fast_pyspark_tester.sql.types import (
     Row,
     LongType,
 )
-from fast_pyspark_tester.sql.column import parse
 from fast_pyspark_tester.sql.utils import IllegalArgumentException
 from fast_pyspark_tester.stat_counter import RowStatHelper, CovarianceCounter
 from fast_pyspark_tester.utils import (

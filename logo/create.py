@@ -2,6 +2,8 @@
 
 import os
 import random
+from pathlib import Path
+
 import svgwrite
 
 DATA = [
@@ -60,7 +62,7 @@ def smaller(svg_document, x, y, v, x_offset=0, y_offset=0):
     if v == 1:
         size = 16.0*(1.0 - distance2/max_distance2)
         number_of_cubes = int(16**2 / (size**2))
-        for i in xrange(number_of_cubes):
+        for i in range(number_of_cubes):
             xi = x*16 + 1 + random.random()*(14.0-size) + x_offset
             yi = y*16 + 1 + random.random()*(14.0-size) + y_offset
             sizepx = str(size)+"px"
@@ -75,11 +77,12 @@ def smaller(svg_document, x, y, v, x_offset=0, y_offset=0):
 
 
 def main():
-    svg_favicon = svgwrite.Drawing(filename="favicon.svg",
+    root = Path(__file__).parent
+    svg_favicon = svgwrite.Drawing(filename=root/"favicon.svg",
                                    size=("128px", "128px"))
-    svg_document = svgwrite.Drawing(filename="logo.svg",
+    svg_document = svgwrite.Drawing(filename=root/"logo.svg",
                                     size=("128px", "128px"))
-    svg_banner = svgwrite.Drawing(filename="banner.svg",
+    svg_banner = svgwrite.Drawing(filename=root/"banner.svg",
                                   size=("600px", "200px"))
     for y, r in enumerate(DATA):
         for x, v in enumerate(r):
@@ -94,19 +97,19 @@ def main():
     )
     svg_banner.add(g)
     # print(svg_document.tostring())
-    svg_favicon.save()
-    svg_document.save()
-    svg_banner.save()
+    svg_favicon.save(pretty=True)
+    svg_document.save(pretty=True)
+    svg_banner.save(pretty=True)
 
     # create pngs
-    os.system('svg2png --width=100 --height=100 logo.svg logo-w100.png')
-    os.system('svg2png --width=600 --height=600 logo.svg logo-w600.png')
-    os.system('svg2png --width=500 --height=100 banner.svg banner-w500.png')
-    os.system('svg2png --width=1500 --height=400 banner.svg banner-w1500.png')
+    os.system(f'svg2png --width=100 --height=100 "{svg_document.filename}" --output="logo-w100.png"')
+    os.system(f'svg2png --width=600 --height=600 "{svg_document.filename}" --output="logo-w600.png"')
+    os.system(f'svg2png --width=500 --height=100 "{svg_banner.filename}" --output="banner-w500.png"')
+    os.system(f'svg2png --width=1500 --height=400 "{svg_banner.filename}" --output="banner-w1500.png"')
     favicon_sizes = [16, 32, 48, 128, 256]
     for s in favicon_sizes:
-        os.system('svg2png --width='+str(s)+' --height='+str(s)+' favicon.svg favicon-w'+str(s)+'.png')
-    png_favicon_names = ['favicon-w'+str(s)+'.png' for s in favicon_sizes]
+        os.system(f'svg2png --width={s} --height={s} "{svg_favicon.filename}" --output="favicon-w{s}.png"')
+    png_favicon_names = [f'favicon-w{s}.png' for s in favicon_sizes]
     os.system('convert ' + (' '.join(png_favicon_names)) +
               ' -colors 256 favicon.ico')
 

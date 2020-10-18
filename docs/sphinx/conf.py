@@ -18,7 +18,6 @@ import sys
 import src.main.python.fast_pyspark_tester.__version__
 
 sys.path.insert(0, os.path.abspath('../..'))
-import fast_pyspark_tester
 PYSPARKLING_VERSION = src.main.python.fast_pyspark_tester.__version__.__version__
 
 # If extensions (or modules to document with autodoc) are in another directory,

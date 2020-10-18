@@ -4,7 +4,6 @@ import tornado.testing
 
 import fast_pyspark_tester
 
-
 LICENSE_FILE = os.path.join(os.path.dirname(__file__), '../../../LICENS*')
 
 

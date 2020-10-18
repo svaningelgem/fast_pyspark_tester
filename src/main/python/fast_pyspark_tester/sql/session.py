@@ -1,6 +1,14 @@
 import sys
 from threading import RLock
 
+from fast_pyspark_tester import RDD
+from fast_pyspark_tester import __version__ as FAST_PYSPARK_TESTER_VERSION
+from fast_pyspark_tester.context import Context
+from fast_pyspark_tester.sql.conf import RuntimeConfig
+from fast_pyspark_tester.sql.dataframe import DataFrame
+from fast_pyspark_tester.sql.internals import DataFrameInternal
+from fast_pyspark_tester.sql.readwriter import DataFrameReader
+from fast_pyspark_tester.sql.schema_utils import infer_schema_from_list
 from fast_pyspark_tester.sql.types import (
     _make_type_verifier,
     DataType,
@@ -10,18 +18,7 @@ from fast_pyspark_tester.sql.types import (
     _has_nulltype,
     _merge_type,
 )
-
-from fast_pyspark_tester import RDD
-from fast_pyspark_tester.context import Context
-from fast_pyspark_tester.sql.conf import RuntimeConfig
-from fast_pyspark_tester.sql.internals import DataFrameInternal
-from fast_pyspark_tester.sql.dataframe import DataFrame
-from fast_pyspark_tester.sql.readwriter import DataFrameReader
-from fast_pyspark_tester.sql.schema_utils import infer_schema_from_list
 from fast_pyspark_tester.sql.utils import require_minimum_pandas_version
-
-from fast_pyspark_tester import __version__ as FAST_PYSPARK_TESTER_VERSION
-
 
 if sys.version >= '3':
     basestring = unicode = str

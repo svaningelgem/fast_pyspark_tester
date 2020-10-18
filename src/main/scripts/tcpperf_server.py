@@ -1,14 +1,14 @@
 from __future__ import print_function, division
 
-from collections import defaultdict
 import json
 import logging
 import math
 import os
-import fast_pyspark_tester
 import struct
 import time
+from collections import defaultdict
 
+import fast_pyspark_tester
 
 N_CONNECTIONS = (100, 1000, 2000, 3000, 3500, 4000, 4500, 5000, 6000, 7000, 8000)
 N_CONNECTIONS_1K = (10, 20, 30, 40, 45, 50, 60, 70, 80, 90, 100)

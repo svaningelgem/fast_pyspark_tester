@@ -2,7 +2,9 @@ from unittest import TestCase
 
 import pytest
 
+from fast_pyspark_tester import Context
 from fast_pyspark_tester import StorageLevel
+from fast_pyspark_tester.sql.session import SparkSession
 from fast_pyspark_tester.sql.types import (
     Row,
     StructType,
@@ -15,8 +17,6 @@ from fast_pyspark_tester.sql.types import (
     IntegerType,
     row_from_keyed_values,
 )
-from fast_pyspark_tester.sql.session import SparkSession
-from fast_pyspark_tester import Context
 from fast_pyspark_tester.sql.utils import require_minimum_pandas_version
 
 try:

@@ -1,6 +1,5 @@
-from fast_pyspark_tester.sql.types import StructField
-
 from fast_pyspark_tester.sql.expressions.expressions import Expression
+from fast_pyspark_tester.sql.types import StructField
 from fast_pyspark_tester.sql.utils import AnalysisException
 
 

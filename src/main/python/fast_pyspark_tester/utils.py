@@ -12,7 +12,6 @@ import pytz
 from pytz import UnknownTimeZoneError
 
 from fast_pyspark_tester.sql.casts import get_time_formatter
-from fast_pyspark_tester.sql.schema_utils import get_on_fields
 from fast_pyspark_tester.sql.internal_utils.joins import (
     FULL_JOIN,
     RIGHT_JOIN,
@@ -22,6 +21,7 @@ from fast_pyspark_tester.sql.internal_utils.joins import (
     LEFT_SEMI_JOIN,
     LEFT_ANTI_JOIN,
 )
+from fast_pyspark_tester.sql.schema_utils import get_on_fields
 from fast_pyspark_tester.sql.types import Row, create_row, row_from_keyed_values
 from fast_pyspark_tester.sql.utils import IllegalArgumentException
 

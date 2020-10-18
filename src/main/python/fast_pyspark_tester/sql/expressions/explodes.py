@@ -1,6 +1,5 @@
-from fast_pyspark_tester.sql.types import StructField, IntegerType, DataType
-
 from fast_pyspark_tester.sql.expressions.expressions import UnaryExpression
+from fast_pyspark_tester.sql.types import StructField, IntegerType, DataType
 
 
 class Explode(UnaryExpression):

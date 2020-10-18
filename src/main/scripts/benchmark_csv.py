@@ -1,8 +1,9 @@
 """Benchmark csv reading performance."""
 
 import argparse
-import fast_pyspark_tester
 import random
+
+import fast_pyspark_tester
 
 
 def create_csv(filename, lines=10000000, columns=12):

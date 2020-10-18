@@ -2,17 +2,17 @@
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from collections import defaultdict
 import itertools
 import logging
 import pickle
 import struct
 import time
 import traceback
+from collections import defaultdict
 
+from . import accumulators
 from .__version__ import FAST_PYSPARK_TESTER_VERSION
 from .broadcast import Broadcast
-from . import accumulators
 from .cache_manager import CacheManager
 from .exceptions import ContextIsLockedException
 from .fileio import File, TextFile

@@ -91,6 +91,7 @@ from fast_pyspark_tester.sql.expressions.explodes import (
     PosExplodeOuter,
 )
 from fast_pyspark_tester.sql.expressions.jsons import StructsToJson
+from fast_pyspark_tester.sql.expressions.literals import Literal
 from fast_pyspark_tester.sql.expressions.mappers import (
     CaseWhen,
     Rand,
@@ -159,7 +160,6 @@ from fast_pyspark_tester.sql.expressions.mappers import (
     MapFromEntries,
     MapConcat,
 )
-from fast_pyspark_tester.sql.expressions.literals import Literal
 from fast_pyspark_tester.sql.expressions.operators import (
     IsNull,
     BitwiseNot,
