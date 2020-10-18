@@ -107,6 +107,12 @@ def set_properties(project):
 
     project.depends_on_requirements(file='requirements.txt')
 
+    project.set_property('pylint_break_build', True)
+
+    project.set_property('flake8_break_build', True)
+    project.set_property('flake8_include_test_sources', True)
+    project.set_property('flake8_include_scripts', True)
+
     project.set_property('distutils_readme_description', True)
     project.set_property('distutils_readme_file', 'README.rst')
 
