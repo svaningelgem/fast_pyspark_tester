@@ -1,18 +1,20 @@
 """fast_pyspark_tester module"""
-from . import exceptions
-from . import fileio
-from . import streaming
-from .__version__ import __version__
-from .accumulators import Accumulator, AccumulatorParam
-from .broadcast import Broadcast
-from .cache_manager import CacheManager, TimedCacheManager
-from .context import Context
-from .rdd import RDD
-
 # flake8: noqa
 from .sql.types import Row
+
+from .__version__ import __version__
+
+from .rdd import RDD
+from .context import Context
+from .broadcast import Broadcast
+from .accumulators import Accumulator, AccumulatorParam
 from .stat_counter import StatCounter
+from .cache_manager import CacheManager, TimedCacheManager
 from .storagelevel import StorageLevel
+
+from . import fileio
+from . import streaming
+from . import exceptions
 
 __all__ = [
     'RDD',
