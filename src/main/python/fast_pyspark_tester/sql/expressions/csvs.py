@@ -8,7 +8,7 @@ sql_csv_function_options = dict(dateFormat=NO_TIMESTAMP_CONVERSION, timestampFor
 
 class SchemaOfCsv(Expression):
     def __init__(self, column, options):
-        super(SchemaOfCsv, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.input_options = options
         # pylint: disable=import-outside-toplevel; circular import

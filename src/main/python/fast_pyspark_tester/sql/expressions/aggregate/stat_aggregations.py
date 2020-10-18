@@ -10,7 +10,7 @@ class SimpleStatAggregation(Aggregation):
         # pylint: disable=import-outside-toplevel
         from fast_pyspark_tester.stat_counter import ColumnStatHelper
 
-        super(SimpleStatAggregation, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.stat_helper = ColumnStatHelper(column)
 
@@ -35,7 +35,7 @@ class Count(SimpleStatAggregation):
 
         if isinstance(column.expr, StarOperator):
             column = Column(Literal(1))
-        super(Count, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.stat_helper = ColumnStatHelper(column)
 

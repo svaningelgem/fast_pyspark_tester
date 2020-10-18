@@ -15,7 +15,7 @@ DAYS_OF_WEEK = ('MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN')
 
 class AddMonths(Expression):
     def __init__(self, start_date, num_months):
-        super(AddMonths, self).__init__(start_date)
+        super().__init__(start_date)
         self.start_date = start_date
         self.num_months = num_months
 
@@ -28,7 +28,7 @@ class AddMonths(Expression):
 
 class DateAdd(Expression):
     def __init__(self, start_date, num_days):
-        super(DateAdd, self).__init__(start_date)
+        super().__init__(start_date)
         self.start_date = start_date
         self.num_days = num_days
         self.timedelta = datetime.timedelta(days=num_days)
@@ -42,7 +42,7 @@ class DateAdd(Expression):
 
 class DateSub(Expression):
     def __init__(self, start_date, num_days):
-        super(DateSub, self).__init__(start_date)
+        super().__init__(start_date)
         self.start_date = start_date
         self.num_days = num_days
         self.timedelta = datetime.timedelta(days=num_days)
@@ -150,7 +150,7 @@ class DayOfWeek(UnaryExpression):
 
 class NextDay(Expression):
     def __init__(self, column, day_of_week):
-        super(NextDay, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.day_of_week = day_of_week
 
@@ -173,7 +173,7 @@ class NextDay(Expression):
 
 class MonthsBetween(Expression):
     def __init__(self, column1, column2, round_off):
-        super(MonthsBetween, self).__init__(column1, column2)
+        super().__init__(column1, column2)
         self.column1 = column1
         self.column2 = column2
         self.round_off = round_off
@@ -210,7 +210,7 @@ class MonthsBetween(Expression):
 
 class DateDiff(Expression):
     def __init__(self, column1, column2):
-        super(DateDiff, self).__init__(column1, column2)
+        super().__init__(column1, column2)
         self.column1 = column1
         self.column2 = column2
 
@@ -229,7 +229,7 @@ class DateDiff(Expression):
 
 class FromUnixTime(Expression):
     def __init__(self, column, f):
-        super(FromUnixTime, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.format = f
         self.formatter = get_time_formatter(self.format)
@@ -244,7 +244,7 @@ class FromUnixTime(Expression):
 
 class DateFormat(Expression):
     def __init__(self, column, f):
-        super(DateFormat, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.format = f
         self.formatter = get_time_formatter(self.format)
@@ -259,14 +259,14 @@ class DateFormat(Expression):
 
 class CurrentTimestamp(Expression):
     def __init__(self):
-        super(CurrentTimestamp, self).__init__()
+        super().__init__()
         self.current_timestamp = None
 
     def eval(self, row, schema):
         return self.current_timestamp
 
     def initialize(self, partition_index):
-        super(CurrentTimestamp, self).initialize(partition_index)
+        super().initialize(partition_index)
         self.current_timestamp = datetime.datetime.now()
 
     def __str__(self):
@@ -275,14 +275,14 @@ class CurrentTimestamp(Expression):
 
 class CurrentDate(Expression):
     def __init__(self):
-        super(CurrentDate, self).__init__()
+        super().__init__()
         self.current_timestamp = None
 
     def eval(self, row, schema):
         return self.current_timestamp.date()
 
     def initialize(self, partition_index):
-        super(CurrentDate, self).initialize(partition_index)
+        super().initialize(partition_index)
         self.current_timestamp = datetime.datetime.now()
 
     def __str__(self):
@@ -291,7 +291,7 @@ class CurrentDate(Expression):
 
 class UnixTimestamp(Expression):
     def __init__(self, column, f):
-        super(UnixTimestamp, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.format = f
         self.parser = get_unix_timestamp_parser(self.format)
@@ -306,7 +306,7 @@ class UnixTimestamp(Expression):
 
 class ParseToTimestamp(Expression):
     def __init__(self, column, f):
-        super(ParseToTimestamp, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.format = f
         self.parser = get_unix_timestamp_parser(self.format)
@@ -323,7 +323,7 @@ class ParseToTimestamp(Expression):
 
 class ParseToDate(Expression):
     def __init__(self, column, f):
-        super(ParseToDate, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.format = f
         self.parser = get_unix_timestamp_parser(self.format)
@@ -340,7 +340,7 @@ class ParseToDate(Expression):
 
 class TruncDate(Expression):
     def __init__(self, column, level):
-        super(TruncDate, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.level = level
 
@@ -358,7 +358,7 @@ class TruncDate(Expression):
 
 class TruncTimestamp(Expression):
     def __init__(self, level, column):
-        super(TruncTimestamp, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.level = level
 
@@ -406,7 +406,7 @@ class TruncTimestamp(Expression):
 
 class FromUTCTimestamp(Expression):
     def __init__(self, column, tz):
-        super(FromUTCTimestamp, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.tz = tz
         self.pytz = parse_tz(tz)
@@ -425,7 +425,7 @@ class FromUTCTimestamp(Expression):
 
 class ToUTCTimestamp(Expression):
     def __init__(self, column, tz):
-        super(ToUTCTimestamp, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.tz = tz
         self.pytz = parse_tz(tz)

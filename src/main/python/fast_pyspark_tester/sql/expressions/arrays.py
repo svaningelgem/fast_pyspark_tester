@@ -4,7 +4,7 @@ from fast_pyspark_tester.sql.utils import AnalysisException
 
 class ArraysOverlap(Expression):
     def __init__(self, array1, array2):
-        super(ArraysOverlap, self).__init__(array1, array2)
+        super().__init__(array1, array2)
         self.array1 = array1
         self.array2 = array2
 
@@ -26,7 +26,7 @@ class ArrayContains(Expression):
     def __init__(self, array, value):
         self.array = array
         self.value = value  # not a column
-        super(ArrayContains, self).__init__(array)
+        super().__init__(array)
 
     def eval(self, row, schema):
         array_eval = self.array.eval(row, schema)
@@ -40,7 +40,7 @@ class ArrayContains(Expression):
 
 class ArrayColumn(Expression):
     def __init__(self, columns):
-        super(ArrayColumn, self).__init__(columns)
+        super().__init__(columns)
         self.columns = columns
 
     def eval(self, row, schema):
@@ -52,7 +52,7 @@ class ArrayColumn(Expression):
 
 class MapColumn(Expression):
     def __init__(self, columns):
-        super(MapColumn, self).__init__(columns)
+        super().__init__(columns)
         self.columns = columns
         self.keys = columns[::2]
         self.values = columns[1::2]
@@ -66,7 +66,7 @@ class MapColumn(Expression):
 
 class MapFromArraysColumn(Expression):
     def __init__(self, keys, values):
-        super(MapFromArraysColumn, self).__init__(keys, values)
+        super().__init__(keys, values)
         self.keys = keys
         self.values = values
 
@@ -119,7 +119,7 @@ class Slice(Expression):
         self.x = x
         self.start = start
         self.length = length
-        super(Slice, self).__init__(x)
+        super().__init__(x)
 
     def eval(self, row, schema):
         return self.x.eval(row, schema)[self.start, self.start + self.length]
@@ -130,7 +130,7 @@ class Slice(Expression):
 
 class ArrayRepeat(Expression):
     def __init__(self, col, count):
-        super(ArrayRepeat, self).__init__(col)
+        super().__init__(col)
         self.col = col
         self.count = count
 
@@ -144,7 +144,7 @@ class ArrayRepeat(Expression):
 
 class Sequence(Expression):
     def __init__(self, start, stop, step):
-        super(Sequence, self).__init__(start, stop, step)
+        super().__init__(start, stop, step)
         self.start = start
         self.stop = stop
         self.step = step
@@ -176,7 +176,7 @@ class Sequence(Expression):
 
 class ArrayJoin(Expression):
     def __init__(self, column, delimiter, nullReplacement):
-        super(ArrayJoin, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.delimiter = delimiter
         self.nullReplacement = nullReplacement
@@ -197,7 +197,7 @@ class ArrayJoin(Expression):
 
 class SortArray(Expression):
     def __init__(self, col, asc):
-        super(SortArray, self).__init__(col)
+        super().__init__(col)
         self.col = col
         self.asc = asc
 
@@ -210,7 +210,7 @@ class SortArray(Expression):
 
 class ArraysZip(Expression):
     def __init__(self, cols):
-        super(ArraysZip, self).__init__(*cols)
+        super().__init__(*cols)
         self.cols = cols
 
     def eval(self, row, schema):
@@ -230,7 +230,7 @@ class Flatten(UnaryExpression):
 
 class ArrayPosition(Expression):
     def __init__(self, col, value):
-        super(ArrayPosition, self).__init__(col)
+        super().__init__(col)
         self.col = col
         self.value = value
 
@@ -249,7 +249,7 @@ class ArrayPosition(Expression):
 
 class ElementAt(Expression):
     def __init__(self, col, extraction):
-        super(ElementAt, self).__init__(col)
+        super().__init__(col)
         self.col = col
         self.extraction = extraction
 
@@ -265,7 +265,7 @@ class ElementAt(Expression):
 
 class ArrayRemove(Expression):
     def __init__(self, col, element):
-        super(ArrayRemove, self).__init__(col, element)
+        super().__init__(col, element)
         self.col = col
         self.element = element
 
@@ -287,7 +287,7 @@ class ArrayDistinct(UnaryExpression):
 
 class ArrayIntersect(Expression):
     def __init__(self, col1, col2):
-        super(ArrayIntersect, self).__init__(col1, col2)
+        super().__init__(col1, col2)
         self.col1 = col1
         self.col2 = col2
 
@@ -300,7 +300,7 @@ class ArrayIntersect(Expression):
 
 class ArrayUnion(Expression):
     def __init__(self, col1, col2):
-        super(ArrayUnion, self).__init__(col1, col2)
+        super().__init__(col1, col2)
         self.col1 = col1
         self.col2 = col2
 
@@ -313,7 +313,7 @@ class ArrayUnion(Expression):
 
 class ArrayExcept(Expression):
     def __init__(self, col1, col2):
-        super(ArrayExcept, self).__init__(col1, col2)
+        super().__init__(col1, col2)
         self.col1 = col1
         self.col2 = col2
 

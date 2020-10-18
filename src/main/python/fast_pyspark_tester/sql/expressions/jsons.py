@@ -9,7 +9,7 @@ class StructsToJson(Expression):
     default_options = dict(dateFormat='yyyy-MM-dd', timestampFormat="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",)
 
     def __init__(self, column, options):
-        super(StructsToJson, self).__init__(column)
+        super().__init__(column)
         self.column = column
         # pylint: disable=import-outside-toplevel; circular import
         from fast_pyspark_tester.sql.internal_utils.readers.jsonreader import JSONReader

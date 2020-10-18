@@ -37,7 +37,7 @@ class StarOperator(Expression):
 
 class CaseWhen(Expression):
     def __init__(self, conditions, values):
-        super(CaseWhen, self).__init__(conditions, values)
+        super().__init__(conditions, values)
 
         self.conditions = conditions
         self.values = values
@@ -65,7 +65,7 @@ class CaseWhen(Expression):
 
 class Otherwise(Expression):
     def __init__(self, conditions, values, default):
-        super(Otherwise, self).__init__(conditions, values, default)
+        super().__init__(conditions, values, default)
 
         self.conditions = conditions
         self.values = values
@@ -91,7 +91,7 @@ class Otherwise(Expression):
 
 class RegExpExtract(Expression):
     def __init__(self, e, exp, groupIdx):
-        super(RegExpExtract, self).__init__(e, exp, groupIdx)
+        super().__init__(e, exp, groupIdx)
 
         regexp = re.compile(exp)
 
@@ -116,7 +116,7 @@ class RegExpExtract(Expression):
 
 class RegExpReplace(Expression):
     def __init__(self, e, exp, replacement):
-        super(RegExpReplace, self).__init__(e, exp, replacement)
+        super().__init__(e, exp, replacement)
 
         regexp = re.compile(exp)
 
@@ -137,7 +137,7 @@ class RegExpReplace(Expression):
 
 class Round(NullSafeColumnOperation):
     def __init__(self, column, scale):
-        super(Round, self).__init__(column)
+        super().__init__(column)
         self.scale = scale
 
     def unsafe_operation(self, value):
@@ -149,7 +149,7 @@ class Round(NullSafeColumnOperation):
 
 class Bround(NullSafeColumnOperation):
     def __init__(self, column, scale):
-        super(Bround, self).__init__(column)
+        super().__init__(column)
         self.scale = scale
 
     def unsafe_operation(self, value):
@@ -161,7 +161,7 @@ class Bround(NullSafeColumnOperation):
 
 class FormatNumber(Expression):
     def __init__(self, column, digits):
-        super(FormatNumber, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.digits = digits
 
@@ -180,7 +180,7 @@ class FormatNumber(Expression):
 
 class SubstringIndex(Expression):
     def __init__(self, column, delim, count):
-        super(SubstringIndex, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.delim = delim
         self.count = count
@@ -195,7 +195,7 @@ class SubstringIndex(Expression):
 
 class Coalesce(Expression):
     def __init__(self, columns):
-        super(Coalesce, self).__init__(columns)
+        super().__init__(columns)
         self.columns = columns
 
     def eval(self, row, schema):
@@ -219,7 +219,7 @@ class IsNaN(UnaryExpression):
 
 class NaNvl(Expression):
     def __init__(self, col1, col2):
-        super(NaNvl, self).__init__(col1, col2)
+        super().__init__(col1, col2)
         self.col1 = col1
         self.col2 = col2
 
@@ -236,7 +236,7 @@ class NaNvl(Expression):
 
 class Hypot(Expression):
     def __init__(self, a, b):
-        super(Hypot, self).__init__(a, b)
+        super().__init__(a, b)
         self.a = a
         self.b = b
 
@@ -297,7 +297,7 @@ class Atan(UnaryExpression):
 
 class Atan2(Expression):
     def __init__(self, y, x):
-        super(Atan2).__init__(y, x)
+        super().__init__(y, x)
         self.y = y
         self.x = x
 
@@ -398,7 +398,7 @@ class Ceil(UnaryExpression):
 
 class Log(Expression):
     def __init__(self, base, value):
-        super(Log, self).__init__(base, value)
+        super().__init__(base, value)
         self.base = base
         self.value = value
 
@@ -475,7 +475,7 @@ class ToRadians(UnaryExpression):
 
 class Rand(Expression):
     def __init__(self, seed=None):
-        super(Rand, self).__init__()
+        super().__init__()
         self.seed = seed if seed is not None else random.random()
         self.random_generator = None
 
@@ -491,7 +491,7 @@ class Rand(Expression):
 
 class Randn(Expression):
     def __init__(self, seed=None):
-        super(Randn, self).__init__()
+        super().__init__()
         self.seed = seed
         self.random_generator = None
 
@@ -507,7 +507,7 @@ class Randn(Expression):
 
 class SparkPartitionID(Expression):
     def __init__(self):
-        super(SparkPartitionID, self).__init__()
+        super().__init__()
         self.partition_index = None
 
     def eval(self, row, schema):
@@ -522,7 +522,7 @@ class SparkPartitionID(Expression):
 
 class CreateStruct(Expression):
     def __init__(self, columns):
-        super(CreateStruct, self).__init__(columns)
+        super().__init__(columns)
         self.columns = columns
 
     def eval(self, row, schema):
@@ -547,7 +547,7 @@ class Bin(UnaryExpression):
 
 class Greatest(Expression):
     def __init__(self, columns):
-        super(Greatest, self).__init__(columns)
+        super().__init__(columns)
         self.columns = columns
 
     def eval(self, row, schema):
@@ -560,7 +560,7 @@ class Greatest(Expression):
 
 class Least(Expression):
     def __init__(self, columns):
-        super(Least, self).__init__(columns)
+        super().__init__(columns)
         self.columns = columns
 
     def eval(self, row, schema):
@@ -597,7 +597,7 @@ class Upper(UnaryExpression):
 
 class Concat(Expression):
     def __init__(self, columns):
-        super(Concat, self).__init__(columns)
+        super().__init__(columns)
         self.columns = columns
 
     def eval(self, row, schema):
@@ -609,7 +609,7 @@ class Concat(Expression):
 
 class ConcatWs(Expression):
     def __init__(self, sep, columns):
-        super(ConcatWs, self).__init__(columns)
+        super().__init__(columns)
         self.sep = sep
         self.columns = columns
 
@@ -664,7 +664,7 @@ class MapFromEntries(UnaryExpression):
 
 class MapConcat(Expression):
     def __init__(self, columns):
-        super(MapConcat, self).__init__(*columns)
+        super().__init__(*columns)
         self.columns = columns
 
     def eval(self, row, schema):
@@ -681,7 +681,7 @@ class MapConcat(Expression):
 
 class StringSplit(Expression):
     def __init__(self, column, regex, limit):
-        super(StringSplit, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.regex = regex
         self.compiled_regex = re.compile(regex)
@@ -699,7 +699,7 @@ class StringSplit(Expression):
 
 class Conv(Expression):
     def __init__(self, column, from_base, to_base):
-        super(Conv, self).__init__(column)
+        super().__init__(column)
         self.column = column
         self.from_base = from_base
         self.to_base = to_base
@@ -813,7 +813,7 @@ class Ascii(UnaryExpression):
 
 class MonotonicallyIncreasingID(Expression):
     def __init__(self):
-        super(MonotonicallyIncreasingID, self).__init__()
+        super().__init__()
         self.generator = None
 
     def eval(self, row, schema):
@@ -847,7 +847,7 @@ class UnBase64(UnaryExpression):
 
 class GroupingID(Expression):
     def __init__(self, columns):
-        super(GroupingID, self).__init__(*columns)
+        super().__init__(*columns)
         self.columns = columns
 
     def eval(self, row, schema):

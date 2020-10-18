@@ -574,7 +574,7 @@ def get_json_encoder(options):
                     return collections.OrderedDict((key, encode_rows(value)) for key, value in item.items())
                 return item
 
-            return super(CustomJSONEncoder, self).encode(encode_rows(o))
+            return super().encode(encode_rows(o))
 
         # default can be overridden if passed a parameter during init
         # pylint doesn't like the behavior but it is the expected one
@@ -584,6 +584,6 @@ def get_json_encoder(options):
                 return timestamp_formatter(o)
             if isinstance(o, datetime.date):
                 return date_formatter(o)
-            return super(CustomJSONEncoder, self).default(o)
+            return super().default(o)
 
     return CustomJSONEncoder

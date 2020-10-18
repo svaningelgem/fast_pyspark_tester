@@ -25,7 +25,7 @@ class Hdfs(FileSystem):
         if hdfs is None:
             raise FileSystemNotSupported('hdfs not supported. Install the python package "hdfs".')
 
-        super(Hdfs, self).__init__(file_name)
+        super().__init__(file_name)
 
     @staticmethod
     def client_and_path(path):
