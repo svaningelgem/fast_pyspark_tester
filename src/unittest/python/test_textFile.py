@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import importlib
 import logging
 import os
 import pickle
@@ -205,17 +206,31 @@ class TextFileTests(unittest.TestCase):
         # 7z a tests/data.7z tests/readme_example.py
         # (brew install p7zip)
 
+
         rdd = Context().textFile('{}/data.7z'.format(LOCAL_TEST_PATH))
         print(rdd.collect())
         self.assertIn('from fast_pyspark_tester import Context', rdd.collect())
 
-        with mock.patch('fast_pyspark_tester.fileio.codec.sevenz.py7zlib', None):
-            log_.clear()
+        module_under_test = 'fast_pyspark_tester.fileio.codec.sevenz'
+
+        log_.clear()
+
+        # Bit of a crude way to fake not having a module available... But hey! It works ;-)
+        orig_import = __import__
+
+        def raise_on_7zimport(name, globals, locals, *args):
+            if name == 'py7zlib' and globals['__name__'] == module_under_test:
+                raise ImportError
+
+            return orig_import(name, globals, locals, *args)
+
+        with mock.patch('builtins.__import__', side_effect=raise_on_7zimport):
+            importlib.reload(sys.modules[module_under_test])
             rdd = Context().textFile('{}/data.7z'.format(LOCAL_TEST_PATH))
             print(rdd.collect())
             log_.check_present(
                 (
-                    'fast_pyspark_tester.fileio.codec.sevenz',
+                    module_under_test,
                     'WARNING',
                     'py7zlib could not be imported. To read 7z files, install the library with "pip install pylzma".'
                 ),
