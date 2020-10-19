@@ -85,3 +85,4 @@ target/
 _SUCCESS
 
 src/unittest/python/20news-19997.tar.gz
+src/unittest/python/tests/

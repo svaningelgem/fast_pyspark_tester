@@ -1,5 +1,3 @@
-from __future__ import division
-
 import fast_pyspark_tester
 from fast_pyspark_tester.sql.functions import col
 from fast_pyspark_tester.sql.types import Row, StructType, StructField, IntegerType
