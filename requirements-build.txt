@@ -4,5 +4,8 @@ futures>=3.0.1
 pylint>=2.3,<2.6
 memory_profiler>=0.47
 pytest
+pytest-mock
 tornado>=4.3
 pybuilder
+pylzma
+testfixtures
