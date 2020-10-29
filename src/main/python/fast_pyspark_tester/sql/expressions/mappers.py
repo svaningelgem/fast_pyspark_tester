@@ -93,19 +93,20 @@ class RegExpExtract(Expression):
     def __init__(self, e, exp, groupIdx):
         super().__init__(e, exp, groupIdx)
 
-        regexp = re.compile(exp)
+        self.exp = exp.get_literal_value()
+        self.groupIdx = groupIdx.get_literal_value()
+        self.e = e
+
+        regexp = re.compile(self.exp)
 
         def fn(x):
             match = regexp.search(x)
             if not match:
                 return ''
-            ret = match.group(groupIdx)
+            ret = match.group(self.groupIdx)
             return ret
 
         self.fn = fn
-        self.exp = exp
-        self.groupIdx = groupIdx
-        self.e = e
 
     def eval(self, row, schema):
         return self.fn(self.e.eval(row, schema))
@@ -118,15 +119,12 @@ class RegExpReplace(Expression):
     def __init__(self, e, exp, replacement):
         super().__init__(e, exp, replacement)
 
-        regexp = re.compile(exp)
-
-        def fn(x):
-            return regexp.sub(replacement, x)
-
-        self.fn = fn
-        self.exp = exp
-        self.replacement = replacement
+        self.exp = exp.get_literal_value()
+        self.replacement = replacement.get_literal_value()
         self.e = e
+
+        regexp = re.compile(self.exp)
+        self.fn = lambda x: regexp.sub(self.replacement, x)
 
     def eval(self, row, schema):
         return self.fn(self.e.eval(row, schema))
@@ -138,7 +136,7 @@ class RegExpReplace(Expression):
 class Round(NullSafeColumnOperation):
     def __init__(self, column, scale):
         super().__init__(column)
-        self.scale = scale
+        self.scale = scale.get_literal_value()
 
     def unsafe_operation(self, value):
         return half_up_round(value, self.scale)
@@ -150,7 +148,7 @@ class Round(NullSafeColumnOperation):
 class Bround(NullSafeColumnOperation):
     def __init__(self, column, scale):
         super().__init__(column)
-        self.scale = scale
+        self.scale = scale.get_literal_value()
 
     def unsafe_operation(self, value):
         return half_even_round(value, self.scale)
@@ -163,7 +161,7 @@ class FormatNumber(Expression):
     def __init__(self, column, digits):
         super().__init__(column)
         self.column = column
-        self.digits = digits
+        self.digits = digits.get_literal_value()
 
     def eval(self, row, schema):
         value = self.column.eval(row, schema)
@@ -182,8 +180,8 @@ class SubstringIndex(Expression):
     def __init__(self, column, delim, count):
         super().__init__(column)
         self.column = column
-        self.delim = delim
-        self.count = count
+        self.delim = delim.get_literal_value()
+        self.count = count.get_literal_value()
 
     def eval(self, row, schema):
         parts = str(self.column.eval(row, schema)).split(self.delim)
@@ -399,7 +397,7 @@ class Ceil(UnaryExpression):
 class Log(Expression):
     def __init__(self, base, value):
         super().__init__(base, value)
-        self.base = base
+        self.base = base.get_literal_value()
         self.value = value
 
     def eval(self, row, schema):
@@ -476,7 +474,7 @@ class ToRadians(UnaryExpression):
 class Rand(Expression):
     def __init__(self, seed=None):
         super().__init__()
-        self.seed = seed if seed is not None else random.random()
+        self.seed = seed.get_literal_value() if seed is not None else random.random()
         self.random_generator = None
 
     def eval(self, row, schema):
@@ -492,7 +490,7 @@ class Rand(Expression):
 class Randn(Expression):
     def __init__(self, seed=None):
         super().__init__()
-        self.seed = seed
+        self.seed = seed.get_literal_value()
         self.random_generator = None
 
     def eval(self, row, schema):
@@ -534,7 +532,7 @@ class CreateStruct(Expression):
         return create_row(struct_cols, struct_values)
 
     def __str__(self):
-        return 'named_struct({0})'.format(', '.join('{0}, {0}'.format(col) for col in self.columns))
+        return "struct({0})".format(", ".join(str(col) for col in self.columns))
 
 
 class Bin(UnaryExpression):
@@ -543,6 +541,45 @@ class Bin(UnaryExpression):
 
     def __str__(self):
         return 'bin({0})'.format(self.column)
+
+
+class ShiftLeft(Expression):
+    def __init__(self, arg, num_bits):
+        super(ShiftLeft, self).__init__(arg)
+        self.arg = arg
+        self.num_bits = num_bits.get_literal_value()
+
+    def eval(self, row, schema):
+        return self.arg.eval(row, schema) << self.num_bits
+
+    def __str__(self):
+        return "shiftleft({0}, {1})".format(self.arg, self.num_bits)
+
+
+class ShiftRight(Expression):
+    def __init__(self, arg, num_bits):
+        super(ShiftRight, self).__init__(arg)
+        self.arg = arg
+        self.num_bits = num_bits.get_literal_value()
+
+    def eval(self, row, schema):
+        return self.arg.eval(row, schema) >> self.num_bits
+
+    def __str__(self):
+        return "shiftright({0}, {1})".format(self.arg, self.num_bits)
+
+
+class ShiftRightUnsigned(object):
+    def __init__(self, arg, num_bits):
+        super(ShiftRightUnsigned, self).__init__(arg)
+        self.arg = arg
+        self.num_bits = num_bits.get_literal_value()
+
+    def eval(self, row, schema):
+        return self.arg.eval(row, schema) >> self.num_bits
+
+    def __str__(self):
+        return "shiftright({0}, {1})".format(self.arg, self.num_bits)
 
 
 class Greatest(Expression):
@@ -610,7 +647,7 @@ class Concat(Expression):
 class ConcatWs(Expression):
     def __init__(self, sep, columns):
         super().__init__(columns)
-        self.sep = sep
+        self.sep = sep.get_literal_value()
         self.columns = columns
 
     def eval(self, row, schema):
@@ -683,9 +720,9 @@ class StringSplit(Expression):
     def __init__(self, column, regex, limit):
         super().__init__(column)
         self.column = column
-        self.regex = regex
-        self.compiled_regex = re.compile(regex)
-        self.limit = limit
+        self.regex = regex.get_literal_value()
+        self.compiled_regex = re.compile(self.regex)
+        self.limit = limit.get_literal_value()
 
     def eval(self, row, schema):
         limit = self.limit if self.limit is not None else 0
@@ -701,8 +738,8 @@ class Conv(Expression):
     def __init__(self, column, from_base, to_base):
         super().__init__(column)
         self.column = column
-        self.from_base = from_base
-        self.to_base = to_base
+        self.from_base = from_base.get_literal_value()
+        self.to_base = to_base.get_literal_value()
 
     def eval(self, row, schema):
         value = self.column.cast(StringType()).eval(row, schema)
@@ -885,70 +922,13 @@ class InputFileName(Expression):
 
 
 __all__ = [
-    'Grouping',
-    'GroupingID',
-    'Coalesce',
-    'IsNaN',
-    'MonotonicallyIncreasingID',
-    'NaNvl',
-    'Rand',
-    'Randn',
-    'SparkPartitionID',
-    'Sqrt',
-    'CreateStruct',
-    'CaseWhen',
-    'Abs',
-    'Acos',
-    'Asin',
-    'Atan',
-    'Atan2',
-    'Bin',
-    'Cbrt',
-    'Ceil',
-    'Conv',
-    'Cos',
-    'Cosh',
-    'Exp',
-    'ExpM1',
-    'Factorial',
-    'Floor',
-    'Greatest',
-    'Hex',
-    'Unhex',
-    'Hypot',
-    'Least',
-    'Log',
-    'Log10',
-    'Log1p',
-    'Log2',
-    'Rint',
-    'Round',
-    'Bround',
-    'Signum',
-    'Sin',
-    'Sinh',
-    'Tan',
-    'Tanh',
-    'ToDegrees',
-    'ToRadians',
-    'Ascii',
-    'Base64',
-    'ConcatWs',
-    'FormatNumber',
-    'Length',
-    'Lower',
-    'RegExpExtract',
-    'RegExpReplace',
-    'UnBase64',
-    'StringSplit',
-    'SubstringIndex',
-    'Upper',
-    'Concat',
-    'Reverse',
-    'MapKeys',
-    'MapValues',
-    'MapEntries',
-    'MapFromEntries',
-    'MapConcat',
-    'StarOperator',
+    "Grouping", "GroupingID", "Coalesce", "IsNaN", "MonotonicallyIncreasingID", "NaNvl", "Rand",
+    "Randn", "SparkPartitionID", "Sqrt", "CreateStruct", "CaseWhen", "Abs", "Acos", "Asin",
+    "Atan", "Atan2", "Bin", "Cbrt", "Ceil", "Conv", "Cos", "Cosh", "Exp", "ExpM1", "Factorial",
+    "Floor", "Greatest", "Hex", "Unhex", "Hypot", "Least", "Log", "Log10", "Log1p", "Log2",
+    "Rint", "Round", "Bround", "Signum", "Sin", "Sinh", "Tan", "Tanh", "ToDegrees",
+    "ToRadians", "Ascii", "Base64", "ConcatWs", "FormatNumber", "Length", "Lower",
+    "RegExpExtract", "RegExpReplace", "UnBase64", "StringSplit", "SubstringIndex", "Upper",
+    "Concat", "Reverse", "MapKeys", "MapValues", "MapEntries", "MapFromEntries",
+    "MapConcat", "StarOperator", "ShiftLeft", "ShiftRight", "ShiftRightUnsigned"
 ]

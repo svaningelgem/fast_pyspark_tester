@@ -11,7 +11,7 @@ from fast_pyspark_tester.sql.types import StructType
 
 class Negate(UnaryExpression):
     def eval(self, row, schema):
-        return not self.column.eval(row, schema)
+        return - self.column.eval(row, schema)
 
     def __str__(self):
         return '(- {0})'.format(self.column)
@@ -63,14 +63,6 @@ class Pow(NullSafeBinaryOperation):
 
     def __str__(self):
         return 'POWER({0}, {1})'.format(self.arg1, self.arg2)
-
-
-class Pmod(NullSafeBinaryOperation):
-    def unsafe_operation(self, value1, value2):
-        return value1 % value2
-
-    def __str__(self):
-        return 'pmod({0} % {1})'.format(self.arg1, self.arg2)
 
 
 class Equal(TypeSafeBinaryOperation):
@@ -270,7 +262,7 @@ class IsIn(Expression):
     def __init__(self, arg1, cols):
         super().__init__(arg1)
         self.arg1 = arg1
-        self.cols = cols
+        self.cols = [c.get_literal_value() for c in cols]
 
     def eval(self, row, schema):
         return self.arg1.eval(row, schema) in self.cols
@@ -308,13 +300,19 @@ class Cast(Expression):
     def __str__(self):
         return '{0}'.format(self.column)
 
+    def __repr__(self):
+        return "CAST({0} AS {1})".format(
+            self.column,
+            self.destination_type.simpleString().upper()
+        )
+
 
 class Substring(Expression):
     def __init__(self, expr, start, length):
         super().__init__(expr)
         self.expr = expr
-        self.start = start
-        self.length = length
+        self.start = start.get_literal_value()
+        self.length = length.get_literal_value()
 
     def eval(self, row, schema):
         return str(self.expr.eval(row, schema))[self.start - 1:self.start - 1 + self.length]
@@ -327,7 +325,7 @@ class Alias(Expression):
     def __init__(self, expr, alias):
         super().__init__(expr, alias)
         self.expr = expr
-        self.alias = alias
+        self.alias = alias.get_literal_value()
 
     @property
     def may_output_multiple_cols(self):
@@ -348,36 +346,44 @@ class Alias(Expression):
         return self.alias
 
 
+class UnaryPositive(UnaryExpression):
+    def eval(self, row, schema):
+        return self.column.eval(row, schema)
+
+    def __str__(self):
+        return "(+ {0})".format(self.column)
+
+
 __all__ = [
-    'Negate',
-    'Add',
-    'Minus',
-    'Time',
-    'Divide',
-    'Mod',
-    'Pow',
-    'Pmod',
-    'Equal',
-    'LessThan',
-    'LessThanOrEqual',
-    'GreaterThan',
-    'GreaterThanOrEqual',
-    'And',
-    'Or',
-    'Invert',
-    'BitwiseOr',
-    'BitwiseAnd',
-    'BitwiseXor',
-    'BitwiseNot',
-    'EqNullSafe',
-    'GetField',
-    'Contains',
-    'StartsWith',
-    'EndsWith',
-    'IsIn',
-    'IsNotNull',
-    'Cast',
-    'Substring',
-    'IsNull',
-    'Alias',
+    "Negate",
+    "Add",
+    "Minus",
+    "Time",
+    "Divide",
+    "Mod",
+    "Pow",
+    "Equal",
+    "LessThan",
+    "LessThanOrEqual",
+    "GreaterThan",
+    "GreaterThanOrEqual",
+    "And",
+    "Or",
+    "Invert",
+    "BitwiseOr",
+    "BitwiseAnd",
+    "BitwiseXor",
+    "BitwiseNot",
+    "EqNullSafe",
+    "GetField",
+    "Contains",
+    "StartsWith",
+    "EndsWith",
+    "IsIn",
+    "IsNotNull",
+    "Cast",
+    "Substring",
+    "IsNull",
+    "Alias",
+    "UnaryPositive",
 ]

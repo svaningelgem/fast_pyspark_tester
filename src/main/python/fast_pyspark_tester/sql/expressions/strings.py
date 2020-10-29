@@ -30,25 +30,28 @@ class StringRTrim(UnaryExpression):
 
 
 class StringInStr(Expression):
-    def __init__(self, substr, column):
+    def __init__(self, column, substr):
         super().__init__(column)
-        self.substr = substr
         self.column = column
+        self.substr = substr.get_literal_value()
 
     def eval(self, row, schema):
         value = self.column.cast(StringType()).eval(row, schema)
-        return int(self.substr in value)
+        try:
+            return value.index(self.substr)
+        except IndexError:
+            return 0
 
     def __str__(self):
-        return 'instr({0}, {1})'.format(self.substr, self.column)
+        return 'instr({0}, {1})'.format(self.column, self.substr)
 
 
 class StringLocate(Expression):
     def __init__(self, substr, column, pos):
         super().__init__(column)
-        self.substr = substr
+        self.substr = substr.get_literal_value()
         self.column = column
-        self.start = pos - 1
+        self.start = pos.get_literal_value() - 1
 
     def eval(self, row, schema):
         value = self.column.cast(StringType()).eval(row, schema)
@@ -66,8 +69,8 @@ class StringLPad(Expression):
     def __init__(self, column, length, pad):
         super().__init__(column)
         self.column = column
-        self.length = length
-        self.pad = pad
+        self.length = length.get_literal_value()
+        self.pad = pad.get_literal_value()
 
     def eval(self, row, schema):
         value = self.column.cast(StringType()).eval(row, schema)
@@ -83,8 +86,8 @@ class StringRPad(Expression):
     def __init__(self, column, length, pad):
         super().__init__(column)
         self.column = column
-        self.length = length
-        self.pad = pad
+        self.length = length.get_literal_value()
+        self.pad = pad.get_literal_value()
 
     def eval(self, row, schema):
         value = self.column.cast(StringType()).eval(row, schema)
@@ -100,7 +103,7 @@ class StringRepeat(Expression):
     def __init__(self, column, n):
         super().__init__(column)
         self.column = column
-        self.n = n
+        self.n = n.get_literal_value()
 
     def eval(self, row, schema):
         value = self.column.cast(StringType()).eval(row, schema)
@@ -114,13 +117,13 @@ class StringTranslate(Expression):
     def __init__(self, column, matching_string, replace_string):
         super().__init__(column)
         self.column = column
-        self.matching_string = matching_string
-        self.replace_string = replace_string
+        self.matching_string = matching_string.get_literal_value()
+        self.replace_string = replace_string.get_literal_value()
         self.translation_table = str.maketrans(
             # Python's translate use an opposite importance order as Spark
             # when there are duplicates in matching_string mapped to different chars
-            matching_string[::-1],
-            replace_string[::-1],
+            self.matching_string[::-1],
+            self.replace_string[::-1],
         )
 
     def eval(self, row, schema):

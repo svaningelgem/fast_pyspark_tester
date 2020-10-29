@@ -17,10 +17,11 @@ class AddMonths(Expression):
     def __init__(self, start_date, num_months):
         super().__init__(start_date)
         self.start_date = start_date
-        self.num_months = num_months
+        self.num_months = num_months.get_literal_value()
+        self.timedelta = datetime.timedelta(days=self.num_months)
 
     def eval(self, row, schema):
-        return self.start_date.cast(DateType()).eval(row, schema) + relativedelta(months=self.num_months)
+        return self.start_date.cast(DateType()).eval(row, schema) + self.timedelta
 
     def __str__(self):
         return 'add_months({0}, {1})'.format(self.start_date, self.num_months)
@@ -30,8 +31,8 @@ class DateAdd(Expression):
     def __init__(self, start_date, num_days):
         super().__init__(start_date)
         self.start_date = start_date
-        self.num_days = num_days
-        self.timedelta = datetime.timedelta(days=num_days)
+        self.num_days = num_days.get_literal_value()
+        self.timedelta = datetime.timedelta(days=self.num_days)
 
     def eval(self, row, schema):
         return self.start_date.cast(DateType()).eval(row, schema) + self.timedelta
@@ -44,8 +45,8 @@ class DateSub(Expression):
     def __init__(self, start_date, num_days):
         super().__init__(start_date)
         self.start_date = start_date
-        self.num_days = num_days
-        self.timedelta = datetime.timedelta(days=num_days)
+        self.num_days = num_days.get_literal_value()
+        self.timedelta = datetime.timedelta(days=self.num_days)
 
     def eval(self, row, schema):
         return self.start_date.cast(DateType()).eval(row, schema) - self.timedelta
@@ -152,7 +153,7 @@ class NextDay(Expression):
     def __init__(self, column, day_of_week):
         super().__init__(column)
         self.column = column
-        self.day_of_week = day_of_week
+        self.day_of_week = day_of_week.get_literal_value()
 
     def eval(self, row, schema):
         value = self.column.cast(DateType()).eval(row, schema)
@@ -176,7 +177,7 @@ class MonthsBetween(Expression):
         super().__init__(column1, column2)
         self.column1 = column1
         self.column2 = column2
-        self.round_off = round_off
+        self.round_off = round_off.get_literal_value()
 
     def eval(self, row, schema):
         value_1 = self.column1.cast(TimestampType()).eval(row, schema)
@@ -231,7 +232,7 @@ class FromUnixTime(Expression):
     def __init__(self, column, f):
         super().__init__(column)
         self.column = column
-        self.format = f
+        self.format = f.get_literal_value()
         self.formatter = get_time_formatter(self.format)
 
     def eval(self, row, schema):
@@ -246,7 +247,7 @@ class DateFormat(Expression):
     def __init__(self, column, f):
         super().__init__(column)
         self.column = column
-        self.format = f
+        self.format = f.get_literal_value()
         self.formatter = get_time_formatter(self.format)
 
     def eval(self, row, schema):
@@ -293,7 +294,7 @@ class UnixTimestamp(Expression):
     def __init__(self, column, f):
         super().__init__(column)
         self.column = column
-        self.format = f
+        self.format = f.get_literal_value()
         self.parser = get_unix_timestamp_parser(self.format)
 
     def eval(self, row, schema):
@@ -308,7 +309,7 @@ class ParseToTimestamp(Expression):
     def __init__(self, column, f):
         super().__init__(column)
         self.column = column
-        self.format = f
+        self.format = f.get_literal_value()
         self.parser = get_unix_timestamp_parser(self.format)
 
     def eval(self, row, schema):
@@ -325,7 +326,7 @@ class ParseToDate(Expression):
     def __init__(self, column, f):
         super().__init__(column)
         self.column = column
-        self.format = f
+        self.format = f.get_literal_value()
         self.parser = get_unix_timestamp_parser(self.format)
 
     def eval(self, row, schema):
@@ -342,7 +343,7 @@ class TruncDate(Expression):
     def __init__(self, column, level):
         super().__init__(column)
         self.column = column
-        self.level = level
+        self.level = level.get_literal_value()
 
     def eval(self, row, schema):
         value = self.column.cast(DateType()).eval(row, schema)
@@ -359,8 +360,8 @@ class TruncDate(Expression):
 class TruncTimestamp(Expression):
     def __init__(self, level, column):
         super().__init__(column)
+        self.level = level.get_literal_value()
         self.column = column
-        self.level = level
 
     def eval(self, row, schema):
         value = self.column.cast(TimestampType()).eval(row, schema)
@@ -408,8 +409,8 @@ class FromUTCTimestamp(Expression):
     def __init__(self, column, tz):
         super().__init__(column)
         self.column = column
-        self.tz = tz
-        self.pytz = parse_tz(tz)
+        self.tz = tz.get_literal_value()
+        self.pytz = parse_tz(self.tz)
 
     def eval(self, row, schema):
         value = self.column.cast(TimestampType()).eval(row, schema)
@@ -427,8 +428,8 @@ class ToUTCTimestamp(Expression):
     def __init__(self, column, tz):
         super().__init__(column)
         self.column = column
-        self.tz = tz
-        self.pytz = parse_tz(tz)
+        self.tz = tz.get_literal_value()
+        self.pytz = parse_tz(self.tz)
 
     def eval(self, row, schema):
         value = self.column.cast(TimestampType()).eval(row, schema)
