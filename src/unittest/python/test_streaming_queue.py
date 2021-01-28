@@ -24,7 +24,7 @@ class TestCount(tornado.testing.AsyncTestCase):
             # Windows is freakingly slow! So we need a higher timeout there...
             ssc.awaitTermination(timeout=1.0)
         else:
-            ssc.awaitTermination(timeout=0.3)
+            ssc.awaitTermination(timeout=0.35)
         self.assertEqual(sum(result), 23)
 
     def test_groupByKey(self):
