@@ -6,25 +6,36 @@ from fast_pyspark_tester.utils import get_json_encoder
 
 
 class StructsToJson(Expression):
-    default_options = dict(dateFormat='yyyy-MM-dd', timestampFormat="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",)
+    pretty_name = "structstojson"
+
+    default_options = dict(
+        dateFormat="yyyy-MM-dd",
+        timestampFormat="yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+    )
 
     def __init__(self, column, options):
-        super().__init__(column)
+        super(StructsToJson, self).__init__(column)
         self.column = column
         # pylint: disable=import-outside-toplevel; circular import
         from fast_pyspark_tester.sql.internal_utils.readers.jsonreader import JSONReader
-
         self.input_options = options
         self.options = Options(JSONReader.default_options, options)
         self.encoder = get_json_encoder(self.options)
 
     def eval(self, row, schema):
         value = self.column.eval(row, schema)
-        return json.dumps(value, cls=self.encoder, separators=(',', ':'))
+        return json.dumps(
+            value,
+            cls=self.encoder,
+            separators=(',', ':')
+        )
 
-    def __str__(self):
-        return 'structstojson({0}{1})'.format(
-            self.column, ', {0}'.format(self.input_options) if self.input_options is not None else '',
+    def args(self):
+        if self.input_options is None:
+            return (self.column, )
+        return (
+            self.column,
+            self.input_options
         )
 
 

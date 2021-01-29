@@ -3,25 +3,29 @@ from fast_pyspark_tester.sql.expressions.expressions import Expression
 from fast_pyspark_tester.sql.internal_utils.options import Options
 from fast_pyspark_tester.sql.utils import AnalysisException
 
-sql_csv_function_options = dict(dateFormat=NO_TIMESTAMP_CONVERSION, timestampFormat=NO_TIMESTAMP_CONVERSION,)
+sql_csv_function_options = dict(
+    dateFormat=NO_TIMESTAMP_CONVERSION,
+    timestampFormat=NO_TIMESTAMP_CONVERSION,
+)
 
 
 class SchemaOfCsv(Expression):
+    pretty_name = "schema_of_csv"
+
     def __init__(self, column, options):
-        super().__init__(column)
+        super(SchemaOfCsv, self).__init__(column)
         self.column = column
         self.input_options = options
         # pylint: disable=import-outside-toplevel; circular import
         from fast_pyspark_tester.sql.internal_utils.readers.csvreader import CSVReader
-
         self.options = Options(CSVReader.default_options, sql_csv_function_options, options)
 
     def eval(self, row, schema):
         value = self.column.eval(row, schema)
-        if not isinstance(value, str) or value == '':
+        if not isinstance(value, str) or value == "":
             raise AnalysisException(
-                'type mismatch: The input csv should be a string literal and not null; '
-                'however, got {0}.'.format(value)
+                "type mismatch: The input csv should be a string literal and not null; "
+                "however, got {0}.".format(value)
             )
         # pylint: disable=import-outside-toplevel; circular import
         from fast_pyspark_tester.sql.internal_utils.readers.csvreader import csv_record_to_row
@@ -31,5 +35,5 @@ class SchemaOfCsv(Expression):
         schema = guess_schema_from_strings(record_as_row.__fields__, [record_as_row], self.options)
         return schema.simpleString()
 
-    def __str__(self):
-        return 'schema_of_csv({0})'.format(self.column)
+    def args(self):
+        return (self.column,)
