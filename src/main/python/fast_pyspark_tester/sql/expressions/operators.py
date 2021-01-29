@@ -1,3 +1,8 @@
+from pysparkling import Row
+from pysparkling.sql.casts import get_caster
+from pysparkling.sql.expressions.expressions import Expression, UnaryExpression, \
+    NullSafeBinaryOperation, TypeSafeBinaryOperation, BinaryOperation
+from pysparkling.sql.types import StructType
 from fast_pyspark_tester import Row
 from fast_pyspark_tester.sql.casts import get_caster
 from fast_pyspark_tester.sql.expressions.expressions import (
@@ -132,12 +137,7 @@ class Invert(UnaryExpression):
         return '(NOT {0})'.format(self.column)
 
 
-class BitwiseOr(Expression):
-    def __init__(self, arg1, arg2):
-        super().__init__(arg1, arg2)
-        self.arg1 = arg1
-        self.arg2 = arg2
-
+class BitwiseOr(BinaryOperation):
     def eval(self, row, schema):
         return self.arg1.eval(row, schema) | self.arg2.eval(row, schema)
 
@@ -145,12 +145,7 @@ class BitwiseOr(Expression):
         return '({0} | {1})'.format(self.arg1, self.arg2)
 
 
-class BitwiseAnd(Expression):
-    def __init__(self, arg1, arg2):
-        super().__init__(arg1, arg2)
-        self.arg1 = arg1
-        self.arg2 = arg2
-
+class BitwiseAnd(BinaryOperation):
     def eval(self, row, schema):
         return self.arg1.eval(row, schema) & self.arg2.eval(row, schema)
 
@@ -158,12 +153,7 @@ class BitwiseAnd(Expression):
         return '({0} & {1})'.format(self.arg1, self.arg2)
 
 
-class BitwiseXor(Expression):
-    def __init__(self, arg1, arg2):
-        super().__init__(arg1, arg2)
-        self.arg1 = arg1
-        self.arg2 = arg2
-
+class BitwiseXor(BinaryOperation):
     def eval(self, row, schema):
         return self.arg1.eval(row, schema) ^ self.arg2.eval(row, schema)
 
@@ -179,12 +169,7 @@ class BitwiseNot(UnaryExpression):
         return '~{0}'.format(self.column)
 
 
-class EqNullSafe(Expression):
-    def __init__(self, arg1, arg2):
-        super().__init__(arg1, arg2)
-        self.arg1 = arg1
-        self.arg2 = arg2
-
+class EqNullSafe(BinaryOperation):
     def eval(self, row, schema):
         return self.arg1.eval(row, schema) == self.arg2.eval(row, schema)
 
@@ -218,8 +203,16 @@ class GetField(Expression):
             return '{0}.{1}'.format(self.item, self.field)
         return '{0}[{1}]'.format(self.item, self.field)
 
+    def args(self):
+        return (
+            self.item,
+            self.field
+        )
+
 
 class Contains(Expression):
+    pretty_name = "contains"
+
     def __init__(self, expr, value):
         super().__init__(expr, value)
         self.expr = expr
@@ -228,11 +221,16 @@ class Contains(Expression):
     def eval(self, row, schema):
         return self.value.eval(row, schema) in self.expr.eval(row, schema)
 
-    def __str__(self):
-        return 'contains({0}, {1})'.format(self.expr, self.value)
+    def args(self):
+        return (
+            self.expr,
+            self.value
+        )
 
 
 class StartsWith(Expression):
+    pretty_name = "startswith"
+
     def __init__(self, arg1, substr):
         super().__init__(arg1, substr)
         self.arg1 = arg1
@@ -241,11 +239,16 @@ class StartsWith(Expression):
     def eval(self, row, schema):
         return str(self.arg1.eval(row, schema)).startswith(self.substr)
 
-    def __str__(self):
-        return 'startswith({0}, {1})'.format(self.arg1, self.substr)
+    def args(self):
+        return (
+            self.arg1,
+            self.substr
+        )
 
 
 class EndsWith(Expression):
+    pretty_name = "endswith"
+
     def __init__(self, arg1, substr):
         super().__init__(arg1, substr)
         self.arg1 = arg1
@@ -254,8 +257,11 @@ class EndsWith(Expression):
     def eval(self, row, schema):
         return str(self.arg1.eval(row, schema)).endswith(self.substr)
 
-    def __str__(self):
-        return 'endswith({0}, {1})'.format(self.arg1, self.substr)
+    def args(self):
+        return (
+            self.arg1,
+            self.substr
+        )
 
 
 class IsIn(Expression):
@@ -269,6 +275,9 @@ class IsIn(Expression):
 
     def __str__(self):
         return '({0} IN ({1}))'.format(self.arg1, ', '.join(str(col) for col in self.cols))
+
+    def args(self):
+        return [self.arg1] + self.cols
 
 
 class IsNotNull(UnaryExpression):
@@ -306,8 +315,16 @@ class Cast(Expression):
             self.destination_type.simpleString().upper()
         )
 
+    def args(self):
+        return (
+            self.column,
+            self.destination_type
+        )
+
 
 class Substring(Expression):
+    pretty_name = "substring"
+
     def __init__(self, expr, start, length):
         super().__init__(expr)
         self.expr = expr
@@ -317,8 +334,12 @@ class Substring(Expression):
     def eval(self, row, schema):
         return str(self.expr.eval(row, schema))[self.start - 1:self.start - 1 + self.length]
 
-    def __str__(self):
-        return 'substring({0}, {1}, {2})'.format(self.expr, self.start, self.length)
+    def args(self):
+        return (
+            self.expr,
+            self.start,
+            self.length
+        )
 
 
 class Alias(Expression):
@@ -344,6 +365,12 @@ class Alias(Expression):
 
     def __str__(self):
         return self.alias
+
+    def args(self):
+        return (
+            self.expr,
+            self.alias
+        )
 
 
 class UnaryPositive(UnaryExpression):

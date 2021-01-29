@@ -2,7 +2,7 @@
 import logging
 from pathlib import Path
 
-from pybuilder.core import use_plugin, init, before, after, Author, Project
+from pybuilder.core import after, Author, before, init, Project, use_plugin
 from pybuilder.errors import BuildFailedException
 from pybuilder.vcs import VCSRevision
 
@@ -72,10 +72,13 @@ def _add_extras_require(project, logger):
         + f'''
         extras_require={{
             'hdfs': ['hdfs>=2.0.0'],
-            'pandas': ['pandas>=0.23.2'],
             'performance': ['matplotlib>=1.5.3'],
             'streaming': ['tornado>=4.3'],
-            'test': [
+            'sql': [
+                'numpy',
+                'pandas>=0.23.2',
+            ],
+            'tests': [
 {requirements_dev}
             ]
         }},

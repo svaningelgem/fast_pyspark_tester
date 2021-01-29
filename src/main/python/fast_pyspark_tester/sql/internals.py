@@ -917,19 +917,20 @@ class InternalGroupedDataFrame(object):
             grouping = tuple(value is GROUPED for value in group_key)
 
             key_as_row = row_from_keyed_values(key).set_grouping(grouping)
-            data.append(
-                row_from_keyed_values(
-                    key
-                    + [
-                        (
-                            str(stat),
-                            stat.with_pre_evaluation_schema(self.jdf.bound_schema).eval(key_as_row, grouping_schema),
-                        )
-                        for pivot_value in all_stats.pivot_values
-                        for stat in get_pivoted_stats(all_stats.groups[group_key][pivot_value], pivot_value)
-                    ]
-                )
-            )
+            data.append(row_from_keyed_values(
+                key + [
+                    (str(stat),
+                     stat.with_pre_evaluation_schema(self.jdf.bound_schema).eval(
+                         key_as_row,
+                         grouping_schema)
+                     )
+                    for pivot_value in all_stats.pivot_values
+                    for stat in get_pivoted_stats(
+                        all_stats.groups[group_key][pivot_value],
+                        pivot_value
+                    )
+                ]
+            ))
 
         if self.pivot_col is not None:
             if len(stats) == 1:

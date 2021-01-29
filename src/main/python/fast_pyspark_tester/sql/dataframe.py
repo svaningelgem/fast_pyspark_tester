@@ -1673,7 +1673,9 @@ class DataFrame(object):
             # to integer type e.g., np.int16, we will hit exception. So we use the inferred
             # float type, not the corrected type from the schema in this case.
             if pandas_type is not None and not (
-                isinstance(field.dataType, IntegralType) and field.nullable and pdf[field.name].isnull().any()
+                isinstance(field.dataType, IntegralType)
+                         and field.nullable
+                         and pdf[field.name].isnull().any()
             ):
                 dtype[field.name] = pandas_type
 

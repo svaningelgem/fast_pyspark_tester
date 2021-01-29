@@ -58,12 +58,17 @@ Install
 
 
 Other links:
-`Github <https://github.com/svenkreiss/fast_pyspark_tester>`_,
-`Issue Tracker <https://github.com/svenkreiss/fast_pyspark_tester/issues>`_,
-|pypi-badge|
+`Github <https://github.com/svaningelgem/pysparkling>`_,
+`Issue Tracker <https://github.com/svaningelgem/pysparkling/issues>`_,
+|pypi-badge|, |test-badge|, |docs-badge|
 
 .. |pypi-badge| image:: https://badge.fury.io/py/fast_pyspark_tester.svg
    :target: https://pypi.python.org/pypi/fast_pyspark_tester/
+.. |test-badge| image:: https://github.com/svenkreiss/pysparkling/workflows/Tests/badge.svg
+   :target: https://github.com/svenkreiss/pysparkling/actions?query=workflow%3ATests
+.. |docs-badge| image:: https://readthedocs.org/projects/pysparkling/badge/?version=latest
+   :target: https://pysparkling.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 
 Features
